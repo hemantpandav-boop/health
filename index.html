@@ -152,7 +152,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v3.2</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v3.3</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -194,12 +194,29 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
   </div>
   <div class="card">
     <div class="card-title">active alerts</div>
+    <div id="med-alert-banner"></div>
     <div class="alert alert-bad"><strong>CPK 367</strong> — double limit. Recheck late June with blood test.</div>
     <div class="alert alert-bad"><strong>Cholesterol 252, LDL 133</strong> — Crestor 20mg started 3 weeks ago. Test late June.</div>
     <div class="alert alert-warn"><strong>Fasting glucose 116</strong> — pre-diabetic range. Monitor.</div>
     <div class="alert alert-warn"><strong>Repaglinide</strong> — discuss with Dr. Lakhani. HbA1c now normal.</div>
     <div class="alert alert-ok"><strong>Diabetes reversed</strong> — HbA1c 9.3% → 5.3% in 13 months.</div>
   </div>
+  <div class="card">
+    <div class="card-title">mounjaro injection log</div>
+    <div class="row" style="margin-bottom:8px">
+      <div class="half"><label>Date</label><input type="date" id="mj-log-date"></div>
+      <div class="half"><label>Dose (mg)</label>
+        <select id="mj-log-dose">
+          <option>2.5</option><option>5</option><option>7.5</option><option selected>10</option><option>12.5</option><option>15</option>
+        </select>
+      </div>
+    </div>
+    <label>Side effects / notes</label>
+    <input type="text" id="mj-log-note" placeholder="e.g. mild nausea, no issues...">
+    <button class="btn btn-green" onclick="logMounjaro()" style="margin-bottom:6px">Log injection</button>
+    <div id="mj-history" style="margin-top:4px"></div>
+  </div>
+
   <div class="card">
     <div class="card-title">next actions</div>
     <div class="list-item"><div class="list-dot" style="background:var(--red)"></div><div>Next Mounjaro — <strong>13 June 2026</strong></div></div>
@@ -424,8 +441,13 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
       <div class="half"><label>BP Diastolic</label><input type="number" id="v-dia" placeholder="80"></div>
     </div>
     <div class="row">
-      <div class="half"><label>Fasting glucose</label><input type="number" id="v-gluc" placeholder="mg/dL"></div>
+      <div class="half"><label>Fasting glucose (morning)</label><input type="number" id="v-gluc" placeholder="mg/dL"></div>
       <div class="half"><label>Sleep (hours)</label><input type="number" id="v-sleep" step="0.5" placeholder="6.5"></div>
+    </div>
+    <div class="section-hd" style="margin-top:4px">pre-meal glucose readings</div>
+    <div class="row">
+      <div class="half"><label>Before lunch</label><input type="number" id="v-gluc-lunch" placeholder="mg/dL"></div>
+      <div class="half"><label>Before dinner</label><input type="number" id="v-gluc-dinner" placeholder="mg/dL"></div>
     </div>
     <label>Symptoms / notes</label>
     <textarea id="v-note" rows="2" placeholder="Energy level, mood, any muscle aches, dizziness..."></textarea>
@@ -451,6 +473,24 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
     </div>
     <div class="water-grid" id="water-grid"></div>
     <button class="btn-sm" onclick="resetWater()" style="margin-top:4px">Reset</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">weight & waist trend</div>
+    <canvas id="wt-chart" height="180" style="width:100%"></canvas>
+    <div style="display:flex;gap:12px;margin-top:6px;font-size:11px">
+      <span style="color:#3b82f6">— Weight (kg)</span>
+      <span style="color:#10b981">— Waist (cm)</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">bp & glucose trend</div>
+    <canvas id="bp-chart" height="160" style="width:100%"></canvas>
+    <div style="display:flex;gap:12px;margin-top:6px;font-size:11px">
+      <span style="color:#ef4444">— Systolic BP</span>
+      <span style="color:#f59e0b">— Fasting glucose</span>
+    </div>
   </div>
 
   <div class="card">
@@ -1539,14 +1579,16 @@ function selectExFromDB(idx) {
 // ═══════════════════════════════════
 function saveVitals() {
   const vdate = document.getElementById('v-date').value || TODAY;
-  const entry = {date:vdate, wt:document.getElementById('v-wt').value, waist:document.getElementById('v-waist').value, sys:document.getElementById('v-sys').value, dia:document.getElementById('v-dia').value, gluc:document.getElementById('v-gluc').value, sleep:document.getElementById('v-sleep').value, wb:document.getElementById('v-wb').value, note:document.getElementById('v-note').value};
+  const glucLunch = document.getElementById('v-gluc-lunch') ? document.getElementById('v-gluc-lunch').value : '';
+  const glucDinner = document.getElementById('v-gluc-dinner') ? document.getElementById('v-gluc-dinner').value : '';
+  const entry = {date:vdate, wt:document.getElementById('v-wt').value, waist:document.getElementById('v-waist').value, sys:document.getElementById('v-sys').value, dia:document.getElementById('v-dia').value, gluc:document.getElementById('v-gluc').value, gluc_lunch:glucLunch, gluc_dinner:glucDinner, sleep:document.getElementById('v-sleep').value, wb:document.getElementById('v-wb').value, note:document.getElementById('v-note').value};
   let logs = JSON.parse(localStorage.getItem('hh_vitals') || '[]');
   logs = logs.filter(l => l.date !== vdate);
   logs.unshift(entry);
   localStorage.setItem('hh_vitals', JSON.stringify(logs));
-  ['v-wt','v-waist','v-sys','v-dia','v-gluc','v-sleep','v-note'].forEach(id => document.getElementById(id).value = '');
+  ['v-wt','v-waist','v-sys','v-dia','v-gluc','v-gluc-lunch','v-gluc-dinner','v-sleep','v-note'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
   document.getElementById('v-wb').value = 7; document.getElementById('wb-val').textContent = '7';
-  renderVitals(); updateScore();
+  renderVitals(); updateScore(); setTimeout(renderTrendCharts, 100);
   if (entry.wt) { document.getElementById('hm-wt').textContent = entry.wt + ' kg'; }
   if (entry.sys) { document.getElementById('hm-bp').textContent = entry.sys + '/' + entry.dia; }
   alert('Vitals saved!');
@@ -1560,7 +1602,9 @@ function renderVitals() {
     <div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:2px">
       ${l.wt ? '<span class="tag tag-b">⚖ ' + l.wt + 'kg</span>' : ''}
       ${l.sys ? '<span class="tag tag-g">BP ' + l.sys + '/' + l.dia + '</span>' : ''}
-      ${l.gluc ? '<span class="tag tag-a">Gluc ' + l.gluc + '</span>' : ''}
+      ${l.gluc ? '<span class="tag tag-a">Fasting ' + l.gluc + '</span>' : ''}
+      ${l.gluc_lunch ? '<span class="tag tag-a">Pre-lunch ' + l.gluc_lunch + '</span>' : ''}
+      ${l.gluc_dinner ? '<span class="tag tag-a">Pre-dinner ' + l.gluc_dinner + '</span>' : ''}
       ${l.sleep ? '<span class="tag tag-p">Sleep ' + l.sleep + 'h</span>' : ''}
       ${l.hr ? '<span class="tag tag-r">HR ' + l.hr + ' bpm</span>' : ''}
       ${l.cals_burned ? '<span class="tag tag-p">Burned ' + l.cals_burned + ' kcal</span>' : ''}
@@ -1894,7 +1938,7 @@ async function pullHCData() {
 
     status.textContent = `Synced — Steps: ${steps.toLocaleString()} | HR: ${hr > 0 ? hr + ' bpm' : 'n/a'} | Sleep: ${sleep > 0 ? sleep + 'h' : 'n/a'} | Burned: ${cals > 0 ? cals + ' kcal' : 'n/a'}`;
     status.style.color = 'var(--green)';
-    renderVitals(); updateScore();
+    renderVitals(); updateScore(); setTimeout(renderTrendCharts, 100);
 
   } catch(e) {
     status.textContent = 'Sync error: ' + e.message;
@@ -1946,7 +1990,7 @@ function saveManualHC() {
 
   document.getElementById('hc-status').textContent = `Saved — Steps: ${Number(steps).toLocaleString()} | HR: ${hr} bpm | Sleep: ${sleep}h | Burned: ${cals} kcal`;
   document.getElementById('hc-status').style.color = 'var(--green)';
-  renderVitals(); updateScore();
+  renderVitals(); updateScore(); setTimeout(renderTrendCharts, 100);
 }
 
 // ═══════════════════════════════════
@@ -2052,16 +2096,208 @@ function showTab(id, btn) {
 // ═══════════════════════════════════
 // INIT
 // ═══════════════════════════════════
+// ═══════════════════════════════════
+// MOUNJARO INJECTION LOG
+// ═══════════════════════════════════
+function logMounjaro() {
+  const date = document.getElementById('mj-log-date').value || TODAY;
+  const dose = document.getElementById('mj-log-dose').value;
+  const note = document.getElementById('mj-log-note').value;
+  let logs = JSON.parse(localStorage.getItem('hh_mj_log') || '[]');
+  logs = logs.filter(l => l.date !== date);
+  logs.unshift({date, dose, note});
+  logs.sort((a,b) => b.date.localeCompare(a.date));
+  localStorage.setItem('hh_mj_log', JSON.stringify(logs));
+  document.getElementById('mj-log-note').value = '';
+  renderMounjaroLog();
+  // Update next injection date
+  const nextDate = new Date(date);
+  nextDate.setDate(nextDate.getDate() + 15);
+  alert('Injection logged: ' + dose + 'mg on ' + date + '\nNext due: ' + nextDate.toISOString().split('T')[0]);
+}
+
+function renderMounjaroLog() {
+  const logs = JSON.parse(localStorage.getItem('hh_mj_log') || '[]');
+  const el = document.getElementById('mj-history');
+  if (!el) return;
+  // Seed with known historical data if empty
+  if (logs.length === 0) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:12px">No injections logged yet. Log above to start tracking. Last known: 29 May 2026, 10mg.</div>';
+    return;
+  }
+  el.innerHTML = '<div style="font-size:11px;color:var(--text2);margin-bottom:4px">Injection history (' + logs.length + ' doses logged):</div>' +
+    logs.slice(0,10).map(function(l) {
+      const next = new Date(l.date);
+      next.setDate(next.getDate() + 15);
+      return '<div class="log-row"><div class="log-date-label">' + l.date + '</div>' +
+        '<div><span class="tag tag-b">' + l.dose + 'mg</span>' +
+        '<span class="tag tag-g">Next: ' + next.toISOString().split('T')[0] + '</span>' +
+        (l.note ? '<span style="font-size:11px;color:var(--text3)"> ' + l.note + '</span>' : '') +
+        '</div></div>';
+    }).join('');
+}
+
+// ═══════════════════════════════════
+// MEDICATION MISSED ALERT
+// ═══════════════════════════════════
+function checkMedAlert() {
+  const el = document.getElementById('med-alert-banner');
+  if (!el) return;
+  const taken = JSON.parse(localStorage.getItem('hh_meds_' + TODAY) || '{}');
+  const hour = new Date().getHours();
+  const alerts = [];
+
+  // Critical meds check
+  if (!taken['crestor']) {
+    if (hour >= 21) {
+      alerts.push('<div class="alert alert-bad" style="margin-bottom:6px">⚠ <strong>Rosuvastatin NOT ticked tonight</strong> — go to Meds tab and tick it off after taking.</div>');
+    } else if (hour >= 18) {
+      alerts.push('<div class="alert alert-warn" style="margin-bottom:6px">⏰ <strong>Rosuvastatin due at bedtime</strong> — remember to take it tonight.</div>');
+    }
+  }
+  if (!taken['eforge'] && hour >= 10) {
+    alerts.push('<div class="alert alert-warn" style="margin-bottom:6px">⚠ <strong>Eforge not ticked today</strong> — have you taken your BP medication?</div>');
+  }
+  if (!taken['repaglinide'] && hour >= 14) {
+    alerts.push('<div class="alert alert-warn" style="margin-bottom:6px">⚠ <strong>Repaglinide not ticked</strong> — take with your heaviest meal.</div>');
+  }
+
+  // Mounjaro due check
+  const mjLogs = JSON.parse(localStorage.getItem('hh_mj_log') || '[]');
+  const lastMJ = mjLogs.length > 0 ? mjLogs[0].date : '2026-05-29';
+  const nextMJ = new Date(lastMJ);
+  nextMJ.setDate(nextMJ.getDate() + 15);
+  const daysToMJ = Math.round((nextMJ - new Date()) / 86400000);
+  if (daysToMJ <= 0) {
+    alerts.push('<div class="alert alert-bad" style="margin-bottom:6px">💉 <strong>Mounjaro injection DUE TODAY</strong> — log it in the tracker above after injecting.</div>');
+  } else if (daysToMJ <= 2) {
+    alerts.push('<div class="alert alert-warn" style="margin-bottom:6px">💉 <strong>Mounjaro due in ' + daysToMJ + ' day' + (daysToMJ===1?'':'s') + '</strong> — prepare your pen.</div>');
+  }
+
+  el.innerHTML = alerts.join('');
+}
+
+// ═══════════════════════════════════
+// WEIGHT & WAIST TREND CHART
+// ═══════════════════════════════════
+function renderTrendCharts() {
+  const vitals = JSON.parse(localStorage.getItem('hh_vitals') || '[]');
+  if (!vitals.length) return;
+
+  // Sort by date ascending, take last 30 entries
+  const sorted = vitals.filter(v => v.wt || v.sys || v.gluc)
+    .sort((a,b) => a.date.localeCompare(b.date)).slice(-20);
+
+  const labels = sorted.map(v => v.date.slice(5)); // MM-DD
+  const weights = sorted.map(v => v.wt ? parseFloat(v.wt) : null);
+  const waists = sorted.map(v => v.waist ? parseFloat(v.waist) : null);
+  const systolics = sorted.map(v => v.sys ? parseFloat(v.sys) : null);
+  const glucoses = sorted.map(v => v.gluc ? parseFloat(v.gluc) : null);
+
+  // Weight chart
+  const wtCanvas = document.getElementById('wt-chart');
+  if (wtCanvas && (weights.some(w=>w) || waists.some(w=>w))) {
+    drawLineChart(wtCanvas, labels, [
+      {data: weights, color: '#3b82f6', label: 'Weight'},
+      {data: waists, color: '#10b981', label: 'Waist'},
+    ]);
+  }
+
+  // BP/Glucose chart
+  const bpCanvas = document.getElementById('bp-chart');
+  if (bpCanvas && (systolics.some(s=>s) || glucoses.some(g=>g))) {
+    drawLineChart(bpCanvas, labels, [
+      {data: systolics, color: '#ef4444', label: 'BP Systolic'},
+      {data: glucoses, color: '#f59e0b', label: 'Glucose'},
+    ]);
+  }
+}
+
+function drawLineChart(canvas, labels, datasets) {
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  const W = canvas.offsetWidth || 340;
+  const H = canvas.height || 160;
+  canvas.width = W;
+  const pad = {top:10, right:10, bottom:30, left:40};
+  const chartW = W - pad.left - pad.right;
+  const chartH = H - pad.top - pad.bottom;
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#1e293b';
+  ctx.fillRect(0, 0, W, H);
+
+  // Get min/max across all datasets
+  const allVals = datasets.flatMap(d => d.data.filter(v => v !== null));
+  if (!allVals.length) return;
+  const minV = Math.floor(Math.min(...allVals) * 0.95);
+  const maxV = Math.ceil(Math.max(...allVals) * 1.05);
+  const range = maxV - minV || 1;
+
+  // Grid lines
+  ctx.strokeStyle = '#334155';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + chartH - (i / 4) * chartH;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + chartW, y); ctx.stroke();
+    ctx.fillStyle = '#64748b'; ctx.font = '9px sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText(Math.round(minV + (i/4)*range), pad.left - 3, y + 3);
+  }
+
+  // X labels
+  const step = Math.max(1, Math.floor(labels.length / 5));
+  ctx.fillStyle = '#64748b'; ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
+  labels.forEach((l, i) => {
+    if (i % step === 0) {
+      const x = pad.left + (i / (labels.length - 1 || 1)) * chartW;
+      ctx.fillText(l, x, H - 5);
+    }
+  });
+
+  // Draw each dataset
+  datasets.forEach(function(ds) {
+    ctx.strokeStyle = ds.color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    let started = false;
+    ds.data.forEach(function(v, i) {
+      if (v === null) { started = false; return; }
+      const x = pad.left + (i / (labels.length - 1 || 1)) * chartW;
+      const y = pad.top + chartH - ((v - minV) / range) * chartH;
+      if (!started) { ctx.moveTo(x, y); started = true; }
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // Dots
+    ctx.fillStyle = ds.color;
+    ds.data.forEach(function(v, i) {
+      if (v === null) return;
+      const x = pad.left + (i / (labels.length - 1 || 1)) * chartW;
+      const y = pad.top + chartH - ((v - minV) / range) * chartH;
+      ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI*2); ctx.fill();
+    });
+  });
+}
+
 function initAll() {
   // Set default dates to today
   try { document.getElementById('v-date').value = TODAY; } catch(e) {}
   try { document.getElementById('m-date').value = TODAY; } catch(e) {}
   try { document.getElementById('ex-date').value = TODAY; } catch(e) {}
+  // Set default dates
+  try { document.getElementById('v-date').value = TODAY; } catch(e) {}
+  try { document.getElementById('m-date').value = TODAY; } catch(e) {}
+  try { document.getElementById('ex-date').value = TODAY; } catch(e) {}
+  try { document.getElementById('mj-log-date').value = TODAY; } catch(e) {}
   renderMeals(); updateTotals();
   renderExercise(); renderExDBList();
   renderVitals(); renderWater();
   renderLabResults();
   renderMeds(); renderStreak();
+  renderMounjaroLog();
+  checkMedAlert();
+  setTimeout(renderTrendCharts, 300);
   updateScore(); initMJ();
 }
 initAll();
