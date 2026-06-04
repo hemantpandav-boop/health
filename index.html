@@ -798,13 +798,27 @@ function searchFood(q) {
   if (!matches.length) { res.style.display = 'none'; return; }
   res.style.display = 'block';
   const db = getFoodDB();
-  res.innerHTML = matches.map((f) => {
-    const idx = db.indexOf(f);
-    return `<div class="food-result-item" onclick="selectFood(${-1});selectFoodByName(${JSON.stringify(f.n).replace(/"/g,"'")})">
-      <div class="food-result-name">${f.n}</div>
-      <div class="food-result-cal">${f.cal} kcal/100g · P:${f.p}g · Fat:${f.f}g · Sat:${f.s}g · Fibre:${f.fi}g</div>
-    </div>`;
+  // Store matches in window for safe access
+  window._foodMatches = matches;
+  res.innerHTML = matches.map((f, i) => {
+    return '<div class="food-result-item" onclick="pickFood(' + i + ')">' +
+      '<div class="food-result-name">' + f.n + '</div>' +
+      '<div class="food-result-cal">' + f.cal + ' kcal/100g · P:' + f.p + 'g · Sat:' + f.s + 'g · Fibre:' + f.fi + 'g</div>' +
+      '</div>';
   }).join('');
+}
+
+function pickFood(i) {
+  const f = window._foodMatches[i];
+  if (!f) return;
+  selectedFood = f;
+  portionGrams = f.g || 100;
+  document.getElementById('food-results').style.display = 'none';
+  document.getElementById('food-search').value = f.n;
+  document.getElementById('food-selected-panel').classList.remove('hidden');
+  document.getElementById('sel-food-name').textContent = f.n;
+  document.getElementById('portion-slider').value = portionGrams;
+  updatePortion(portionGrams);
 }
 
 function selectFoodByName(name) {
@@ -1028,12 +1042,19 @@ function searchEx(q) {
   const matches = EX_DB.filter(e => e.n.toLowerCase().includes(q.toLowerCase())).slice(0, 10);
   if (!matches.length) { res.style.display = 'none'; return; }
   res.style.display = 'block';
-  res.innerHTML = matches.map((e) => {
-    return `<div class="food-result-item" onclick="selectExByName(${JSON.stringify(e.n).replace(/"/g,"'")})">
-      <div class="food-result-name">${e.n} ${e.cpk ? '<span style="color:var(--amber);font-size:10px">⚠ high strain</span>' : ''}</div>
-      <div class="food-result-cal">${e.loc} · ${e.muscle} · Target: ${e.sets} sets × ${e.reps > 0 ? e.reps + ' reps' : 'duration'}</div>
-    </div>`;
+  window._exMatches = matches;
+  res.innerHTML = matches.map((e, i) => {
+    return '<div class="food-result-item" onclick="pickEx(' + i + ')">' +
+      '<div class="food-result-name">' + e.n + (e.cpk ? ' <span style="color:var(--amber);font-size:10px">⚠ high strain</span>' : '') + '</div>' +
+      '<div class="food-result-cal">' + e.loc + ' · ' + e.muscle + ' · Target: ' + e.sets + ' sets × ' + (e.reps > 0 ? e.reps + ' reps' : 'duration') + '</div>' +
+      '</div>';
   }).join('');
+}
+
+function pickEx(i) {
+  const e = window._exMatches[i];
+  if (!e) return;
+  selectExByName(e.n);
 }
 
 function selectExByName(name) {
