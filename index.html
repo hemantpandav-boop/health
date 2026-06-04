@@ -152,7 +152,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v3.1</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v3.2</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -844,6 +844,72 @@ const BUILTIN_FOODS = [
   {n:'Black tea (no sugar)',cal:1,p:0,c:0.2,f:0,s:0,fi:0,unit:'ml'},
   {n:'Coconut water',cal:19,p:0.7,c:3.7,f:0.2,s:0,fi:1,unit:'ml'},
   {n:'Fresh lime water (no sugar)',cal:6,p:0.1,c:1.8,f:0,s:0,fi:0,unit:'ml'},
+
+  // ── SOUTH INDIAN FOODS ── (verified from multiple Indian food databases)
+  // Per 100g values. Serving sizes shown in quick buttons.
+
+  // IDLI — steamed rice+urad dal, fermented
+  // Source: Indian Food Composition Tables 2017 + cross-verified
+  {n:'Idli (steamed)',cal:58,p:2.1,c:11.5,f:0.4,s:0.1,fi:0.5,unit:'g',
+   servings:[{label:'1 idli (45g)',g:45},{label:'2 idlis (90g)',g:90},{label:'3 idlis (135g)',g:135}]},
+
+  // DOSA varieties
+  {n:'Sada plain dosa (thin, light oil)',cal:168,p:3.9,c:32,f:3.0,s:0.5,fi:1.5,unit:'g',
+   servings:[{label:'1 small dosa (60g)',g:60},{label:'1 medium dosa (80g)',g:80},{label:'1 large dosa (100g)',g:100}]},
+  {n:'Masala dosa (with potato filling)',cal:195,p:4.2,c:30,f:6.5,s:1.0,fi:2.5,unit:'g',
+   servings:[{label:'1 homemade (130g)',g:130},{label:'1 restaurant (180g)',g:180}]},
+  {n:'Mysore masala dosa',cal:212,p:3.5,c:26,f:10,s:1.5,fi:2,unit:'g',
+   servings:[{label:'1 piece (99g)',g:99},{label:'1 large restaurant (150g)',g:150}]},
+  {n:'Rava sooji dosa',cal:238,p:4.5,c:38,f:7.5,s:1.2,fi:1.5,unit:'g',
+   servings:[{label:'1 dosa (80g)',g:80},{label:'1 large (110g)',g:110}]},
+  {n:'Set dosa (soft thick)',cal:145,p:3.5,c:26,f:3.0,s:0.5,fi:1.5,unit:'g',
+   servings:[{label:'1 piece (70g)',g:70},{label:'2 pieces (140g)',g:140}]},
+
+  // UTTAPAM
+  {n:'Tomato uttapam (medium)',cal:178,p:4.5,c:28,f:5.5,s:0.8,fi:2.5,unit:'g',
+   servings:[{label:'1 medium uttapam (120g)',g:120},{label:'1 large (160g)',g:160}]},
+  {n:'Onion uttapam',cal:182,p:4.2,c:28,f:6.0,s:0.8,fi:2.0,unit:'g',
+   servings:[{label:'1 medium (120g)',g:120},{label:'1 large (160g)',g:160}]},
+  {n:'Mixed veg uttapam',cal:175,p:4.5,c:27,f:5.5,s:0.7,fi:3.0,unit:'g',
+   servings:[{label:'1 medium (120g)',g:120},{label:'1 large (160g)',g:160}]},
+
+  // MEDU VADA
+  {n:'Medu vada (fried)',cal:322,p:8.5,c:37,f:16,s:2.5,fi:4.0,unit:'g',
+   servings:[{label:'1 small vada (40g)',g:40},{label:'1 medium vada (55g)',g:55},{label:'2 vadas (110g)',g:110}]},
+
+  // CHUTNEYS & ACCOMPANIMENTS
+  {n:'Coconut chutney',cal:262,p:2.5,c:9,f:25,s:22,fi:7,unit:'g',
+   servings:[{label:'1 tbsp (15g)',g:15},{label:'2 tbsp (30g)',g:30},{label:'3 tbsp (45g)',g:45}]},
+  {n:'Sambar (lentil vegetable soup)',cal:42,p:2.5,c:6.5,f:0.8,s:0.1,fi:2.5,unit:'ml',
+   servings:[{label:'Small katori 100ml',g:100},{label:'Medium katori 150ml',g:150},{label:'Large bowl 250ml',g:250}]},
+  {n:'Tomato chutney',cal:62,p:1.5,c:10,f:2,s:0.3,fi:2.5,unit:'g',
+   servings:[{label:'1 tbsp (15g)',g:15},{label:'2 tbsp (30g)',g:30}]},
+  {n:'Green coriander chutney',cal:55,p:2,c:8,f:1.5,s:0.2,fi:3,unit:'g',
+   servings:[{label:'1 tbsp (15g)',g:15},{label:'2 tbsp (30g)',g:30}]},
+  {n:'Tamarind sweet chutney',cal:200,p:1,c:48,f:0.5,s:0,fi:2,unit:'g',
+   servings:[{label:'1 tsp (8g)',g:8},{label:'1 tbsp (15g)',g:15}]},
+
+  // MOONG DAL CHEELA
+  {n:'Moong dal cheela (pan fried)',cal:190,p:8.5,c:24,f:6.5,s:1.0,fi:3.5,unit:'g',
+   servings:[{label:'1 cheela (60g)',g:60},{label:'2 cheelas (120g)',g:120}]},
+  {n:'Besan chilla (pan fried)',cal:167,p:6.2,c:22,f:5.5,s:0.8,fi:3,unit:'g',
+   servings:[{label:'1 chilla (40g)',g:40},{label:'2 chillas (80g)',g:80}]},
+
+  // STREET FOODS
+  {n:'Bread pakoda (fried)',cal:285,p:7,c:36,f:13,s:2.0,fi:2.5,unit:'g',
+   servings:[{label:'1 piece (80g)',g:80},{label:'2 pieces (160g)',g:160}]},
+  {n:'Aloo samosa (fried)',cal:308,p:5.5,c:38,f:15,s:2.5,fi:3,unit:'g',
+   servings:[{label:'1 small (60g)',g:60},{label:'1 medium (80g)',g:80},{label:'1 large (100g)',g:100}]},
+  {n:'Ragda pattice',cal:180,p:6.5,c:26,f:6,s:1.0,fi:5,unit:'g',
+   servings:[{label:'1 plate restaurant (250g)',g:250},{label:'Home serving (180g)',g:180}]},
+  {n:'Bhel puri (street style)',cal:230,p:5,c:38,f:7,s:1.0,fi:3,unit:'g',
+   servings:[{label:'1 small plate (100g)',g:100},{label:'1 medium plate (150g)',g:150}]},
+
+  // NORTH INDIAN SNACKS
+  {n:'Aloo vada fried',cal:285,p:4.5,c:38,f:13,s:2,fi:3,unit:'g',
+   servings:[{label:'1 piece (60g)',g:60},{label:'2 pieces (120g)',g:120}]},
+  {n:'Bread pakoda stuffed',cal:295,p:7.5,c:35,f:14,s:2.2,fi:2.5,unit:'g',
+   servings:[{label:'1 piece (80g)',g:80}]},
 ];
 
 
@@ -896,6 +962,17 @@ function pickFood(i) {
 function renderServingButtons(f) {
   const el = document.getElementById('portion-serving-btns');
   if (!el) return;
+  
+  // If food has predefined servings array, use those directly
+  if (f.servings && f.servings.length > 0) {
+    el.style.display = 'flex';
+    el.innerHTML = '<span style="font-size:10px;color:var(--text3);width:100%">Quick servings:</span>' +
+      f.servings.map(function(s) {
+        return '<button class="btn-sm" onclick="setPortion(' + s.g + ')" style="font-size:11px;padding:4px 10px;color:var(--green);border-color:var(--green)">' + s.label + '</button>';
+      }).join('');
+    return;
+  }
+  
   const servings = [];
   // Add food-specific serving buttons
   const n = f.n.toLowerCase();
