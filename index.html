@@ -152,7 +152,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v3.3</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v3.4</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -1173,7 +1173,7 @@ function logSelectedFood() {
   selectedFood = null;
   document.getElementById('food-search').value = '';
   document.getElementById('food-selected-panel').classList.add('hidden');
-  renderMeals(); updateTotals(); updateScore();
+  renderMeals(); updateTotals(); showNutritionAlert(); updateScore(); showNutritionAlert();
   alert('Logged: ' + entry.name + ' (' + entry.grams + 'g) — ' + entry.cal + ' kcal');
 }
 
@@ -1219,7 +1219,7 @@ function deleteMeal(idx) {
   const toDelete = todayLogs[idx];
   logs = logs.filter(l => l !== toDelete);
   localStorage.setItem('hh_meals', JSON.stringify(logs));
-  renderMeals(); updateTotals(); updateScore();
+  renderMeals(); updateTotals(); showNutritionAlert(); updateScore(); showNutritionAlert();
 }
 
 function updateTotals() {
@@ -2280,6 +2280,83 @@ function drawLineChart(canvas, labels, datasets) {
   });
 }
 
+// ═══════════════════════════════════
+// FOOD FLAG SYSTEM
+// ═══════════════════════════════════
+function getFoodFlag(entry) {
+  const sat = entry.sat || 0;
+  const carbs = entry.c || 0;
+  // Red: high sat fat OR very high carbs
+  if (sat >= 3 || carbs >= 40) return '<span style="color:var(--red);font-size:13px" title="High sat fat or carbs">🔴</span>';
+  // Amber: moderate
+  if (sat >= 1.5 || carbs >= 20) return '<span style="color:var(--amber);font-size:13px" title="Moderate sat fat or carbs">🟡</span>';
+  // Green: clean food
+  return '<span style="color:var(--green);font-size:13px" title="LDL friendly">🟢</span>';
+}
+
+function getCarbTag(entry) {
+  const carbs = entry.c || 0;
+  if (carbs >= 40) return 'background:#450a0a;color:#fca5a5'; // red
+  if (carbs >= 20) return 'background:#431407;color:#fcd34d'; // amber
+  return 'background:#052e16;color:#86efac'; // green
+}
+
+// ═══════════════════════════════════
+// INSTANT NUTRITION ALERT
+// ═══════════════════════════════════
+function showNutritionAlert() {
+  const el = document.getElementById('nutrition-alert-panel');
+  if (!el) return;
+
+  const logs = JSON.parse(localStorage.getItem('hh_meals') || '[]');
+  const today = logs.filter(l => l.date === TODAY);
+  if (!today.length) { el.innerHTML = ''; return; }
+
+  const totCal = today.reduce((a,l)=>a+l.cal,0);
+  const totProt = today.reduce((a,l)=>a+(l.p||0),0);
+  const totCarb = today.reduce((a,l)=>a+(l.c||0),0);
+  const totSat = today.reduce((a,l)=>a+(l.sat||0),0);
+  const totFat = today.reduce((a,l)=>a+(l.f||0),0);
+  const hour = new Date().getHours();
+
+  const alerts = [];
+
+  // SAT FAT alerts
+  if (totSat >= 13) {
+    alerts.push('<div class="alert alert-bad">🔴 <strong>Sat fat ' + totSat.toFixed(1) + 'g — LIMIT REACHED</strong> — avoid all dairy, fried, or processed foods for rest of day. LDL impact: high.</div>');
+  } else if (totSat >= 8) {
+    alerts.push('<div class="alert alert-warn">🟡 <strong>Sat fat ' + totSat.toFixed(1) + 'g / 13g</strong> — ' + (13-totSat).toFixed(1) + 'g remaining. Choose only green-flag foods from here.</div>');
+  }
+
+  // CARBS alerts
+  if (totCarb >= 130) {
+    alerts.push('<div class="alert alert-bad">🔴 <strong>Carbs ' + totCarb.toFixed(0) + 'g — over daily target</strong> — no more rice, bread, or sugary foods today.</div>');
+  } else if (totCarb >= 90) {
+    alerts.push('<div class="alert alert-warn">🟡 <strong>Carbs ' + totCarb.toFixed(0) + 'g / 130g</strong> — ' + (130-totCarb).toFixed(0) + 'g remaining. Stick to vegetables and protein only.</div>');
+  }
+
+  // CALORIES
+  if (totCal >= 1700) {
+    alerts.push('<div class="alert alert-bad">🔴 <strong>Calories ' + totCal + ' / 1700</strong> — daily target reached. Only water, black tea, or vegetables from here.</div>');
+  } else if (totCal >= 1400) {
+    alerts.push('<div class="alert alert-warn">🟡 <strong>Calories ' + totCal + ' / 1700</strong> — ' + (1700-totCal) + ' kcal remaining. Plan your next meal carefully.</div>');
+  }
+
+  // PROTEIN GAP alert (after 6pm)
+  if (hour >= 18 && totProt < 80) {
+    alerts.push('<div class="alert alert-bad">💪 <strong>Protein only ' + totProt.toFixed(0) + 'g / 120g</strong> — critically low by evening. Add protein shake, eggs, or dal urgently to protect muscle.</div>');
+  } else if (hour >= 14 && totProt < 60) {
+    alerts.push('<div class="alert alert-warn">💪 <strong>Protein ' + totProt.toFixed(0) + 'g / 120g</strong> — behind target. Plan a protein-rich meal or shake in the next few hours.</div>');
+  }
+
+  // All good message
+  if (!alerts.length && today.length >= 2) {
+    alerts.push('<div class="alert alert-ok">✓ <strong>Nutrition on track</strong> — Sat fat ' + totSat.toFixed(1) + 'g · Carbs ' + totCarb.toFixed(0) + 'g · Protein ' + totProt.toFixed(0) + 'g · Cal ' + totCal + '. Keep going.</div>');
+  }
+
+  el.innerHTML = alerts.length ? '<div class="card" style="margin-bottom:10px"><div class="card-title">nutrition status</div>' + alerts.join('') + '</div>' : '';
+}
+
 function initAll() {
   // Set default dates to today
   try { document.getElementById('v-date').value = TODAY; } catch(e) {}
@@ -2290,7 +2367,7 @@ function initAll() {
   try { document.getElementById('m-date').value = TODAY; } catch(e) {}
   try { document.getElementById('ex-date').value = TODAY; } catch(e) {}
   try { document.getElementById('mj-log-date').value = TODAY; } catch(e) {}
-  renderMeals(); updateTotals();
+  renderMeals(); updateTotals(); showNutritionAlert();
   renderExercise(); renderExDBList();
   renderVitals(); renderWater();
   renderLabResults();
