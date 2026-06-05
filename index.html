@@ -163,7 +163,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v4.2</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v4.3</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -2518,22 +2518,25 @@ function showNutritionAlert() {
 // MEAL SLOT SYSTEM
 // ═══════════════════════════════════
 const MEAL_SLOTS = [
-  {id:'Wake Up', icon:'🌄', target:33, color:'#64748b',
-   tip:'6:00am — 2 minutes. Non-negotiable. Full day selenium in one nut.',
+  {id:'Wake Up', icon:'🌄', target:82, color:'#64748b',
+   tip:'6:00am — 2 minutes. Non-negotiable. Chia seeds soak here for 2 hours, fully gelled by breakfast time.',
    foods:[
-     '1 Brazil nut — weigh 5g (33 kcal)',
-     '200ml water + pinch chia seeds 2g + juice of half lemon — zero calories'
+     '1 Brazil nut — weigh 5g (33 kcal). Full day selenium in one nut.',
+     '200ml water + chia seeds 10g + 1 tbsp American Garden lemon juice (or fresh lime) — soak together. Chia gels in 15 min, drink anytime. ~49 kcal.',
+     'NOTE: American Garden lemon juice — 1 tbsp = juice of half fresh lemon. Keep refrigerated after opening. Use within 6 weeks.',
+     'NOTE: Never eat dry chia seeds alone — always in liquid. Soak minimum 10 minutes.'
    ]},
-  {id:'Breakfast', icon:'🌅', target:340, color:'#f59e0b',
-   tip:'8:00am — Weigh everything once, memorise portions after. ROTATE fruit daily.',
+  {id:'Breakfast', icon:'🌅', target:360, color:'#f59e0b',
+   tip:'8:00am — Whey in WATER only (faster absorption, fewer calories). Weigh nuts once, memorise after. ROTATE fruit daily.',
    foods:[
-     '1 scoop whey 30g in 150ml Marmum milk — 135 kcal, 27g protein',
-     'Pumpkin seeds — weigh 10g exactly — 56 kcal',
-     'Flaxseed ground — weigh 10g exactly — 53 kcal, omega-3',
-     'Almonds soaked peeled — weigh 11g (8 almonds) — 64 kcal',
-     'Walnuts — weigh 20g (6 halves) — 131 kcal, LDL lowering',
+     '1 scoop whey 30g in 200ml water — 110 kcal, 25g protein (water only — not milk)',
+     'Pumpkin seeds — weigh 10g exactly — 56 kcal, magnesium + zinc',
+     'Almonds soaked peeled — weigh 11g (8 almonds) — 64 kcal, protein + good fat',
+     'Walnuts — weigh 20g (6 halves) — 131 kcal, LDL-lowering omega-3',
+     'NO flaxseed — chia seeds at 6am wake-up replaces flaxseed omega-3',
      'ROTATE fruit (pick ONE daily): Apple 100g / Pear 140g / Papaya 200g / Banana 60g / Guava 100g / Orange 120g / Strawberries 100g',
-     'NOTE: On fruit days, reduce walnuts to 10g (3 halves) to stay in calorie range'
+     'On fruit days: reduce walnuts to 14g (4 halves) to stay in calorie range',
+     'On no-fruit days: keep walnuts at 20g (6 halves)'
    ]},
   {id:'Pre-Lunch', icon:'🥗', target:50, color:'#10b981',
    tip:'12:30pm — EVERY day. Fibre slows glucose spike 20-30%. Takes 5 minutes.',
@@ -2556,9 +2559,9 @@ const MEAL_SLOTS = [
      'ALWAYS: Isabgol 5g before if not taken. Raita or curd 150g always. Salad alongside.'
    ]},
   {id:'Evening Snack', icon:'🥜', target:215, color:'#8b5cf6',
-   tip:'5:30pm sharp — CRAVING DANGER ZONE. Drink whey FIRST. Always.',
+   tip:'5:30pm sharp — CRAVING DANGER ZONE. Drink whey in WATER FIRST. No milk. No mixing with anything. Always.',
    foods:[
-     'STEP 1 — ALWAYS FIRST: 1 scoop whey 30g in water — 110 kcal, 25g protein',
+     'STEP 1 — ALWAYS FIRST: 1 scoop whey 30g in 200ml water — 110 kcal, 25g protein. Drink completely before eating anything.',
      'STEP 2 — Then ONE of these:',
      'Roasted makhana 30g + chaat masala — 104 kcal — BEST DAILY CHOICE',
      'Boiled potato 100g + chaat masala + lemon + 2 roasted papads 20g — ~160 kcal',
