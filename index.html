@@ -142,6 +142,17 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 .modal{background:var(--bg2);border-radius:16px 16px 0 0;padding:16px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto}
 .modal-title{font-size:15px;font-weight:600;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
 .hidden{display:none}
+.meal-slot{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.meal-slot-header{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;cursor:pointer}
+.meal-slot-name{font-size:13px;font-weight:600}
+.meal-slot-meta{font-size:11px;color:var(--text3);margin-top:2px}
+.meal-slot-progress{height:4px;background:var(--bg3);border-radius:2px;margin:0 13px 10px}
+.meal-slot-fill{height:100%;border-radius:2px;transition:width .3s}
+.meal-slot-body{padding:0 13px 13px}
+.meal-slot-entry{display:flex;align-items:flex-start;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)}
+.meal-slot-entry:last-child{border-bottom:none}
+.meal-entry-actions{display:flex;gap:4px;flex-shrink:0}
+.move-btn{font-size:10px;padding:3px 7px;border-radius:4px;background:var(--bg3);border:1px solid var(--border);color:var(--text2);cursor:pointer;white-space:nowrap}
 .streak-row{display:flex;gap:3px;flex-wrap:wrap;margin-top:6px}
 .streak-day{width:26px;height:26px;border-radius:4px;border:1px solid var(--border);background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--text3)}
 .streak-day.done{background:#065f46;border-color:var(--green);color:var(--green)}
@@ -152,7 +163,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v3.4</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v3.5</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -230,8 +241,9 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 
 <!-- TAB 2: MEALS -->
 <div class="tab" id="tab-meals">
+
   <div class="card">
-    <div class="card-title">today's nutrition</div>
+    <div class="card-title">today's nutrition summary</div>
     <div class="progress-wrap">
       <div class="progress-label"><span>Calories</span><span id="cal-today">0 / 1700 kcal</span></div>
       <div class="progress-bar"><div class="progress-fill" id="cal-bar" style="background:var(--accent);width:0%"></div></div>
@@ -241,7 +253,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
       <div class="progress-bar"><div class="progress-fill" id="prot-bar" style="background:var(--green);width:0%"></div></div>
     </div>
     <div class="progress-wrap">
-      <div class="progress-label"><span>Saturated fat <span style="color:var(--text3)">(LDL driver — keep under 13g)</span></span><span id="satfat-today">0 / 13g</span></div>
+      <div class="progress-label"><span>Saturated fat <span style="color:var(--text3)">(keep under 13g)</span></span><span id="satfat-today">0 / 13g</span></div>
       <div class="progress-bar"><div class="progress-fill" id="satfat-bar" style="background:var(--red);width:0%"></div></div>
     </div>
     <div class="progress-wrap">
@@ -250,12 +262,24 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
     </div>
   </div>
 
-  <div class="card">
-    <div class="card-title">log a meal</div>
-    <label>Date (defaults to today)</label>
+  <div id="nutrition-alert-panel"></div>
+
+  <!-- MEAL SLOTS -->
+  <div id="meal-slots-container"></div>
+
+  <!-- LOG FOOD PANEL -->
+  <div class="card" id="log-food-card">
+    <div class="card-title" id="log-food-title">log food</div>
+    <label>Date</label>
     <input type="date" id="m-date">
-    <label>Meal type</label>
-    <select id="m-type"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option></select>
+    <label>Meal slot</label>
+    <select id="m-type">
+      <option value="Breakfast">Breakfast (~400 kcal)</option>
+      <option value="Morning Snack">Morning Snack (~150 kcal)</option>
+      <option value="Lunch">Lunch (~500 kcal)</option>
+      <option value="Evening Snack">Evening Snack (~150 kcal)</option>
+      <option value="Dinner">Dinner (~500 kcal)</option>
+    </select>
     <label>Search food</label>
     <div class="food-search-wrap">
       <input type="text" id="food-search" placeholder="Type food name e.g. dal, eggs, oats..." autocomplete="off" oninput="searchFood(this.value)">
@@ -1173,11 +1197,12 @@ function logSelectedFood() {
   selectedFood = null;
   document.getElementById('food-search').value = '';
   document.getElementById('food-selected-panel').classList.add('hidden');
-  renderMeals(); updateTotals(); showNutritionAlert(); updateScore(); showNutritionAlert();
+  renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert(); updateScore(); showNutritionAlert();
   alert('Logged: ' + entry.name + ' (' + entry.grams + 'g) — ' + entry.cal + ' kcal');
 }
 
 function renderMeals() {
+  renderMealSlots();
   const logs = JSON.parse(localStorage.getItem('hh_meals') || '[]');
   const todayLogs = logs.filter(l => l.date === TODAY);
   const el = document.getElementById('meal-list');
@@ -1219,7 +1244,7 @@ function deleteMeal(idx) {
   const toDelete = todayLogs[idx];
   logs = logs.filter(l => l !== toDelete);
   localStorage.setItem('hh_meals', JSON.stringify(logs));
-  renderMeals(); updateTotals(); showNutritionAlert(); updateScore(); showNutritionAlert();
+  renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert(); updateScore(); showNutritionAlert();
 }
 
 function updateTotals() {
@@ -2357,6 +2382,126 @@ function showNutritionAlert() {
   el.innerHTML = alerts.length ? '<div class="card" style="margin-bottom:10px"><div class="card-title">nutrition status</div>' + alerts.join('') + '</div>' : '';
 }
 
+// ═══════════════════════════════════
+// MEAL SLOT SYSTEM
+// ═══════════════════════════════════
+const MEAL_SLOTS = [
+  {id:'Breakfast',       icon:'🌅', target:400,  color:'#f59e0b'},
+  {id:'Morning Snack',   icon:'🍎', target:150,  color:'#10b981'},
+  {id:'Lunch',           icon:'🍱', target:500,  color:'#3b82f6'},
+  {id:'Evening Snack',   icon:'🥜', target:150,  color:'#8b5cf6'},
+  {id:'Dinner',          icon:'🌙', target:500,  color:'#06b6d4'},
+];
+
+function renderMealSlots(date) {
+  var d = date || TODAY;
+  var logs = JSON.parse(localStorage.getItem('hh_meals') || '[]');
+  var dayLogs = logs.filter(function(l){ return l.date === d; });
+  var container = document.getElementById('meal-slots-container');
+  if (!container) return;
+
+  var html = '';
+  MEAL_SLOTS.forEach(function(slot, slotIdx) {
+    var entries = dayLogs.filter(function(l){ return l.type === slot.id; });
+    var slotCal = entries.reduce(function(a,l){return a+l.cal;},0);
+    var slotProt = entries.reduce(function(a,l){return a+(l.p||0);},0);
+    var slotCarb = entries.reduce(function(a,l){return a+(l.c||0);},0);
+    var slotSat = entries.reduce(function(a,l){return a+(l.sat||0);},0);
+    var pct = Math.min(100, Math.round(slotCal/slot.target*100));
+    var overColor = slotCal > slot.target*1.2 ? 'var(--red)' : slotCal > slot.target ? 'var(--amber)' : slot.color;
+
+    var entriesHTML = '';
+    if (entries.length) {
+      entries.forEach(function(e) {
+        var globalIdx = logs.indexOf(e);
+        var moveBtns = '';
+        MEAL_SLOTS.forEach(function(s, sidx) {
+          if (s.id !== slot.id) {
+            moveBtns += '<button class="move-btn" data-gidx="' + globalIdx + '" data-sidx="' + sidx + '" onclick="moveToSlot(this.dataset.gidx,this.dataset.sidx)">' + s.icon + ' ' + s.id.split(' ')[0] + '</button>';
+          }
+        });
+        entriesHTML += '<div class="meal-slot-entry">' +
+          '<div style="flex:1;min-width:0">' +
+            '<div style="font-size:12px;font-weight:500">' + getFoodFlag(e) + ' ' + e.name + ' <span style="color:var(--text3)">(' + e.grams + (e.unit||'g') + ')</span></div>' +
+            '<div style="margin-top:2px">' +
+              '<span class="tag tag-b" style="font-size:10px">' + e.cal + ' kcal</span>' +
+              '<span class="tag tag-g" style="font-size:10px">P ' + (e.p||0) + 'g</span>' +
+              '<span class="tag tag-a" style="font-size:10px">Sat ' + (e.sat||0) + 'g</span>' +
+            '</div>' +
+            '<div style="margin-top:3px;display:flex;flex-wrap:wrap;gap:3px"><span style="font-size:10px;color:var(--text3)">Move to:</span>' + moveBtns + '</div>' +
+          '</div>' +
+          '<button class="btn-icon" data-gidx="' + globalIdx + '" onclick="deleteMealByIdx(this.dataset.gidx)" style="color:var(--red);font-size:16px;padding:4px 8px">✕</button>' +
+        '</div>';
+      });
+    } else {
+      entriesHTML = '<div style="color:var(--text3);font-size:12px;padding:8px 0">Empty — tap + to log food here</div>';
+    }
+
+    html += '<div class="meal-slot">' +
+      '<div class="meal-slot-header" data-slot="' + slotIdx + '" onclick="selectSlotToLog(this.dataset.slot)">' +
+        '<div>' +
+          '<div class="meal-slot-name">' + slot.icon + ' ' + slot.id + '</div>' +
+          '<div class="meal-slot-meta">' + slotCal + ' / ' + slot.target + ' kcal' +
+            (entries.length ? ' · P:' + slotProt.toFixed(0) + 'g · Carbs:' + slotCarb.toFixed(0) + 'g · Sat:' + slotSat.toFixed(1) + 'g' : '') +
+          '</div>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:8px">' +
+          (entries.length ? '<span class="tag tag-g" style="font-size:10px">' + entries.length + ' item' + (entries.length>1?'s':'') + '</span>' : '') +
+          '<span style="font-size:20px;color:var(--accent)">+</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="meal-slot-progress"><div class="meal-slot-fill" style="width:' + pct + '%;background:' + overColor + '"></div></div>' +
+      '<div class="meal-slot-body">' + entriesHTML + '</div>' +
+    '</div>';
+  });
+  container.innerHTML = html;
+}
+
+
+function selectSlotToLog(slotIdxOrId) {
+  var slot = typeof slotIdxOrId === 'string' && isNaN(slotIdxOrId) 
+    ? MEAL_SLOTS.find(function(s){return s.id===slotIdxOrId;})
+    : MEAL_SLOTS[parseInt(slotIdxOrId)];
+  if (!slot) return;
+  var sel = document.getElementById('m-type');
+  if (sel) {
+    for (var i=0; i<sel.options.length; i++) {
+      if (sel.options[i].value === slot.id) { sel.selectedIndex = i; break; }
+    }
+  }
+  var card = document.getElementById('log-food-card');
+  if (card) card.scrollIntoView({behavior:'smooth', block:'start'});
+  var title = document.getElementById('log-food-title');
+  if (title) title.textContent = 'Log food — ' + slot.id;
+}
+
+function moveToSlot(globalIdx, slotIdx) {
+  var newSlot = MEAL_SLOTS[parseInt(slotIdx)].id;
+  moveEntry(parseInt(globalIdx), newSlot);
+}
+
+function moveEntry(globalIdx, newSlot) {
+  let logs = JSON.parse(localStorage.getItem('hh_meals') || '[]');
+  if (logs[globalIdx]) {
+    logs[globalIdx].type = newSlot;
+    localStorage.setItem('hh_meals', JSON.stringify(logs));
+    renderMealSlots();
+    updateTotals();
+    showNutritionAlert();
+  }
+}
+
+function deleteMealByIdx(globalIdx) {
+  var logs = JSON.parse(localStorage.getItem('hh_meals') || '[]');
+  logs.splice(parseInt(globalIdx), 1);
+  localStorage.setItem('hh_meals', JSON.stringify(logs));
+  renderMeals();
+  renderMealSlots();
+  updateTotals();
+  updateScore();
+  showNutritionAlert();
+}
+
 function initAll() {
   // Set default dates to today
   try { document.getElementById('v-date').value = TODAY; } catch(e) {}
@@ -2367,7 +2512,7 @@ function initAll() {
   try { document.getElementById('m-date').value = TODAY; } catch(e) {}
   try { document.getElementById('ex-date').value = TODAY; } catch(e) {}
   try { document.getElementById('mj-log-date').value = TODAY; } catch(e) {}
-  renderMeals(); updateTotals(); showNutritionAlert();
+  renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert();
   renderExercise(); renderExDBList();
   renderVitals(); renderWater();
   renderLabResults();
