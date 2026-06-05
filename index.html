@@ -163,7 +163,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v4.5</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v4.6</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -895,6 +895,16 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
         <button class="steps-opt-btn" onclick="selectSteps(this,'11000')" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">10k+</button>
         <button class="steps-opt-btn" onclick="selectSteps(this,'0')" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">Rest day</button>
       </div>
+    </div>
+
+    <!-- ISABGOL -->
+    <div style="background:var(--bg3);border-radius:10px;padding:12px;margin-bottom:12px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--green)">🌿 Isabgol taken today?</div>
+      <div style="display:flex;gap:8px">
+        <button id="ci-isabgol-lunch" onclick="toggleCIIsabgol('lunch')" style="flex:1;padding:10px;border-radius:8px;border:2px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:12px;font-weight:600">🍱 Before Lunch</button>
+        <button id="ci-isabgol-dinner" onclick="toggleCIIsabgol('dinner')" style="flex:1;padding:10px;border-radius:8px;border:2px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:12px;font-weight:600">🌙 Before Dinner</button>
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:5px;text-align:center">1 tsp each time — lowers LDL 10-15%</div>
     </div>
 
     <!-- WELLBEING -->
@@ -1946,43 +1956,105 @@ function renderLabResults() {
 // HEALTH SCORE
 // ═══════════════════════════════════
 function updateScore() {
-  const meds = JSON.parse(localStorage.getItem('hh_meds_' + TODAY) || '{}');
-  const medCount = Object.values(meds).filter(Boolean).length;
-  const vitals = JSON.parse(localStorage.getItem('hh_vitals') || '[]').find(v => v.date === TODAY) || {};
-  const meals = JSON.parse(localStorage.getItem('hh_meals') || '[]').filter(m => m.date === TODAY);
-  const water = JSON.parse(localStorage.getItem('hh_water_' + TODAY) || '[]').filter(Boolean).length;
-  const steps = parseInt(vitals.steps || 0);
-  const sleep = parseFloat(vitals.sleep || 0);
-  const satFat = meals.reduce((a,m)=>a+m.sat,0);
+  var score = 0;
+  var breakdown = [];
+  var today = new Date().toISOString().split('T')[0];
 
-  let score = 0;
-  const medScore = Math.round(medCount / MEDS.length * 25); score += medScore;
-  const stepScore = steps >= 8000 ? 20 : steps >= 6000 ? 15 : steps >= 4000 ? 10 : steps > 0 ? 5 : 0; score += stepScore;
-  const waterScore = water >= 8 ? 15 : water >= 5 ? 10 : water >= 3 ? 5 : 0; score += waterScore;
-  const sleepScore = sleep >= 7 ? 15 : sleep >= 6 ? 10 : sleep >= 5 ? 5 : 0; score += sleepScore;
-  const mealScore = meals.length >= 3 ? 15 : meals.length >= 2 ? 10 : meals.length >= 1 ? 5 : 0; score += mealScore;
-  const vitalsToday = JSON.parse(localStorage.getItem('hh_vitals')||'[]').find(v=>v.date===TODAY)||{};
-  const stepBonus = parseInt(vitalsToday.steps||0) >= 8000 ? 0 : 0;
-  const satScore = satFat <= 8 ? 10 : satFat <= 13 ? 5 : 0; // 13g sat fat limit maintained score += satScore;
+  // 1. MEDICINES — 25 points
+  var taken = JSON.parse(localStorage.getItem('hh_meds_' + today) || '{}');
+  var medCount = Object.values(taken).filter(Boolean).length;
+  var medPct = MEDS.length > 0 ? medCount / MEDS.length : 0;
+  var medScore = Math.round(medPct * 25);
+  score += medScore;
+  breakdown.push({label:'Medicines ' + medCount + '/' + MEDS.length, val:medScore, max:25, color:'var(--green)'});
 
-  document.getElementById('score-num').textContent = score;
-  const badge = document.getElementById('score-badge');
-  if (score >= 80) { document.getElementById('score-num').style.color = 'var(--green)'; badge.className = 'tag tag-g'; badge.textContent = 'Excellent'; }
-  else if (score >= 60) { document.getElementById('score-num').style.color = 'var(--accent)'; badge.className = 'tag tag-b'; badge.textContent = 'Good'; }
-  else if (score >= 40) { document.getElementById('score-num').style.color = 'var(--amber)'; badge.className = 'tag tag-a'; badge.textContent = 'Fair'; }
-  else { document.getElementById('score-num').style.color = 'var(--red)'; badge.className = 'tag tag-r'; badge.textContent = 'Needs work'; }
+  // 2. MEALS LOGGED — 15 points
+  var meals = JSON.parse(localStorage.getItem('hh_meals') || '[]');
+  var todayMeals = meals.filter(function(l){return l.date===today;});
+  var mealScore = Math.min(15, Math.round(todayMeals.length * 2.5));
+  score += mealScore;
+  breakdown.push({label:'Meals ' + todayMeals.length + ' logged', val:mealScore, max:15, color:'var(--accent)'});
 
-  document.getElementById('sc-meds').textContent = medCount + '/' + MEDS.length;
-  document.getElementById('sc-steps').textContent = steps ? steps.toLocaleString() : '--';
-  document.getElementById('sc-water').textContent = water + '/10';
-  document.getElementById('sc-sleep').textContent = sleep || '--';
-  document.getElementById('sc-meals').textContent = meals.length;
-  document.getElementById('sc-sat').textContent = satFat.toFixed(1) + 'g / 13g';
+  // 3. CALORIES ON TARGET — 15 points
+  var totCal = todayMeals.reduce(function(a,l){return a+l.cal;},0);
+  var calScore = totCal >= 1000 && totCal <= 1700 ? 15 : totCal >= 800 && totCal <= 1900 ? 8 : 0;
+  score += calScore;
+  breakdown.push({label:'Calories ' + totCal + ' kcal', val:calScore, max:15, color:'var(--accent)'});
+
+  // 4. PROTEIN — 15 points
+  var totProt = parseFloat(todayMeals.reduce(function(a,l){return a+(l.p||0);},0).toFixed(0));
+  var protScore = totProt >= 120 ? 15 : Math.round((totProt / 120) * 15);
+  score += protScore;
+  breakdown.push({label:'Protein ' + totProt + 'g', val:protScore, max:15, color:'var(--green)'});
+
+  // 5. WATER — 10 points
+  var water = JSON.parse(localStorage.getItem('hh_water_' + today) || '[]');
+  var glasses = water.filter(Boolean).length;
+  var waterScore = Math.round(Math.min(1, glasses/10) * 10);
+  score += waterScore;
+  breakdown.push({label:'Water ' + glasses + '/10', val:waterScore, max:10, color:'var(--accent2)'});
+
+  // 6. EXERCISE — 10 points
+  var exLogs = JSON.parse(localStorage.getItem('hh_exercise') || '[]');
+  var todayEx = exLogs.filter(function(l){return l.date===today;});
+  var exScore = Math.min(10, todayEx.length * 2);
+  score += exScore;
+  breakdown.push({label:'Exercise ' + todayEx.length + ' done', val:exScore, max:10, color:'var(--purple)'});
+
+  // 7. ISABGOL — 5 points
+  var isab = JSON.parse(localStorage.getItem('hh_isabgol_' + today) || '{}');
+  var isabScore = (isab.lunch && isab.dinner) ? 5 : (isab.lunch || isab.dinner) ? 2 : 0;
+  score += isabScore;
+  breakdown.push({label:'Isabgol', val:isabScore, max:5, color:'var(--green)'});
+
+  // 8. SAT FAT — 5 points
+  var totSat = parseFloat(todayMeals.reduce(function(a,l){return a+(l.sat||0);},0).toFixed(1));
+  var satScore = totSat <= 8 ? 5 : totSat <= 13 ? 3 : 0;
+  score += satScore;
+  breakdown.push({label:'Sat fat ' + totSat + 'g', val:satScore, max:5, color:'var(--red)'});
+
+  score = Math.min(100, Math.round(score));
+
+  var scoreEl = document.getElementById('score-num');
+  var badgeEl = document.getElementById('score-badge');
+  var scoreColor = score >= 80 ? 'var(--green)' : score >= 60 ? 'var(--amber)' : 'var(--red)';
+  var scoreLabel = score >= 80 ? 'Excellent day' : score >= 60 ? 'Good day' : score >= 40 ? 'Average day' : 'Needs work';
+  if (scoreEl) { scoreEl.textContent = score; scoreEl.style.color = scoreColor; }
+  if (badgeEl) { badgeEl.textContent = scoreLabel; }
+
+  var items = [
+    {id:'sc-meds', val:medCount+'/'+MEDS.length, good:medPct>=0.9},
+    {id:'sc-water', val:glasses+'/10', good:glasses>=8},
+    {id:'sc-meals', val:todayMeals.length+' items', good:todayMeals.length>=5},
+    {id:'sc-sat', val:totSat+'g', good:totSat<=10},
+  ];
+  items.forEach(function(item) {
+    var el = document.getElementById(item.id);
+    if (el) { el.textContent = item.val; el.className = 'score-item-val ' + (item.good?'ok':'warn'); }
+  });
+
+  var bdEl = document.getElementById('score-breakdown');
+  if (bdEl) {
+    bdEl.innerHTML = breakdown.map(function(b) {
+      var pct = Math.round(b.val/b.max*100);
+      return '<div style="margin-bottom:5px">' +
+        '<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:2px">' +
+          '<span>' + b.label + '</span><span style="color:' + b.color + '">' + b.val + '/' + b.max + '</span>' +
+        '</div>' +
+        '<div class="progress-bar" style="height:5px"><div class="progress-fill" style="width:' + pct + '%;background:' + b.color + '"></div></div>' +
+      '</div>';
+    }).join('');
+  }
+
+  var eggText = document.getElementById('egg-unlock-text');
+  if (eggText && today >= '2026-06-16') {
+    eggText.innerHTML = '🥚 <strong>Eggs unlocked!</strong> Add to dinner — 3 whites + 1 whole egg.';
+  }
+
+  return score;
 }
 
-// ═══════════════════════════════════
-// DOCTOR SUMMARY
-// ═══════════════════════════════════
+
 function generateDocSummary() {
   const vitals = JSON.parse(localStorage.getItem('hh_vitals') || '[]').slice(0, 30);
   const meals = JSON.parse(localStorage.getItem('hh_meals') || '[]').slice(0, 90);
@@ -2800,7 +2872,34 @@ function showCheckin() {
   });
   var el = document.getElementById('checkin-med-list');
   if (el) el.innerHTML = medHTML;
+
+  var isab = JSON.parse(localStorage.getItem('hh_isabgol_' + TODAY) || '{}');
+  ['lunch','dinner'].forEach(function(meal) {
+    var btn = document.getElementById('ci-isabgol-' + meal);
+    if (!btn) return;
+    btn.style.background = isab[meal] ? 'var(--green)' : 'var(--bg2)';
+    btn.style.borderColor = isab[meal] ? 'var(--green)' : 'var(--border)';
+    btn.style.color = isab[meal] ? 'white' : 'var(--text)';
+    btn.textContent = (isab[meal] ? '\u2713 ' : '') + (meal === 'lunch' ? '\uD83C\uDF71 Before Lunch' : '\uD83C\uDF19 Before Dinner');
+  });
+
   document.getElementById('checkin-modal').classList.remove('hidden');
+}
+
+function toggleCIIsabgol(meal) {
+  var key = 'hh_isabgol_' + TODAY;
+  var data = JSON.parse(localStorage.getItem(key) || '{}');
+  data[meal] = !data[meal];
+  localStorage.setItem(key, JSON.stringify(data));
+  var btn = document.getElementById('ci-isabgol-' + meal);
+  if (btn) {
+    btn.style.background = data[meal] ? 'var(--green)' : 'var(--bg2)';
+    btn.style.borderColor = data[meal] ? 'var(--green)' : 'var(--border)';
+    btn.style.color = data[meal] ? 'white' : 'var(--text)';
+    btn.textContent = (data[meal] ? '\u2713 ' : '') + (meal === 'lunch' ? '\uD83C\uDF71 Before Lunch' : '\uD83C\uDF19 Before Dinner');
+  }
+  renderIsabgol();
+  updateScore();
 }
 
 function toggleCIMed(idx) {
