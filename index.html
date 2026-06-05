@@ -163,7 +163,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v4.4</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v4.5</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -448,37 +448,127 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 
 </div>
 
-<!-- TAB 4: VITALS --><!-- TAB 4: VITALS -->
+<!-- TAB 4: VITALS -->
 <div class="tab" id="tab-vitals">
+
+  <!-- QUICK LOG ROW -->
   <div class="card">
-    <div class="card-title">log vitals</div>
-    <label>Date (defaults to today)</label>
-    <input type="date" id="v-date">
+    <div class="card-title">quick morning log <span style="color:var(--text3);font-size:10px">Mon · Wed · Fri recommended</span></div>
+    <div style="background:var(--bg3);border-radius:8px;padding:10px;margin-bottom:10px">
+      <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:8px">📅 Log for date:</div>
+      <input type="date" id="v-quick-date" style="margin-bottom:8px">
+      <div class="row">
+        <div class="half">
+          <label>⚖️ Weight (kg)</label>
+          <input type="number" id="v-quick-wt" step="0.1" placeholder="83.9">
+        </div>
+        <div class="half">
+          <label>🩸 Fasting glucose (mg/dL)</label>
+          <input type="number" id="v-quick-gluc" placeholder="116">
+        </div>
+      </div>
+      <div class="row">
+        <div class="half">
+          <label>BP Systolic</label>
+          <input type="number" id="v-quick-sys" placeholder="124" style="margin-bottom:0">
+        </div>
+        <div class="half">
+          <label>BP Diastolic</label>
+          <input type="number" id="v-quick-dia" placeholder="72" style="margin-bottom:0">
+        </div>
+      </div>
+      <button class="btn btn-green" onclick="saveQuickVitals()" style="margin-top:8px">Save morning readings</button>
+    </div>
+
+    <!-- ISABGOL TRACKER -->
+    <div style="background:var(--bg3);border-radius:8px;padding:10px">
+      <div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:6px">🌿 Isabgol tracker — 2× daily = LDL -10-15%</div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button id="isabgol-lunch-btn" onclick="toggleIsabgol('lunch')" style="flex:1;padding:10px;border-radius:8px;border:2px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:12px;font-weight:600">
+          🍱 Before Lunch
+        </button>
+        <button id="isabgol-dinner-btn" onclick="toggleIsabgol('dinner')" style="flex:1;padding:10px;border-radius:8px;border:2px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:12px;font-weight:600">
+          🌙 Before Dinner
+        </button>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:6px;text-align:center" id="isabgol-status">Tap when taken — builds 30-day streak</div>
+      <div class="streak-row" id="isabgol-streak" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <!-- WEIGHT TREND -->
+  <div class="card">
+    <div class="card-title">weight trend</div>
+    <div class="metric-grid" style="margin-bottom:10px">
+      <div class="metric"><div class="metric-label">Current</div><div class="metric-value info" id="wt-current">--</div><div class="metric-sub">kg</div></div>
+      <div class="metric"><div class="metric-label">7-day avg</div><div class="metric-value ok" id="wt-7avg">--</div><div class="metric-sub">kg</div></div>
+      <div class="metric"><div class="metric-label">Lost total</div><div class="metric-value ok" id="wt-lost">--</div><div class="metric-sub">from 97 kg</div></div>
+      <div class="metric"><div class="metric-label">This week</div><div class="metric-value warn" id="wt-week-change">--</div><div class="metric-sub">vs last week</div></div>
+    </div>
+    <canvas id="wt-trend-chart" height="160" style="width:100%"></canvas>
+    <div style="font-size:11px;color:var(--text3);margin-top:6px;text-align:center">Target: 75 kg · Started: 97 kg · Lost so far: 13.1 kg</div>
+    <div id="wt-history" style="margin-top:8px"></div>
+  </div>
+
+  <!-- GLUCOSE TREND -->
+  <div class="card">
+    <div class="card-title">fasting glucose trend</div>
+    <div class="metric-grid" style="margin-bottom:10px">
+      <div class="metric"><div class="metric-label">Latest</div><div class="metric-value warn" id="gluc-current">--</div><div class="metric-sub">mg/dL</div></div>
+      <div class="metric"><div class="metric-label">7-day avg</div><div class="metric-value warn" id="gluc-7avg">--</div><div class="metric-sub">mg/dL</div></div>
+      <div class="metric"><div class="metric-label">Target</div><div class="metric-value ok">100</div><div class="metric-sub">mg/dL</div></div>
+      <div class="metric"><div class="metric-label">Status</div><div class="metric-value warn" id="gluc-status">--</div><div class="metric-sub"></div></div>
+    </div>
+    <canvas id="gluc-trend-chart" height="160" style="width:100%"></canvas>
+    <div style="display:flex;gap:12px;margin-top:6px;font-size:11px">
+      <span style="color:#f59e0b">— Fasting glucose</span>
+      <span style="color:#10b981">— Target 100</span>
+      <span style="color:#ef4444">— Pre-diabetic 126</span>
+    </div>
+    <div id="gluc-history" style="margin-top:8px"></div>
+  </div>
+
+  <!-- CHOLESTEROL LOG -->
+  <div class="card">
+    <div class="card-title">cholesterol — blood test log</div>
+    <div style="background:var(--bg3);border-radius:8px;padding:10px;margin-bottom:10px">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Log when you get a blood test result. Next test: late June 2026.</div>
+      <input type="date" id="chol-date">
+      <div class="row">
+        <div class="half"><label>Total cholesterol</label><input type="number" id="chol-total" placeholder="252" style="margin-bottom:0"></div>
+        <div class="half"><label>LDL</label><input type="number" id="chol-ldl" placeholder="133" style="margin-bottom:0"></div>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <div class="half"><label>HDL</label><input type="number" id="chol-hdl" placeholder="71" style="margin-bottom:0"></div>
+        <div class="half"><label>Triglycerides</label><input type="number" id="chol-trig" placeholder="141" style="margin-bottom:0"></div>
+      </div>
+      <button class="btn" onclick="saveCholesterol()" style="margin-top:8px">Save cholesterol result</button>
+    </div>
+    <canvas id="chol-trend-chart" height="160" style="width:100%"></canvas>
+    <div style="display:flex;gap:12px;margin-top:6px;font-size:11px;flex-wrap:wrap">
+      <span style="color:#ef4444">— Total</span>
+      <span style="color:#f59e0b">— LDL (target &lt;100)</span>
+      <span style="color:#10b981">— HDL (target &gt;60)</span>
+    </div>
+    <div id="chol-history" style="margin-top:8px"></div>
+  </div>
+
+  <!-- OTHER VITALS -->
+  <div class="card">
+    <div class="card-title">other vitals log</div>
+    <label>Date</label><input type="date" id="v-date">
     <div class="row">
-      <div class="half"><label>Weight (kg)</label><input type="number" id="v-wt" step="0.1" placeholder="83.0"></div>
       <div class="half"><label>Waist (cm)</label><input type="number" id="v-waist" placeholder="109"></div>
-    </div>
-    <div class="row">
-      <div class="half"><label>BP Systolic</label><input type="number" id="v-sys" placeholder="120"></div>
-      <div class="half"><label>BP Diastolic</label><input type="number" id="v-dia" placeholder="80"></div>
-    </div>
-    <div class="row">
-      <div class="half"><label>Fasting glucose (morning)</label><input type="number" id="v-gluc" placeholder="mg/dL"></div>
       <div class="half"><label>Sleep (hours)</label><input type="number" id="v-sleep" step="0.5" placeholder="6.5"></div>
     </div>
-    <div class="section-hd" style="margin-top:4px">pre-meal glucose readings</div>
-    <div class="row">
-      <div class="half"><label>Before lunch</label><input type="number" id="v-gluc-lunch" placeholder="mg/dL"></div>
-      <div class="half"><label>Before dinner</label><input type="number" id="v-gluc-dinner" placeholder="mg/dL"></div>
-    </div>
     <label>Symptoms / notes</label>
-    <textarea id="v-note" rows="2" placeholder="Energy level, mood, any muscle aches, dizziness..."></textarea>
+    <textarea id="v-note" rows="2" placeholder="Energy, mood, muscle aches, dizziness..."></textarea>
     <label>Wellbeing (1-10)</label>
     <input type="range" id="v-wb" min="1" max="10" value="7" oninput="document.getElementById('wb-val').textContent=this.value">
     <div style="text-align:center;font-size:18px;font-weight:700;color:var(--accent)" id="wb-val">7</div>
-    <button class="btn" onclick="saveVitals()" style="margin-top:8px">Save Vitals</button>
+    <button class="btn" onclick="saveVitals()">Save vitals</button>
     <div class="row" style="margin-bottom:6px">
-      <button class="btn" onclick="syncHealthConnect()" style="background:var(--green);margin-bottom:0">Sync Samsung Health data</button>
+      <button class="btn" onclick="syncHealthConnect()" style="background:var(--green);margin-bottom:0">Sync Samsung Health</button>
     </div>
     <div id="hc-status" style="font-size:11px;color:var(--text3);text-align:center;margin-bottom:8px"></div>
     <div class="row">
@@ -487,6 +577,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
     </div>
   </div>
 
+  <!-- HYDRATION -->
   <div class="card">
     <div class="card-title">hydration tracker</div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
@@ -497,31 +588,15 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
     <button class="btn-sm" onclick="resetWater()" style="margin-top:4px">Reset</button>
   </div>
 
-  <div class="card">
-    <div class="card-title">weight & waist trend</div>
-    <canvas id="wt-chart" height="180" style="width:100%"></canvas>
-    <div style="display:flex;gap:12px;margin-top:6px;font-size:11px">
-      <span style="color:#3b82f6">— Weight (kg)</span>
-      <span style="color:#10b981">— Waist (cm)</span>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">bp & glucose trend</div>
-    <canvas id="bp-chart" height="160" style="width:100%"></canvas>
-    <div style="display:flex;gap:12px;margin-top:6px;font-size:11px">
-      <span style="color:#ef4444">— Systolic BP</span>
-      <span style="color:#f59e0b">— Fasting glucose</span>
-    </div>
-  </div>
-
+  <!-- VITALS HISTORY -->
   <div class="card">
     <div class="card-title">vitals history</div>
     <div id="vitals-list"><div style="color:var(--text3);font-size:12px">No entries yet.</div></div>
   </div>
+
 </div>
 
-<!-- TAB 5: LABS -->
+<!-- TAB 5: LABS --><!-- TAB 5: LABS -->
 <div class="tab" id="tab-labs">
   <div class="card">
     <div class="card-title">add new lab result</div>
@@ -1308,6 +1383,8 @@ function logSelectedFood() {
   showDaySummary(TODAY);
   showWeekAverage();
   renderExercise();
+  seedHistoricalData();
+  setTimeout(function(){renderWeightTrend(); renderGlucoseTrend(); renderCholesterolTrend(); renderIsabgol();}, 400);
   setTimeout(initCheckin, 1000); updateScore(); showNutritionAlert();
   alert('Logged: ' + entry.name + ' (' + entry.grams + 'g) — ' + entry.cal + ' kcal');
 }
@@ -1359,6 +1436,8 @@ function deleteMeal(idx) {
   showDaySummary(TODAY);
   showWeekAverage();
   renderExercise();
+  seedHistoricalData();
+  setTimeout(function(){renderWeightTrend(); renderGlucoseTrend(); renderCholesterolTrend(); renderIsabgol();}, 400);
   setTimeout(initCheckin, 1000); updateScore(); showNutritionAlert();
 }
 
@@ -3449,13 +3528,439 @@ function renderExercise() {
   setExVersion('home');
 }
 
+// ═══════════════════════════════════
+// WEIGHT + GLUCOSE + CHOLESTEROL + ISABGOL
+// ═══════════════════════════════════
+
+// Seed historical data on first run
+function seedHistoricalData() {
+  // Weight history from InBody and known readings
+  var wtData = JSON.parse(localStorage.getItem('hh_weight_log') || '[]');
+  if (wtData.length === 0) {
+    wtData = [
+      {date:'2025-04-01', wt:97.0},
+      {date:'2025-07-01', wt:93.0},
+      {date:'2025-10-07', wt:85.7},
+      {date:'2026-05-11', wt:83.9},
+    ];
+    localStorage.setItem('hh_weight_log', JSON.stringify(wtData));
+  }
+  // Glucose history from lab reports
+  var glucData = JSON.parse(localStorage.getItem('hh_glucose_log') || '[]');
+  if (glucData.length === 0) {
+    glucData = [
+      {date:'2025-04-10', gluc:278},
+      {date:'2025-08-16', gluc:81},
+      {date:'2025-11-14', gluc:95},
+      {date:'2026-01-14', gluc:89},
+      {date:'2026-05-11', gluc:116},
+    ];
+    localStorage.setItem('hh_glucose_log', JSON.stringify(glucData));
+  }
+  // Cholesterol history
+  var cholData = JSON.parse(localStorage.getItem('hh_chol_log') || '[]');
+  if (cholData.length === 0) {
+    cholData = [
+      {date:'2025-04-10', total:212, ldl:146, hdl:62, trig:263},
+      {date:'2025-05-30', total:220, ldl:140, hdl:61, trig:226},
+      {date:'2025-07-06', total:160, ldl:95,  hdl:35, trig:148},
+      {date:'2025-08-16', total:190, ldl:106, hdl:63, trig:161},
+      {date:'2025-11-14', total:217, ldl:111, hdl:67, trig:130},
+      {date:'2025-12-01', total:229, ldl:123, hdl:66, trig:143},
+      {date:'2026-03-18', total:218, ldl:141, hdl:60, trig:116},
+      {date:'2026-05-11', total:252, ldl:133, hdl:71, trig:141},
+    ];
+    localStorage.setItem('hh_chol_log', JSON.stringify(cholData));
+  }
+}
+
+function saveQuickVitals() {
+  var date = document.getElementById('v-quick-date').value || TODAY;
+  var wt = parseFloat(document.getElementById('v-quick-wt').value);
+  var gluc = parseFloat(document.getElementById('v-quick-gluc').value);
+  var sys = parseFloat(document.getElementById('v-quick-sys').value);
+  var dia = parseFloat(document.getElementById('v-quick-dia').value);
+
+  if (wt > 0) {
+    var wtLog = JSON.parse(localStorage.getItem('hh_weight_log') || '[]');
+    wtLog = wtLog.filter(function(e){return e.date !== date;});
+    wtLog.push({date:date, wt:wt});
+    wtLog.sort(function(a,b){return a.date.localeCompare(b.date);});
+    localStorage.setItem('hh_weight_log', JSON.stringify(wtLog));
+  }
+
+  if (gluc > 0) {
+    var glucLog = JSON.parse(localStorage.getItem('hh_glucose_log') || '[]');
+    glucLog = glucLog.filter(function(e){return e.date !== date;});
+    glucLog.push({date:date, gluc:gluc});
+    glucLog.sort(function(a,b){return a.date.localeCompare(b.date);});
+    localStorage.setItem('hh_glucose_log', JSON.stringify(glucLog));
+  }
+
+  if (sys > 0 && dia > 0) {
+    var vitals = JSON.parse(localStorage.getItem('hh_vitals') || '[]');
+    var existing = vitals.find(function(v){return v.date===date;}) || {date:date};
+    existing.sys = sys; existing.dia = dia;
+    vitals = vitals.filter(function(v){return v.date!==date;});
+    vitals.unshift(existing);
+    localStorage.setItem('hh_vitals', JSON.stringify(vitals));
+  }
+
+  // Clear inputs
+  document.getElementById('v-quick-wt').value = '';
+  document.getElementById('v-quick-gluc').value = '';
+  document.getElementById('v-quick-sys').value = '';
+  document.getElementById('v-quick-dia').value = '';
+
+  renderWeightTrend();
+  renderGlucoseTrend();
+  renderVitals();
+  updateScore();
+
+  var saved = [];
+  if (wt > 0) saved.push('Weight: ' + wt + ' kg');
+  if (gluc > 0) saved.push('Glucose: ' + gluc + ' mg/dL');
+  if (sys > 0) saved.push('BP: ' + sys + '/' + dia);
+  alert('Saved for ' + date + ':\n' + saved.join('\n'));
+}
+
+function saveCholesterol() {
+  var date = document.getElementById('chol-date').value || TODAY;
+  var total = parseFloat(document.getElementById('chol-total').value);
+  var ldl = parseFloat(document.getElementById('chol-ldl').value);
+  var hdl = parseFloat(document.getElementById('chol-hdl').value);
+  var trig = parseFloat(document.getElementById('chol-trig').value);
+
+  if (!ldl && !total) { alert('Please enter at least LDL or Total cholesterol.'); return; }
+
+  var log = JSON.parse(localStorage.getItem('hh_chol_log') || '[]');
+  log = log.filter(function(e){return e.date !== date;});
+  log.push({date:date, total:total||0, ldl:ldl||0, hdl:hdl||0, trig:trig||0});
+  log.sort(function(a,b){return a.date.localeCompare(b.date);});
+  localStorage.setItem('hh_chol_log', JSON.stringify(log));
+
+  document.getElementById('chol-total').value = '';
+  document.getElementById('chol-ldl').value = '';
+  document.getElementById('chol-hdl').value = '';
+  document.getElementById('chol-trig').value = '';
+
+  renderCholesterolTrend();
+  var ldlStatus = ldl < 100 ? '✓ LDL at target' : ldl < 130 ? 'LDL improving' : '⚠ LDL still high';
+  alert('Cholesterol saved for ' + date + '\nLDL: ' + ldl + ' mg/dL — ' + ldlStatus);
+}
+
+function renderWeightTrend() {
+  var log = JSON.parse(localStorage.getItem('hh_weight_log') || '[]');
+  var sorted = log.slice(-30);
+
+  // Metrics
+  if (sorted.length > 0) {
+    var latest = sorted[sorted.length-1].wt;
+    var el = document.getElementById('wt-current');
+    if (el) el.textContent = latest.toFixed(1);
+    el = document.getElementById('wt-lost');
+    if (el) el.textContent = (97 - latest).toFixed(1) + ' kg';
+
+    // 7-day avg
+    var recent = sorted.filter(function(e){
+      var d = new Date(e.date+'T00:00:00');
+      var cutoff = new Date(); cutoff.setDate(cutoff.getDate()-7);
+      return d >= cutoff;
+    });
+    if (recent.length > 0) {
+      var avg = recent.reduce(function(a,e){return a+e.wt;},0) / recent.length;
+      el = document.getElementById('wt-7avg');
+      if (el) el.textContent = avg.toFixed(1);
+    }
+
+    // Week change
+    var thisWeek = sorted.filter(function(e){
+      var d = new Date(e.date+'T00:00:00');
+      var c = new Date(); c.setDate(c.getDate()-7);
+      return d >= c;
+    });
+    var lastWeek = sorted.filter(function(e){
+      var d = new Date(e.date+'T00:00:00');
+      var c1 = new Date(); c1.setDate(c1.getDate()-14);
+      var c2 = new Date(); c2.setDate(c2.getDate()-7);
+      return d >= c1 && d < c2;
+    });
+    if (thisWeek.length > 0 && lastWeek.length > 0) {
+      var twAvg = thisWeek.reduce(function(a,e){return a+e.wt;},0)/thisWeek.length;
+      var lwAvg = lastWeek.reduce(function(a,e){return a+e.wt;},0)/lastWeek.length;
+      var change = twAvg - lwAvg;
+      el = document.getElementById('wt-week-change');
+      if (el) {
+        el.textContent = (change > 0 ? '+' : '') + change.toFixed(1) + ' kg';
+        el.className = 'metric-value ' + (change <= 0 ? 'ok' : 'bad');
+      }
+    }
+  }
+
+  // Chart
+  var canvas = document.getElementById('wt-trend-chart');
+  if (!canvas || sorted.length < 2) return;
+  var labels = sorted.map(function(e){return e.date.slice(5);});
+  var weights = sorted.map(function(e){return e.wt;});
+
+  // Add 7-day rolling average
+  var avgLine = weights.map(function(w, i) {
+    var slice = weights.slice(Math.max(0,i-3), i+1);
+    return slice.reduce(function(a,b){return a+b;},0)/slice.length;
+  });
+
+  drawTrendChart(canvas, labels, [
+    {data:weights, color:'#3b82f6', label:'Weight', dots:true},
+    {data:avgLine, color:'#06b6d4', label:'7-day avg', dots:false, dashed:true},
+  ], 70, 100, '#10b981', 'Target 75kg');
+
+  // History list
+  var histEl = document.getElementById('wt-history');
+  if (histEl) {
+    var recent10 = sorted.slice(-10).reverse();
+    histEl.innerHTML = '<div style="font-size:11px;color:var(--text3);margin-bottom:4px">Recent readings:</div>' +
+      recent10.map(function(e, i) {
+        var prev = recent10[i+1];
+        var change = prev ? (e.wt - prev.wt) : 0;
+        return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px">' +
+          '<span style="color:var(--text3)">' + e.date + '</span>' +
+          '<span><strong>' + e.wt.toFixed(1) + ' kg</strong>' +
+            (prev ? ' <span style="color:' + (change<=0?'var(--green)':'var(--red)') + ';font-size:10px">' + (change>0?'+':'') + change.toFixed(1) + 'kg</span>' : '') +
+          '</span>' +
+        '</div>';
+      }).join('');
+  }
+}
+
+function renderGlucoseTrend() {
+  var log = JSON.parse(localStorage.getItem('hh_glucose_log') || '[]');
+  var sorted = log.slice(-30);
+
+  if (sorted.length > 0) {
+    var latest = sorted[sorted.length-1].gluc;
+    var el = document.getElementById('gluc-current');
+    if (el) { el.textContent = latest; el.className = 'metric-value ' + (latest<100?'ok':latest<126?'warn':'bad'); }
+
+    var recent = sorted.filter(function(e){
+      var d = new Date(e.date+'T00:00:00');
+      var c = new Date(); c.setDate(c.getDate()-7);
+      return d >= c;
+    });
+    if (recent.length > 0) {
+      var avg = Math.round(recent.reduce(function(a,e){return a+e.gluc;},0)/recent.length);
+      el = document.getElementById('gluc-7avg');
+      if (el) { el.textContent = avg; el.className = 'metric-value ' + (avg<100?'ok':avg<126?'warn':'bad'); }
+    }
+
+    el = document.getElementById('gluc-status');
+    if (el) {
+      if (latest < 100) { el.textContent = 'Normal ✓'; el.className = 'metric-value ok'; }
+      else if (latest < 126) { el.textContent = 'Pre-diabetic'; el.className = 'metric-value warn'; }
+      else { el.textContent = 'Diabetic range'; el.className = 'metric-value bad'; }
+    }
+  }
+
+  var canvas = document.getElementById('gluc-trend-chart');
+  if (!canvas || sorted.length < 2) return;
+  var labels = sorted.map(function(e){return e.date.slice(5);});
+  var glucoses = sorted.map(function(e){return e.gluc;});
+
+  // Target line at 100
+  var targetLine = glucoses.map(function(){return 100;});
+  var dangerLine = glucoses.map(function(){return 126;});
+
+  drawTrendChart(canvas, labels, [
+    {data:glucoses, color:'#f59e0b', label:'Fasting glucose', dots:true},
+    {data:targetLine, color:'#10b981', label:'Target 100', dots:false, dashed:true},
+    {data:dangerLine, color:'#ef4444', label:'Pre-diabetic 126', dots:false, dashed:true},
+  ], 70, 300, null, null);
+
+  var histEl = document.getElementById('gluc-history');
+  if (histEl) {
+    var recent10 = sorted.slice(-10).reverse();
+    histEl.innerHTML = '<div style="font-size:11px;color:var(--text3);margin-bottom:4px">Recent readings:</div>' +
+      recent10.map(function(e) {
+        var status = e.gluc < 100 ? 'ok' : e.gluc < 126 ? 'warn' : 'bad';
+        var label = e.gluc < 100 ? 'Normal' : e.gluc < 126 ? 'Pre-diabetic' : 'High';
+        return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px">' +
+          '<span style="color:var(--text3)">' + e.date + '</span>' +
+          '<span><strong class="' + status + '">' + e.gluc + '</strong> mg/dL <span style="font-size:10px;color:var(--text3)">' + label + '</span></span>' +
+        '</div>';
+      }).join('');
+  }
+}
+
+function renderCholesterolTrend() {
+  var log = JSON.parse(localStorage.getItem('hh_chol_log') || '[]');
+  var sorted = log.slice(-20);
+  if (sorted.length === 0) return;
+
+  var canvas = document.getElementById('chol-trend-chart');
+  if (canvas && sorted.length >= 2) {
+    var labels = sorted.map(function(e){return e.date.slice(5);});
+    drawTrendChart(canvas, labels, [
+      {data:sorted.map(function(e){return e.total||0;}), color:'#ef4444', label:'Total', dots:true},
+      {data:sorted.map(function(e){return e.ldl||0;}), color:'#f59e0b', label:'LDL', dots:true},
+      {data:sorted.map(function(e){return e.hdl||0;}), color:'#10b981', label:'HDL', dots:true},
+    ], 30, 300, null, null);
+  }
+
+  var histEl = document.getElementById('chol-history');
+  if (histEl) {
+    histEl.innerHTML = '<div style="font-size:11px;color:var(--text3);margin-bottom:4px">Blood test history:</div>' +
+      sorted.slice().reverse().map(function(e) {
+        var ldlColor = e.ldl < 100 ? 'var(--green)' : e.ldl < 130 ? 'var(--amber)' : 'var(--red)';
+        return '<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:11px">' +
+          '<div style="color:var(--text3);margin-bottom:2px">' + e.date + '</div>' +
+          '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+            (e.total ? '<span class="tag tag-r">Total: ' + e.total + '</span>' : '') +
+            (e.ldl ? '<span class="tag" style="background:#431407;color:' + ldlColor + '">LDL: ' + e.ldl + '</span>' : '') +
+            (e.hdl ? '<span class="tag tag-g">HDL: ' + e.hdl + '</span>' : '') +
+            (e.trig ? '<span class="tag tag-b">Trig: ' + e.trig + '</span>' : '') +
+          '</div>' +
+        '</div>';
+      }).join('');
+  }
+}
+
+function drawTrendChart(canvas, labels, datasets, forceMin, forceMax, targetVal, targetLabel) {
+  var ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  var W = canvas.offsetWidth || 340;
+  var H = canvas.height || 160;
+  canvas.width = W;
+  var pad = {top:12, right:12, bottom:28, left:42};
+  var cW = W - pad.left - pad.right;
+  var cH = H - pad.top - pad.bottom;
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#1e293b';
+  ctx.fillRect(0, 0, W, H);
+
+  var allVals = datasets.flatMap(function(d){return d.data.filter(function(v){return v !== null && v > 0;});});
+  if (!allVals.length) return;
+  var minV = forceMin !== undefined ? forceMin : Math.floor(Math.min.apply(null,allVals) * 0.95);
+  var maxV = forceMax !== undefined ? forceMax : Math.ceil(Math.max.apply(null,allVals) * 1.05);
+  var range = maxV - minV || 1;
+
+  // Grid
+  ctx.strokeStyle = '#334155'; ctx.lineWidth = 0.5;
+  for (var i = 0; i <= 4; i++) {
+    var y = pad.top + cH - (i/4)*cH;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left+cW, y); ctx.stroke();
+    ctx.fillStyle = '#64748b'; ctx.font = '9px sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText(Math.round(minV + (i/4)*range), pad.left-3, y+3);
+  }
+
+  // X labels
+  var step = Math.max(1, Math.floor(labels.length/5));
+  ctx.fillStyle = '#64748b'; ctx.font = '9px sans-serif'; ctx.textAlign = 'center';
+  labels.forEach(function(l,i){
+    if (i%step===0) {
+      var x = pad.left + (labels.length>1 ? i/(labels.length-1)*cW : cW/2);
+      ctx.fillText(l, x, H-5);
+    }
+  });
+
+  // Target line
+  if (targetVal !== null && targetVal !== undefined) {
+    var ty = pad.top + cH - ((targetVal-minV)/range)*cH;
+    ctx.strokeStyle = '#10b981'; ctx.lineWidth = 1; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(pad.left, ty); ctx.lineTo(pad.left+cW, ty); ctx.stroke();
+    ctx.setLineDash([]);
+    if (targetLabel) { ctx.fillStyle = '#10b981'; ctx.font = '9px sans-serif'; ctx.textAlign = 'right'; ctx.fillText(targetLabel, pad.left+cW, ty-3); }
+  }
+
+  // Datasets
+  datasets.forEach(function(ds) {
+    var validData = ds.data.filter(function(v){return v !== null && v > 0;});
+    if (!validData.length) return;
+    ctx.strokeStyle = ds.color; ctx.lineWidth = 2;
+    if (ds.dashed) ctx.setLineDash([5,4]); else ctx.setLineDash([]);
+    ctx.beginPath();
+    var started = false;
+    ds.data.forEach(function(v,i) {
+      if (!v || v <= 0) { started = false; return; }
+      var x = pad.left + (labels.length>1 ? i/(labels.length-1)*cW : cW/2);
+      var y = pad.top + cH - ((v-minV)/range)*cH;
+      if (!started) { ctx.moveTo(x,y); started=true; } else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+    ctx.setLineDash([]);
+    if (ds.dots) {
+      ctx.fillStyle = ds.color;
+      ds.data.forEach(function(v,i) {
+        if (!v || v <= 0) return;
+        var x = pad.left + (labels.length>1 ? i/(labels.length-1)*cW : cW/2);
+        var y = pad.top + cH - ((v-minV)/range)*cH;
+        ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill();
+      });
+    }
+  });
+}
+
+// ISABGOL TRACKER
+function toggleIsabgol(meal) {
+  var key = 'hh_isabgol_' + TODAY;
+  var data = JSON.parse(localStorage.getItem(key) || '{}');
+  data[meal] = !data[meal];
+  localStorage.setItem(key, JSON.stringify(data));
+  renderIsabgol();
+}
+
+function renderIsabgol() {
+  var key = 'hh_isabgol_' + TODAY;
+  var data = JSON.parse(localStorage.getItem(key) || '{}');
+
+  var lBtn = document.getElementById('isabgol-lunch-btn');
+  var dBtn = document.getElementById('isabgol-dinner-btn');
+  var status = document.getElementById('isabgol-status');
+
+  if (lBtn) {
+    lBtn.style.background = data.lunch ? 'var(--green)' : 'var(--bg2)';
+    lBtn.style.borderColor = data.lunch ? 'var(--green)' : 'var(--border)';
+    lBtn.style.color = data.lunch ? 'white' : 'var(--text)';
+    lBtn.textContent = (data.lunch ? '✓ ' : '') + '🍱 Before Lunch';
+  }
+  if (dBtn) {
+    dBtn.style.background = data.dinner ? 'var(--green)' : 'var(--bg2)';
+    dBtn.style.borderColor = data.dinner ? 'var(--green)' : 'var(--border)';
+    dBtn.style.color = data.dinner ? 'white' : 'var(--text)';
+    dBtn.textContent = (data.dinner ? '✓ ' : '') + '🌙 Before Dinner';
+  }
+  if (status) {
+    if (data.lunch && data.dinner) status.textContent = '✓ Both doses taken today — LDL lowering active';
+    else if (data.lunch || data.dinner) status.textContent = '1/2 done — take second dose too';
+    else status.textContent = 'Not taken yet today — tap when you take it';
+  }
+
+  // Isabgol streak — last 30 days
+  var streakEl = document.getElementById('isabgol-streak');
+  if (!streakEl) return;
+  var html = '';
+  for (var i = 29; i >= 0; i--) {
+    var d = getDateOffset(-i);
+    var dayData = JSON.parse(localStorage.getItem('hh_isabgol_' + d) || '{}');
+    var both = dayData.lunch && dayData.dinner;
+    var one = dayData.lunch || dayData.dinner;
+    var isToday = d === TODAY;
+    html += '<div class="streak-day' + (both?' done':one?' style="background:#065f46;border-color:var(--amber)"':'') + (isToday?' today':'') + '">' +
+      new Date(d+'T00:00:00').getDate() + '</div>';
+  }
+  streakEl.innerHTML = html;
+}
+
 function initAll() {
   // Set default dates to today
   try { document.getElementById('v-date').value = TODAY; } catch(e) {}
+  try { document.getElementById('v-quick-date').value = TODAY; } catch(e) {}
+  try { document.getElementById('chol-date').value = TODAY; } catch(e) {}
   try { document.getElementById('m-date').value = TODAY; } catch(e) {}
   try { document.getElementById('ex-date').value = TODAY; } catch(e) {}
   // Set default dates
   try { document.getElementById('v-date').value = TODAY; } catch(e) {}
+  try { document.getElementById('v-quick-date').value = TODAY; } catch(e) {}
+  try { document.getElementById('chol-date').value = TODAY; } catch(e) {}
   try { document.getElementById('m-date').value = TODAY; } catch(e) {}
   try { document.getElementById('ex-date').value = TODAY; } catch(e) {}
   try { document.getElementById('mj-log-date').value = TODAY; } catch(e) {}
@@ -3463,6 +3968,8 @@ function initAll() {
   showDaySummary(TODAY);
   showWeekAverage();
   renderExercise();
+  seedHistoricalData();
+  setTimeout(function(){renderWeightTrend(); renderGlucoseTrend(); renderCholesterolTrend(); renderIsabgol();}, 400);
   setTimeout(initCheckin, 1000);
   renderExercise(); renderExDBList();
   renderVitals(); renderWater();
