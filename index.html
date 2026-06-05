@@ -163,7 +163,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v4.3</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v4.4</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -355,117 +355,100 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <!-- TAB 3: EXERCISE -->
 <div class="tab" id="tab-exercise">
 
+  <div class="card" id="ex-day-header">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div>
+        <div style="font-size:16px;font-weight:700" id="ex-day-name">Loading...</div>
+        <div style="font-size:12px;color:var(--text3)" id="ex-day-focus"></div>
+      </div>
+      <div style="font-size:28px" id="ex-day-icon"></div>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:8px">
+      <button id="btn-home" onclick="setExVersion('home')" style="flex:1;font-size:11px;padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);cursor:pointer">🏠 Home</button>
+      <button id="btn-gym_machine" onclick="setExVersion('gym_machine')" style="flex:1;font-size:11px;padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);cursor:pointer">🏋️ Machine</button>
+      <button id="btn-gym_cable" onclick="setExVersion('gym_cable')" style="flex:1;font-size:11px;padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);cursor:pointer">💪 Cable</button>
+    </div>
+    <div style="font-size:11px;color:var(--text3);text-align:center" id="ex-version-label">Select workout type above — mix freely on same day</div>
+  </div>
+
+  <div class="card" style="padding:10px 12px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <label style="font-size:11px;color:var(--text3);margin:0;white-space:nowrap">Date:</label>
+      <input type="date" id="ex-log-date" style="flex:1;margin-bottom:0;font-size:12px;padding:6px" onchange="renderTodayWorkout()">
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-title">today's workout summary</div>
     <div class="metric-grid">
-      <div class="metric"><div class="metric-label">Exercises done</div><div class="metric-value info" id="ex-count-today">0</div></div>
-      <div class="metric"><div class="metric-label">Total sets</div><div class="metric-value ok" id="ex-sets-today">0</div></div>
-      <div class="metric"><div class="metric-label">Total reps</div><div class="metric-value ok" id="ex-reps-today">0</div></div>
-      <div class="metric"><div class="metric-label">Cardio (mins)</div><div class="metric-value warn" id="ex-cardio-today">0</div></div>
-      <div class="metric"><div class="metric-label">Calories burned</div><div class="metric-value pu" id="ex-cals-today">0 kcal</div></div>
-      <div class="metric"><div class="metric-label">Net calories</div><div class="metric-value" id="ex-net-today" style="font-size:14px">-- kcal</div><div class="metric-sub">eaten minus burned</div></div>
+      <div class="metric"><div class="metric-label">Done</div><div class="metric-value info" id="ex-done-count">0</div><div class="metric-sub" id="ex-planned-count">of 0 planned</div></div>
+      <div class="metric"><div class="metric-label">Total sets</div><div class="metric-value ok" id="ex-total-sets">0</div></div>
+      <div class="metric"><div class="metric-label">Calories burned</div><div class="metric-value pu" id="ex-total-cals">0 kcal</div></div>
+      <div class="metric"><div class="metric-label">Cardio</div><div class="metric-value warn" id="ex-total-cardio">0 min</div></div>
     </div>
+    <div class="progress-wrap" style="margin-top:8px">
+      <div class="progress-label"><span>Completion</span><span id="ex-completion-pct">0%</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="ex-completion-bar" style="background:var(--green);width:0%"></div></div>
+    </div>
+    <div style="font-size:11px;color:var(--text2);margin-top:6px" id="ex-muscles-today"></div>
   </div>
 
-  <div class="card">
-    <div class="card-title">log exercise</div>
-    <label>Date (defaults to today)</label>
-    <input type="date" id="ex-date">
-    <label>Location</label>
-    <select id="ex-location" onchange="filterExDB()">
-      <option value="all">All exercises</option>
-      <option value="home">Home (dumbbells)</option>
-      <option value="gym">Gym (machines)</option>
-      <option value="cardio">Cardio</option>
-    </select>
-    <label>Muscle group</label>
-    <select id="ex-muscle" onchange="filterExDB()">
-      <option value="all">All muscle groups</option>
-      <option value="chest">Chest</option>
-      <option value="back">Back</option>
-      <option value="shoulders">Shoulders</option>
-      <option value="arms">Arms (biceps/triceps)</option>
-      <option value="legs">Legs</option>
-      <option value="core">Core / abs</option>
-      <option value="cardio">Cardio</option>
-      <option value="full">Full body</option>
-    </select>
-    <label>Search exercise</label>
-    <div class="food-search-wrap">
-      <input type="text" id="ex-search" placeholder="Type exercise name..." autocomplete="off" oninput="searchEx(this.value)">
-      <div class="food-results" id="ex-results"></div>
-    </div>
-    <div id="ex-selected-panel" class="hidden">
-      <div class="food-selected" id="ex-selected-card">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start">
-          <div>
-            <div class="food-selected-name" id="ex-sel-name"></div>
-            <div style="font-size:11px;color:var(--text2);margin-top:2px" id="ex-sel-muscle"></div>
-          </div>
-          <span id="ex-cpk-badge" class="chol-score hidden"></span>
-        </div>
-        <div style="font-size:11px;color:var(--text3);margin-top:6px" id="ex-sel-tip"></div>
-        <div style="background:var(--bg2);border-radius:6px;padding:8px;margin-top:8px">
-          <div style="font-size:11px;color:var(--text2);margin-bottom:6px">Target: <span id="ex-sel-target"></span></div>
-          <div class="row" style="margin-bottom:0">
-            <div class="half">
-              <label>Sets completed</label>
-              <select id="ex-sets-input" onchange="updateCalPreview()">
-                <option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option>
-              </select>
-            </div>
-            <div class="half">
-              <label>Reps per set</label>
-              <select id="ex-reps-input" onchange="updateCalPreview()">
-                <option>5</option><option>6</option><option>8</option><option>10</option><option>12</option>
-                <option selected>15</option><option>20</option><option>25</option><option>30</option>
-              </select>
-            </div>
-          </div>
-          <div class="row">
-            <div class="half">
-              <label>Weight (kg) if applicable</label>
-              <input type="number" id="ex-weight-input" placeholder="0 = bodyweight" step="0.5" style="margin-bottom:0">
-            </div>
-            <div class="half">
-              <label>Duration (mins) for cardio</label>
-              <input type="number" id="ex-dur-input" placeholder="0" style="margin-bottom:0">
-            </div>
-          </div>
-          <div class="row" style="margin-top:6px">
-            <div class="half">
-              <label>Heart rate (bpm) optional</label>
-              <input type="number" id="ex-hr-input" placeholder="120" style="margin-bottom:0">
-            </div>
-            <div class="half">
-              <label style="color:var(--green)">Est. calories burned</label>
-              <div id="ex-cal-preview" style="font-size:18px;font-weight:700;color:var(--green);padding:8px 0">--</div>
-            </div>
-          </div>
-        </div>
-        <button class="btn btn-green" onclick="logSelectedEx()" style="margin-top:8px;margin-bottom:0">Log this exercise</button>
+  <div class="card" id="ex-warmup-card">
+    <div class="card-title">warmup — do first</div>
+    <div id="ex-warmup-list"></div>
+  </div>
+
+  <div class="card" id="ex-workout-card">
+    <div class="card-title" id="ex-workout-title">workout</div>
+    <div id="ex-workout-list"></div>
+  </div>
+
+  <div class="card hidden" id="ex-log-panel">
+    <div class="card-title" id="ex-log-title">log exercise</div>
+    <div id="ex-log-details" style="background:var(--bg3);border-radius:8px;padding:10px;margin-bottom:10px;font-size:12px"></div>
+    <div class="row">
+      <div class="half"><label>Sets done</label>
+        <select id="ex-log-sets" onchange="updateExCalPreview()"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option></select>
+      </div>
+      <div class="half"><label>Reps per set</label>
+        <select id="ex-log-reps" onchange="updateExCalPreview()"><option>5</option><option>8</option><option>10</option><option selected>12</option><option>15</option><option>20</option><option>30</option></select>
       </div>
     </div>
+    <div class="row">
+      <div class="half"><label>Weight kg (0=bodyweight)</label><input type="number" id="ex-log-weight" placeholder="0" step="0.5" style="margin-bottom:0"></div>
+      <div class="half"><label>Duration mins (cardio)</label><input type="number" id="ex-log-dur" placeholder="0" oninput="updateExCalPreview()" style="margin-bottom:0"></div>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <div class="half"><label>Heart rate bpm (optional)</label><input type="number" id="ex-log-hr" placeholder="120" oninput="updateExCalPreview()" style="margin-bottom:0"></div>
+      <div class="half"><label style="color:var(--green)">Est. calories burned</label><div id="ex-log-cal-preview" style="font-size:22px;font-weight:700;color:var(--green);padding:6px 0">--</div></div>
+    </div>
+    <button class="btn btn-green" onclick="saveExerciseLog()" style="margin-top:8px;margin-bottom:6px">✓ Log this exercise</button>
+    <button onclick="hideExLogPanel()" style="width:100%;background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;padding:4px">Cancel</button>
+  </div>
+
+  <div class="card" id="ex-cooldown-card">
+    <div class="card-title">cooldown — always finish with this</div>
+    <div id="ex-cooldown-list"></div>
   </div>
 
   <div class="card">
-    <div class="card-title">today's log</div>
-    <div id="ex-today-list"><div style="color:var(--text3);font-size:12px">No exercises logged today.</div></div>
+    <div class="card-title">today's full log</div>
+    <div id="ex-today-log"><div style="color:var(--text3);font-size:12px">No exercises logged yet.</div></div>
   </div>
 
   <div class="card">
-    <div class="card-title">workout history</div>
-    <div id="ex-history-list"><div style="color:var(--text3);font-size:12px">No history yet.</div></div>
+    <div class="card-title">weekly summary <span style="color:var(--text3);font-size:10px">(past 7 days, not today)</span></div>
+    <div id="ex-weekly-summary"><div style="color:var(--text3);font-size:12px">Log workouts to see summary.</div></div>
   </div>
 
   <div class="card">
-    <div class="card-title">full exercise database</div>
-    <div id="ex-db-list"></div>
+    <div class="card-title">30-day streak</div>
+    <div class="streak-row" id="ex-streak-row"></div>
   </div>
 
 </div>
 
-<!-- TAB 4: VITALS -->
+<!-- TAB 4: VITALS --><!-- TAB 4: VITALS -->
 <div class="tab" id="tab-vitals">
   <div class="card">
     <div class="card-title">log vitals</div>
@@ -1324,6 +1307,7 @@ function logSelectedFood() {
   renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert();
   showDaySummary(TODAY);
   showWeekAverage();
+  renderExercise();
   setTimeout(initCheckin, 1000); updateScore(); showNutritionAlert();
   alert('Logged: ' + entry.name + ' (' + entry.grams + 'g) — ' + entry.cal + ' kcal');
 }
@@ -1374,6 +1358,7 @@ function deleteMeal(idx) {
   renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert();
   showDaySummary(TODAY);
   showWeekAverage();
+  renderExercise();
   setTimeout(initCheckin, 1000); updateScore(); showNutritionAlert();
 }
 
@@ -2975,6 +2960,495 @@ function showWeekAverage() {
     '</div>';
 }
 
+// ═══════════════════════════════════
+// WEEKLY WORKOUT — 3 VERSIONS PER DAY
+// ═══════════════════════════════════
+const WEEKLY_PLAN = {
+  MON:{focus:'Chest · Shoulders · Triceps',icon:'💪',warmup:'standard',
+    home:[
+      {n:'Incline Push-up (table edge)',sets:3,reps:12,met:3.5,muscle:'Chest',cpk:false,shoulder:false,tip:'Hands on sturdy table. Lower chest to edge, push back. No floor needed.',alt:'Wall Push-up if table too low'},
+      {n:'Dumbbell Front Raise',sets:3,reps:10,met:3.0,muscle:'Shoulders (front)',cpk:false,shoulder:false,tip:'Raise to shoulder height ONLY — not overhead. Right shoulder — light weight.',alt:'Seated on chair'},
+      {n:'Dumbbell Lateral Raise',sets:3,reps:12,met:3.0,muscle:'Shoulders (side)',cpk:false,shoulder:false,tip:'Raise to shoulder height. Stop there — no higher. Constant tension.',alt:null},
+      {n:'Tricep Kickback',sets:3,reps:12,met:3.0,muscle:'Triceps',cpk:false,shoulder:false,tip:'Hinge forward, upper arm parallel to floor. Extend arm fully back. No overhead.',alt:null},
+      {n:'Dumbbell Shrug',sets:3,reps:15,met:3.0,muscle:'Traps',cpk:false,shoulder:false,tip:'Straight up, hold 1 sec, lower slowly.',alt:null},
+      {n:'Walk 25 min',sets:1,reps:0,dur:25,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'After dinner walk best for glucose.',alt:null},
+    ],
+    gym_machine:[
+      {n:'Chest Press Machine',sets:3,reps:12,met:4.0,muscle:'Chest',cpk:false,shoulder:false,tip:'Handles at chest level. Push forward, control return.',alt:null},
+      {n:'Pec Deck Machine',sets:3,reps:12,met:3.5,muscle:'Chest (inner)',cpk:false,shoulder:false,tip:'Squeeze at centre. Hold 1 sec.',alt:null},
+      {n:'Lateral Raise Machine',sets:3,reps:15,met:3.0,muscle:'Shoulders (side)',cpk:false,shoulder:false,tip:'Shoulder height only. Right shoulder protection.',alt:null},
+      {n:'Tricep Pushdown Machine',sets:3,reps:12,met:3.0,muscle:'Triceps',cpk:false,shoulder:false,tip:'Elbows fixed at sides. Full extension down.',alt:null},
+      {n:'Shoulder Press Machine (light)',sets:2,reps:10,met:3.0,muscle:'Shoulders',cpk:false,shoulder:true,tip:'⚠ RIGHT SHOULDER — very light only. Stop if pain.',alt:'Extra lateral raise sets'},
+      {n:'Treadmill 25 min',sets:1,reps:0,dur:25,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'5 km/h moderate. 2% incline optional.',alt:null},
+    ],
+    gym_cable:[
+      {n:'Cable Chest Press (standing dual)',sets:3,reps:12,met:4.0,muscle:'Chest + Core',cpk:false,shoulder:false,tip:'Cables at chest height. Step forward, press. Core activated throughout. Superior to machine.',alt:null},
+      {n:'Cable Chest Fly (crossover)',sets:3,reps:12,met:3.8,muscle:'Chest (full)',cpk:false,shoulder:false,tip:'Set cables high, sweep down and across. Full stretch at top.',alt:null},
+      {n:'Cable Lateral Raise (one arm)',sets:3,reps:15,met:3.0,muscle:'Shoulders (side)',cpk:false,shoulder:false,tip:'Cable at floor. Raise to shoulder height. Constant tension throughout.',alt:null},
+      {n:'Tricep Rope Pushdown',sets:3,reps:12,met:3.2,muscle:'Triceps',cpk:false,shoulder:false,tip:'Rope attachment. Flare wrists at bottom — maximises contraction.',alt:null},
+      {n:'Cable Face Pull (rope)',sets:3,reps:15,met:3.0,muscle:'Rear delts + Rotator cuff',cpk:false,shoulder:false,tip:'Cable at face height. Pull rope to face, elbows flare wide. Best right shoulder rehab exercise.',alt:null},
+      {n:'Treadmill 25 min',sets:1,reps:0,dur:25,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'Moderate pace.',alt:null},
+    ],
+    cooldown:['Shoulder Static Stretch 20sec × 2 both sides','Chest Static Stretch 20sec × 2','Triceps Static Stretch 20sec × 2'],
+  },
+  TUE:{focus:'Back · Biceps · Core',icon:'🔙',warmup:'standard',
+    home:[
+      {n:'One Arm Dumbbell Row',sets:2,reps:12,met:3.5,muscle:'Back (lats)',cpk:false,shoulder:false,tip:'Hinge at hips. Pull to hip, squeeze shoulder blade. Both sides.',alt:null},
+      {n:'Dumbbell Bent-Over Row',sets:2,reps:12,met:3.5,muscle:'Back (mid)',cpk:false,shoulder:false,tip:'Both dumbbells. Pull to belly button. Squeeze shoulder blades together.',alt:null},
+      {n:'Dumbbell Bicep Curl',sets:2,reps:12,met:3.0,muscle:'Biceps',cpk:false,shoulder:false,tip:'Stand straight. Curl alternately. Elbows fixed at sides throughout.',alt:null},
+      {n:'Dumbbell Preacher Curl (arm on chair)',sets:3,reps:15,met:3.0,muscle:'Biceps (peak)',cpk:false,shoulder:false,tip:'Upper arm rests on chair back. Curl fully. Lower slowly 3 seconds.',alt:null},
+      {n:'Tricep Kickback',sets:2,reps:12,met:3.0,muscle:'Triceps',cpk:false,shoulder:false,tip:'Hinge forward. Extend arm fully back. No overhead.',alt:null},
+      {n:'Standing Knee Raise',sets:2,reps:12,met:3.5,muscle:'Core (lower abs)',cpk:false,shoulder:false,tip:'Alternate knees to hip height. Hold wall if needed. Replaces floor reverse crunch.',alt:null},
+      {n:'Standing Oblique Crunch',sets:2,reps:12,met:3.5,muscle:'Core (obliques)',cpk:false,shoulder:false,tip:'Knee up to same-side elbow. Targets love handles and belly directly.',alt:null},
+      {n:'Walk 25 min',sets:1,reps:0,dur:25,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'Essential every session.',alt:null},
+    ],
+    gym_machine:[
+      {n:'Lat Pulldown Machine',sets:3,reps:12,met:4.0,muscle:'Back (lats)',cpk:false,shoulder:false,tip:'Wide grip. Pull to upper chest. Lean back 15 degrees. Squeeze shoulder blades.',alt:null},
+      {n:'Seated Row Machine',sets:3,reps:12,met:4.0,muscle:'Back (mid)',cpk:false,shoulder:false,tip:'Pull handles to sides of chest. Squeeze shoulder blades together.',alt:null},
+      {n:'Bicep Curl Machine',sets:3,reps:12,met:3.0,muscle:'Biceps',cpk:false,shoulder:false,tip:'Upper arms on pad. Curl fully. Lower slowly 3 seconds.',alt:null},
+      {n:'Ab Crunch Machine',sets:3,reps:15,met:3.5,muscle:'Core (abs)',cpk:false,shoulder:false,tip:'Slow. Hold 1 sec at full contraction.',alt:null},
+      {n:'Oblique Machine',sets:3,reps:15,met:3.5,muscle:'Core (obliques)',cpk:false,shoulder:false,tip:'Slow rotation each side. Targets love handles directly.',alt:null},
+      {n:'Treadmill 25 min',sets:1,reps:0,dur:25,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'Moderate pace.',alt:null},
+    ],
+    gym_cable:[
+      {n:'Cable Lat Pulldown (rope)',sets:3,reps:12,met:4.2,muscle:'Back (lats) + Core',cpk:false,shoulder:false,tip:'Stand and pull down. More core than seated machine. Pull to chest.',alt:null},
+      {n:'Cable Seated Row (rope)',sets:3,reps:12,met:4.2,muscle:'Back (mid) + Core',cpk:false,shoulder:false,tip:'Rope gives wider range than bar. Pull to sides of waist.',alt:null},
+      {n:'Cable Bicep Curl',sets:3,reps:12,met:3.2,muscle:'Biceps',cpk:false,shoulder:false,tip:'Constant tension throughout — superior to dumbbell curl.',alt:null},
+      {n:'Cable Hammer Curl (rope)',sets:2,reps:12,met:3.0,muscle:'Biceps + Forearms',cpk:false,shoulder:false,tip:'Rope, neutral grip. Works brachialis alongside bicep.',alt:null},
+      {n:'Cable Crunch Standing (rope)',sets:3,reps:15,met:3.8,muscle:'Core (abs)',cpk:false,shoulder:false,tip:'Rope at high cable. Crunch down standing. Best standing abs exercise.',alt:null},
+      {n:'Cable Oblique Crunch',sets:3,reps:15,met:3.5,muscle:'Core (obliques)',cpk:false,shoulder:false,tip:'One side cable high. Pull down and across. Directly targets love handles.',alt:null},
+      {n:'Treadmill 25 min',sets:1,reps:0,dur:25,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'Moderate pace.',alt:null},
+    ],
+    cooldown:['Child Pose Mobility 20sec × 2','Upper Back Static Stretch 20sec × 2','Biceps Static Stretch 15sec × 2','Forearms Static Stretch 15sec × 2'],
+  },
+  WED:{focus:'Legs · Core',icon:'🦵',warmup:'standard',
+    home:[
+      {n:'Chair Squat (sit to stand)',sets:3,reps:12,met:4.5,muscle:'Quads + Glutes',cpk:false,shoulder:false,tip:'Sit on chair fully, stand fully. Hold dumbbells for resistance.',alt:null},
+      {n:'Leg Extension on Chair',sets:2,reps:12,met:3.5,muscle:'Quadriceps',cpk:false,shoulder:false,tip:'Sit upright. Extend one leg fully, hold 2 sec, lower slowly. Alternate.',alt:null},
+      {n:'Wall Plank',sets:3,reps:0,dur:30,met:3.5,muscle:'Core (all)',cpk:false,shoulder:false,tip:'Hands on wall, walk feet back, body diagonal and rigid. Same as floor plank — no floor needed.',alt:'Table Plank'},
+      {n:'Dumbbell Calf Raise',sets:2,reps:12,met:2.8,muscle:'Calves',cpk:false,shoulder:false,tip:'Rise fully on toes, hold 2 sec. Lower fully.',alt:null},
+      {n:'Dumbbell Deadlift (1 set light — CPK)',sets:1,reps:12,met:5.0,muscle:'Hamstrings + Glutes',cpk:true,shoulder:false,tip:'⚠ CPK ELEVATED — 1 set only, very light. Hinge at hips, back flat.',alt:'Skip if muscle soreness'},
+      {n:'Standing Oblique Crunch',sets:2,reps:15,met:3.5,muscle:'Core (obliques)',cpk:false,shoulder:false,tip:'Knee to same-side elbow. Targets belly area.',alt:null},
+      {n:'Walk 25 min',sets:1,reps:0,dur:25,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'Essential.',alt:null},
+    ],
+    gym_machine:[
+      {n:'Leg Press Machine',sets:3,reps:12,met:5.0,muscle:'Quads + Glutes + Hamstrings',cpk:true,shoulder:false,tip:'Feet shoulder-width. Lower to 90 degrees. Do not lock knees.',alt:null},
+      {n:'Leg Extension Machine',sets:3,reps:12,met:3.5,muscle:'Quadriceps',cpk:false,shoulder:false,tip:'Extend fully, hold 1 sec. Lower slowly 3 seconds.',alt:null},
+      {n:'Leg Curl Machine (seated)',sets:3,reps:12,met:3.5,muscle:'Hamstrings',cpk:false,shoulder:false,tip:'Pull heel toward seat. Hold briefly. Return slowly.',alt:null},
+      {n:'Seated Calf Raise Machine',sets:3,reps:20,met:2.8,muscle:'Calves',cpk:false,shoulder:false,tip:'Full range. High reps for calves.',alt:null},
+      {n:'Ab Crunch Machine',sets:3,reps:15,met:3.5,muscle:'Core (abs)',cpk:false,shoulder:false,tip:'Slow and controlled. Hold at contraction.',alt:null},
+      {n:'Oblique Machine',sets:3,reps:15,met:3.5,muscle:'Core (obliques)',cpk:false,shoulder:false,tip:'Equal reps each side. Love handles.',alt:null},
+      {n:'Treadmill 25 min',sets:1,reps:0,dur:25,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'Moderate pace.',alt:null},
+    ],
+    gym_cable:[
+      {n:'Cable Squat (rope)',sets:3,reps:12,met:5.0,muscle:'Quads + Glutes + Core',cpk:false,shoulder:false,tip:'Low cable, hold rope, squat. More core activation than machine.',alt:null},
+      {n:'Cable Pull-Through (rope)',sets:3,reps:12,met:4.5,muscle:'Glutes + Hamstrings',cpk:false,shoulder:false,tip:'Cable between legs. Hinge forward, thrust hips forward. Excellent standing glute exercise.',alt:null},
+      {n:'Cable Leg Kickback (ankle)',sets:3,reps:12,met:3.5,muscle:'Glutes',cpk:false,shoulder:false,tip:'Cable at ankle. Stand facing machine, kick leg back. Hold wall for balance.',alt:null},
+      {n:'Cable Crunch Standing (rope)',sets:3,reps:15,met:3.8,muscle:'Core (abs)',cpk:false,shoulder:false,tip:'Best standing abs exercise.',alt:null},
+      {n:'Cable Oblique Crunch',sets:3,reps:15,met:3.5,muscle:'Core (obliques)',cpk:false,shoulder:false,tip:'Targets love handles and belly.',alt:null},
+      {n:'Treadmill 25 min',sets:1,reps:0,dur:25,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'Moderate pace.',alt:null},
+    ],
+    cooldown:['Abs Static Stretch Cobra 20sec × 2','Quadriceps Static Stretch 20sec × 2','Hamstrings Static Stretch 20sec × 2','Lower Back Static Stretch 20sec × 2'],
+  },
+  THU:{focus:'Chest · Triceps',icon:'🏋',warmup:'standard',
+    home:[
+      {n:'Incline Push-up (table edge)',sets:3,reps:12,met:3.5,muscle:'Chest + Triceps',cpk:false,shoulder:false,tip:'Hands on sturdy table. Lower chest to edge, push back up.',alt:'Wall push-up'},
+      {n:'Plate Chest Press (standing)',sets:3,reps:12,met:3.5,muscle:'Chest',cpk:false,shoulder:false,tip:'Hold plate or dumbbell with both hands at chest. Press forward fully.',alt:null},
+      {n:'Tricep Dips (chair)',sets:3,reps:12,met:3.8,muscle:'Triceps',cpk:false,shoulder:false,tip:'Hands on chair edge behind you. Lower down, push back up. Excellent tricep exercise.',alt:null},
+      {n:'Tricep Kickback',sets:2,reps:12,met:3.0,muscle:'Triceps',cpk:false,shoulder:false,tip:'Hinge forward. Extend fully back. No overhead.',alt:null},
+      {n:'Dumbbell Shrug',sets:2,reps:15,met:3.0,muscle:'Traps',cpk:false,shoulder:false,tip:'Straight up, hold, lower slowly.',alt:null},
+      {n:'Walk 20 min',sets:1,reps:0,dur:20,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'20 min on Thursday — slightly shorter.',alt:null},
+    ],
+    gym_machine:[
+      {n:'Chest Press Machine',sets:3,reps:12,met:4.0,muscle:'Chest',cpk:false,shoulder:false,tip:'Slightly heavier than Monday — second chest day.',alt:null},
+      {n:'Pec Deck Machine',sets:3,reps:12,met:3.5,muscle:'Chest (inner)',cpk:false,shoulder:false,tip:'Squeeze at centre. Hold 1 sec.',alt:null},
+      {n:'Tricep Pushdown Machine',sets:3,reps:12,met:3.0,muscle:'Triceps',cpk:false,shoulder:false,tip:'Elbows fixed. Full extension down.',alt:null},
+      {n:'Tricep Dips (parallel bars)',sets:3,reps:12,met:3.8,muscle:'Triceps',cpk:false,shoulder:false,tip:'Lower slowly. Do not go too deep — shoulder protection.',alt:null},
+      {n:'Back Extension Machine',sets:2,reps:15,met:3.5,muscle:'Lower back',cpk:false,shoulder:false,tip:'Extend to neutral spine only. Posture work.',alt:null},
+      {n:'Treadmill 20 min',sets:1,reps:0,dur:20,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'Moderate pace.',alt:null},
+    ],
+    gym_cable:[
+      {n:'Cable Chest Press (standing)',sets:3,reps:12,met:4.0,muscle:'Chest + Core',cpk:false,shoulder:false,tip:'Dual cable at chest height. Step forward, press. Core activated throughout.',alt:null},
+      {n:'Cable Chest Fly (crossover)',sets:3,reps:12,met:3.8,muscle:'Chest (full)',cpk:false,shoulder:false,tip:'Best chest exercise on cables. Full stretch and contraction.',alt:null},
+      {n:'Tricep Rope Pushdown',sets:3,reps:12,met:3.2,muscle:'Triceps',cpk:false,shoulder:false,tip:'Flare wrists at bottom for maximum contraction.',alt:null},
+      {n:'Cable Face Pull (rope)',sets:3,reps:15,met:3.0,muscle:'Rear delts + Rotator cuff',cpk:false,shoulder:false,tip:'Pull rope to face, elbows high. Excellent shoulder health.',alt:null},
+      {n:'Treadmill 20 min',sets:1,reps:0,dur:20,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'Moderate pace.',alt:null},
+    ],
+    cooldown:['Shoulder Static Stretch 20sec × 2','Chest Static Stretch 20sec × 2','Triceps Static Stretch 20sec × 2'],
+  },
+  FRI:{focus:'Shoulder Rehab · Mobility · Core',icon:'🔄',warmup:'standard',
+    home:[
+      {n:'Shoulder Rolls',sets:2,reps:12,met:2.0,muscle:'Shoulder mobility',cpk:false,shoulder:false,tip:'Forward 12, backward 12. Coach prescribed for right shoulder rehab.',alt:null},
+      {n:'Shoulder Mobility with Towel',sets:2,reps:12,met:2.0,muscle:'Rotator cuff',cpk:false,shoulder:false,tip:'Hold towel behind back, one hand high one low. Gentle pull. Improves shoulder range.',alt:null},
+      {n:'Shoulder Stabilization (wall slide)',sets:2,reps:12,met:2.5,muscle:'Rotator cuff stabilisers',cpk:false,shoulder:false,tip:'Forearms on wall, slide up and down. Activates shoulder stabilisers.',alt:null},
+      {n:'Shoulder Wall Ball Rolls',sets:2,reps:12,met:2.5,muscle:'Rotator cuff',cpk:false,shoulder:false,tip:'Ball between wall and shoulder. Roll in circles. Both sides. Coach prescribed.',alt:null},
+      {n:'Standing Back Extension',sets:2,reps:12,met:3.0,muscle:'Lower back',cpk:false,shoulder:false,tip:'Hands behind head. Lean back gently from waist. Replaces prone floor exercise.',alt:'Prone Back Extension on mat (face down)'},
+      {n:'Standing Wall Cat Camel',sets:2,reps:12,met:2.5,muscle:'Spine mobility',cpk:false,shoulder:false,tip:'Hands on wall. Round back up (cat), arch back down (camel). No kneeling needed.',alt:null},
+      {n:'Standing Bird Dog',sets:2,reps:12,met:3.0,muscle:'Core stability + Back',cpk:false,shoulder:false,tip:'One hand on wall. Extend opposite leg back. Alternate. Replaces kneeling bird dog.',alt:null},
+      {n:'Alternate Toe Touches',sets:2,reps:12,met:3.5,muscle:'Core + Obliques',cpk:false,shoulder:false,tip:'Reach opposite hand to opposite foot. Targets obliques and belly.',alt:null},
+      {n:'Standing Knee Raise',sets:2,reps:12,met:3.5,muscle:'Core (lower abs)',cpk:false,shoulder:false,tip:'Alternate knees to hip height. Replaces kneeling leg extension.',alt:null},
+    ],
+    gym_machine:[
+      {n:'Lateral Raise Machine',sets:3,reps:15,met:3.0,muscle:'Shoulders (side)',cpk:false,shoulder:false,tip:'Shoulder height only. Moderate weight.',alt:null},
+      {n:'Back Extension Machine',sets:3,reps:15,met:3.5,muscle:'Lower back',cpk:false,shoulder:false,tip:'Neutral spine. Posture exercise. Important at 62.',alt:null},
+      {n:'Ab Crunch Machine',sets:3,reps:15,met:3.5,muscle:'Core',cpk:false,shoulder:false,tip:'Slow and controlled.',alt:null},
+      {n:'Oblique Machine',sets:3,reps:15,met:3.5,muscle:'Obliques',cpk:false,shoulder:false,tip:'Targets waist and love handles.',alt:null},
+      {n:'Seated Calf Raise Machine',sets:2,reps:20,met:2.8,muscle:'Calves',cpk:false,shoulder:false,tip:'Full range. High reps.',alt:null},
+    ],
+    gym_cable:[
+      {n:'Cable Face Pull (rope)',sets:3,reps:15,met:3.0,muscle:'Rear delts + Rotator cuff',cpk:false,shoulder:false,tip:'Best right shoulder rehab exercise on cables. Pull to face, elbows high and wide.',alt:null},
+      {n:'Cable Lateral Raise (one arm)',sets:3,reps:15,met:3.0,muscle:'Shoulders (side)',cpk:false,shoulder:false,tip:'Constant tension vs machine. Cable at floor, raise to shoulder height.',alt:null},
+      {n:'Cable Crunch Standing (rope)',sets:3,reps:15,met:3.8,muscle:'Core (abs)',cpk:false,shoulder:false,tip:'Rope at high cable. Crunch down.',alt:null},
+      {n:'Cable Oblique Crunch',sets:3,reps:15,met:3.5,muscle:'Obliques',cpk:false,shoulder:false,tip:'Direct waist and love handle work.',alt:null},
+      {n:'Cable Pull-Through (rope)',sets:2,reps:15,met:4.0,muscle:'Glutes + Hamstrings',cpk:false,shoulder:false,tip:'Hip hinge and thrust. Excellent standing glute work.',alt:null},
+    ],
+    cooldown:['Abs Static Stretch 20sec × 1','Lower Back Static Stretch 20sec × 1','Standing Side Stretch 20sec × 1','Chest Static Stretch 20sec × 1','Hamstrings Static Stretch 20sec × 1'],
+  },
+  SAT:{focus:'Legs · Core (heavier)',icon:'🦵',warmup:'standard',
+    home:[
+      {n:'Chair Squat (sit to stand)',sets:3,reps:12,met:4.5,muscle:'Quads + Glutes',cpk:false,shoulder:false,tip:'3 sets — heavier than Wednesday. Hold dumbbells.',alt:null},
+      {n:'Leg Extension on Chair',sets:3,reps:12,met:3.5,muscle:'Quadriceps',cpk:false,shoulder:false,tip:'3 sets vs 2 on Wednesday — progressive overload.',alt:null},
+      {n:'Dumbbell Calf Raise',sets:2,reps:12,met:2.8,muscle:'Calves',cpk:false,shoulder:false,tip:'Heavier dumbbells if possible.',alt:null},
+      {n:'Wall Plank',sets:3,reps:0,dur:30,met:3.5,muscle:'Core (all)',cpk:false,shoulder:false,tip:'Hands on wall, body diagonal. Hold 30 sec.',alt:'Table Plank'},
+      {n:'Dumbbell Deadlift (1 set light — CPK)',sets:1,reps:12,met:5.0,muscle:'Hamstrings + Glutes',cpk:true,shoulder:false,tip:'⚠ CPK ELEVATED — 1 set only, light until CPK rechecked late June.',alt:'Skip if any muscle soreness'},
+      {n:'Standing Oblique Crunch',sets:3,reps:15,met:3.5,muscle:'Core (obliques)',cpk:false,shoulder:false,tip:'3 sets Saturday — belly fat focus day.',alt:null},
+      {n:'Walk 25 min',sets:1,reps:0,dur:25,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'Essential.',alt:null},
+    ],
+    gym_machine:[
+      {n:'Leg Press Machine',sets:4,reps:12,met:5.0,muscle:'Quads + Glutes + Hamstrings',cpk:true,shoulder:false,tip:'4 sets on Saturday — heavier leg day. Do not lock knees.',alt:null},
+      {n:'Leg Extension Machine',sets:3,reps:12,met:3.5,muscle:'Quadriceps',cpk:false,shoulder:false,tip:'Extend fully, lower slowly.',alt:null},
+      {n:'Leg Curl Machine',sets:3,reps:12,met:3.5,muscle:'Hamstrings',cpk:false,shoulder:false,tip:'Pull heel to seat. Hold briefly.',alt:null},
+      {n:'Seated Calf Raise Machine',sets:3,reps:20,met:2.8,muscle:'Calves',cpk:false,shoulder:false,tip:'High reps.',alt:null},
+      {n:'Oblique Machine',sets:3,reps:15,met:3.5,muscle:'Obliques',cpk:false,shoulder:false,tip:'Saturday belly fat focus.',alt:null},
+      {n:'Ab Crunch Machine',sets:3,reps:15,met:3.5,muscle:'Core',cpk:false,shoulder:false,tip:'Slow and controlled.',alt:null},
+      {n:'Treadmill 25 min',sets:1,reps:0,dur:25,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'Moderate pace.',alt:null},
+    ],
+    gym_cable:[
+      {n:'Cable Squat (rope)',sets:3,reps:12,met:5.0,muscle:'Quads + Glutes + Core',cpk:false,shoulder:false,tip:'Low cable. Squat holding rope. More core than machine.',alt:null},
+      {n:'Cable Pull-Through (rope)',sets:3,reps:12,met:4.5,muscle:'Glutes + Hamstrings',cpk:false,shoulder:false,tip:'Hip hinge and thrust. Excellent glute activation.',alt:null},
+      {n:'Cable Leg Kickback (ankle)',sets:3,reps:12,met:3.5,muscle:'Glutes',cpk:false,shoulder:false,tip:'Kick leg back against cable. Both sides.',alt:null},
+      {n:'Cable Crunch Standing (rope)',sets:3,reps:15,met:3.8,muscle:'Core (abs)',cpk:false,shoulder:false,tip:'Best standing abs exercise.',alt:null},
+      {n:'Cable Oblique Crunch',sets:3,reps:15,met:3.5,muscle:'Obliques',cpk:false,shoulder:false,tip:'Saturday belly focus — 3 sets.',alt:null},
+      {n:'Treadmill 25 min',sets:1,reps:0,dur:25,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'Moderate pace.',alt:null},
+    ],
+    cooldown:['Abs Static Stretch Cobra 20sec × 2','Quadriceps Static Stretch 20sec × 2','Hamstrings Static Stretch 20sec × 2','Glutes Static Stretch 20sec × 2','Lower Back Static Stretch 20sec × 2'],
+  },
+  SUN:{focus:'Full Body · Active Recovery',icon:'🌟',warmup:'standard',
+    home:[
+      {n:'Chair Squat',sets:2,reps:12,met:4.5,muscle:'Legs + Glutes',cpk:false,shoulder:false,tip:'Active recovery — moderate effort.',alt:null},
+      {n:'Dumbbell Calf Raise',sets:2,reps:12,met:2.8,muscle:'Calves',cpk:false,shoulder:false,tip:'Light weight on Sunday.',alt:null},
+      {n:'Standing Oblique Crunch',sets:2,reps:12,met:3.5,muscle:'Core (obliques)',cpk:false,shoulder:false,tip:'Both sides. Belly fat focus.',alt:null},
+      {n:'Standing Hip Thrust (wall)',sets:2,reps:15,met:3.0,muscle:'Glutes',cpk:false,shoulder:false,tip:'Back against wall. Thrust hips forward squeezing glutes. Replaces floor glute bridge.',alt:null},
+      {n:'Standing Knee Raise',sets:2,reps:12,met:3.5,muscle:'Core (lower abs)',cpk:false,shoulder:false,tip:'Alternate knees up. Replaces floor reverse crunch.',alt:null},
+      {n:'One Arm Dumbbell Row',sets:2,reps:12,met:3.5,muscle:'Back',cpk:false,shoulder:false,tip:'Light weight on Sunday — active recovery.',alt:null},
+      {n:'Dumbbell Lateral Raise',sets:2,reps:12,met:3.0,muscle:'Shoulders (side)',cpk:false,shoulder:false,tip:'Light weight. Replaces overhead push press. Right shoulder safe.',alt:null},
+      {n:'Alternate Toe Touches',sets:2,reps:12,met:3.5,muscle:'Core + Obliques',cpk:false,shoulder:false,tip:'Reach hand to opposite foot. Light and mobile.',alt:null},
+    ],
+    gym_machine:[
+      {n:'Seated Row Machine',sets:2,reps:12,met:4.0,muscle:'Back',cpk:false,shoulder:false,tip:'Active recovery — moderate weight, focus on form.',alt:null},
+      {n:'Lat Pulldown Machine',sets:2,reps:12,met:4.0,muscle:'Back (lats)',cpk:false,shoulder:false,tip:'Lighter than Tuesday. Recovery day.',alt:null},
+      {n:'Lateral Raise Machine',sets:2,reps:15,met:3.0,muscle:'Shoulders',cpk:false,shoulder:false,tip:'Light weight. Active recovery.',alt:null},
+      {n:'Leg Press Machine',sets:2,reps:15,met:5.0,muscle:'Legs',cpk:true,shoulder:false,tip:'Lighter than Saturday. Recovery sets.',alt:null},
+      {n:'Ab Crunch Machine',sets:2,reps:15,met:3.5,muscle:'Core',cpk:false,shoulder:false,tip:'Light recovery core work.',alt:null},
+    ],
+    gym_cable:[
+      {n:'Cable Seated Row (rope)',sets:2,reps:12,met:4.2,muscle:'Back + Core',cpk:false,shoulder:false,tip:'Light weight. Full range. Recovery focus.',alt:null},
+      {n:'Cable Lateral Raise (one arm)',sets:2,reps:15,met:3.0,muscle:'Shoulders',cpk:false,shoulder:false,tip:'Light weight Sunday.',alt:null},
+      {n:'Cable Crunch Standing (rope)',sets:2,reps:15,met:3.8,muscle:'Core',cpk:false,shoulder:false,tip:'Recovery core work.',alt:null},
+      {n:'Cable Oblique Crunch',sets:2,reps:15,met:3.5,muscle:'Obliques',cpk:false,shoulder:false,tip:'Belly fat focus even on recovery day.',alt:null},
+      {n:'Cable Pull-Through (rope)',sets:2,reps:15,met:4.0,muscle:'Glutes',cpk:false,shoulder:false,tip:'Light weight. Active recovery.',alt:null},
+    ],
+    cooldown:['Abs Static Stretch 20sec × 1','Lower Back Static Stretch 20sec × 1','Standing Side Stretch 20sec × 1'],
+  },
+};
+
+const EX_DAYS = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+const EX_DAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+var currentExVersion = 'home';
+var currentLogEx = null;
+
+function getExDay(dateStr) {
+  var d = dateStr ? new Date(dateStr + 'T00:00:00') : new Date();
+  return EX_DAYS[d.getDay()];
+}
+
+function setExVersion(v) {
+  currentExVersion = v;
+  var labels = {home:'🏠 Home workout — dumbbells only', gym_machine:'🏋️ Gym — machines (Level 1)', gym_cable:'💪 Gym — cables and ropes (Level 2 — superior)'};
+  var el = document.getElementById('ex-version-label');
+  if (el) el.textContent = labels[v] || '';
+  ['home','gym_machine','gym_cable'].forEach(function(id) {
+    var btn = document.getElementById('btn-' + id);
+    if (!btn) return;
+    btn.style.background = id === v ? 'var(--accent)' : 'var(--bg3)';
+    btn.style.color = id === v ? 'white' : 'var(--text)';
+    btn.style.borderColor = id === v ? 'var(--accent)' : 'var(--border)';
+  });
+  renderTodayWorkout();
+}
+
+function renderTodayWorkout() {
+  var dateStr = document.getElementById('ex-log-date') ? document.getElementById('ex-log-date').value : '';
+  var day = getExDay(dateStr);
+  var plan = WEEKLY_PLAN[day];
+  if (!plan) return;
+  var dayIdx = EX_DAYS.indexOf(day);
+  var nameEl = document.getElementById('ex-day-name');
+  var focusEl = document.getElementById('ex-day-focus');
+  var iconEl = document.getElementById('ex-day-icon');
+  if (nameEl) nameEl.textContent = EX_DAY_NAMES[dayIdx] + ' Workout';
+  if (focusEl) focusEl.textContent = plan.focus;
+  if (iconEl) iconEl.textContent = plan.icon;
+
+  // Warmup
+  var wu = document.getElementById('ex-warmup-list');
+  if (wu) wu.innerHTML = '<div style="font-size:12px;color:var(--text2)">Neck rotation · Shoulder rolls · Arm circles · Arm scissor chops · Torso twist · Leg swings · Ankle rotation<br><span style="font-size:11px;color:var(--text3)">10 reps × 1 set each — always do before workout</span></div>';
+
+  // Exercises
+  var exercises = plan[currentExVersion] || plan.home;
+  var titleEl = document.getElementById('ex-workout-title');
+  if (titleEl) titleEl.textContent = currentExVersion === 'home' ? '🏠 Home Workout' : currentExVersion === 'gym_machine' ? '🏋️ Gym Machine Workout' : '💪 Gym Cable & Rope Workout';
+
+  var dateKey = dateStr || TODAY;
+  var logs = JSON.parse(localStorage.getItem('hh_exercise') || '[]');
+  var dayLogs = logs.filter(function(l) { return l.date === dateKey; });
+
+  var listEl = document.getElementById('ex-workout-list');
+  if (listEl) {
+    listEl.innerHTML = exercises.map(function(ex, idx) {
+      var done = dayLogs.some(function(l) { return l.name === ex.n; });
+      var flags = '';
+      if (ex.cpk) flags += '<div style="color:var(--amber);font-size:10px;margin-top:2px">⚠ High strain — CPK elevated. Keep light.</div>';
+      if (ex.shoulder) flags += '<div style="color:var(--amber);font-size:10px;margin-top:2px">⚠ Right shoulder — light weight only. Stop if pain.</div>';
+      return '<div style="background:' + (done ? '#052e16' : 'var(--bg3)') + ';border-radius:8px;padding:10px;margin-bottom:7px;border:1px solid ' + (done ? 'var(--green)' : 'var(--border)') + '">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start">' +
+          '<div style="flex:1">' +
+            '<div style="font-size:13px;font-weight:600;color:' + (done ? 'var(--green)' : 'var(--text)') + '">' + (done ? '✓ ' : '') + ex.n + '</div>' +
+            '<div style="font-size:11px;color:var(--text3);margin-top:2px">' + ex.muscle + ' · ' + (ex.dur > 0 ? ex.dur + ' min' : ex.sets + ' × ' + ex.reps + ' reps') + '</div>' +
+            flags +
+            '<div style="font-size:11px;color:var(--text2);margin-top:4px;font-style:italic">' + ex.tip + '</div>' +
+            (ex.alt ? '<div style="font-size:10px;color:var(--accent);margin-top:2px">Alt: ' + ex.alt + '</div>' : '') +
+          '</div>' +
+          '<button data-idx="' + idx + '" onclick="openExLogPanel(parseInt(this.dataset.idx))" style="background:' + (done ? 'var(--green)' : 'var(--accent)') + ';border:none;border-radius:6px;color:white;font-size:11px;padding:6px 10px;cursor:pointer;margin-left:8px;flex-shrink:0">' + (done ? '✓' : '+ Log') + '</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // Cooldown
+  var cdEl = document.getElementById('ex-cooldown-list');
+  if (cdEl && plan.cooldown) {
+    cdEl.innerHTML = plan.cooldown.map(function(c) {
+      return '<div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div style="font-size:12px">' + c + '</div></div>';
+    }).join('');
+  }
+
+  renderExSummary(dateKey, exercises);
+  renderExWeekly();
+  renderExStreak();
+}
+
+function openExLogPanel(idx) {
+  var dateStr = document.getElementById('ex-log-date') ? document.getElementById('ex-log-date').value : '';
+  var day = getExDay(dateStr);
+  var plan = WEEKLY_PLAN[day];
+  var exercises = plan ? (plan[currentExVersion] || plan.home) : [];
+  currentLogEx = exercises[idx];
+  if (!currentLogEx) return;
+
+  var titleEl = document.getElementById('ex-log-title');
+  if (titleEl) titleEl.textContent = 'Log: ' + currentLogEx.n;
+
+  var detailEl = document.getElementById('ex-log-details');
+  if (detailEl) detailEl.innerHTML =
+    '<strong style="color:var(--accent)">' + currentLogEx.muscle + '</strong><br>' +
+    '<span style="color:var(--text3)">' + (currentLogEx.dur > 0 ? 'Target: ' + currentLogEx.dur + ' minutes' : 'Target: ' + currentLogEx.sets + ' × ' + currentLogEx.reps + ' reps') + '</span>' +
+    (currentLogEx.cpk ? '<br><span style="color:var(--amber)">⚠ CPK elevated — keep light</span>' : '') +
+    (currentLogEx.shoulder ? '<br><span style="color:var(--amber)">⚠ Right shoulder — light weight only</span>' : '');
+
+  var setsEl = document.getElementById('ex-log-sets');
+  var durEl = document.getElementById('ex-log-dur');
+  if (setsEl) setsEl.value = currentLogEx.sets || 3;
+  if (durEl) durEl.value = currentLogEx.dur || 0;
+
+  var panel = document.getElementById('ex-log-panel');
+  if (panel) {
+    panel.classList.remove('hidden');
+    panel.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  updateExCalPreview();
+}
+
+function hideExLogPanel() {
+  var panel = document.getElementById('ex-log-panel');
+  if (panel) panel.classList.add('hidden');
+  currentLogEx = null;
+}
+
+function calcExCals(met, sets, reps, dur, hr) {
+  var mins = dur > 0 ? dur : sets * (40 + 75) / 60;
+  if (mins <= 0) return 0;
+  if (hr > 0) {
+    var cals = ((62 * 0.2017) + (83.9 * 0.09036) + (hr * 0.6309) - 55.0969) * mins / 4.184;
+    return Math.max(0, Math.round(cals));
+  }
+  return Math.round(met * 83.9 * (mins / 60));
+}
+
+function updateExCalPreview() {
+  if (!currentLogEx) return;
+  var sets = parseInt(document.getElementById('ex-log-sets').value || 3);
+  var reps = parseInt(document.getElementById('ex-log-reps').value || 12);
+  var dur = parseFloat(document.getElementById('ex-log-dur').value || 0);
+  var hr = parseInt(document.getElementById('ex-log-hr').value || 0);
+  var cals = calcExCals(currentLogEx.met, sets, reps, dur, hr);
+  var el = document.getElementById('ex-log-cal-preview');
+  if (el) el.textContent = cals > 0 ? cals + ' kcal' : '--';
+}
+
+function saveExerciseLog() {
+  if (!currentLogEx) return;
+  var sets = parseInt(document.getElementById('ex-log-sets').value || 3);
+  var reps = parseInt(document.getElementById('ex-log-reps').value || 12);
+  var weight = parseFloat(document.getElementById('ex-log-weight').value || 0);
+  var dur = parseFloat(document.getElementById('ex-log-dur').value || 0);
+  var hr = parseInt(document.getElementById('ex-log-hr').value || 0);
+  var cals = calcExCals(currentLogEx.met, sets, reps, dur, hr);
+  var dateStr = document.getElementById('ex-log-date') ? (document.getElementById('ex-log-date').value || TODAY) : TODAY;
+
+  var entry = {
+    date: dateStr,
+    time: new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
+    name: currentLogEx.n,
+    muscle: currentLogEx.muscle,
+    version: currentExVersion,
+    sets: sets, reps: reps, weight: weight, dur: dur, hr: hr, cals: cals,
+  };
+
+  var logs = JSON.parse(localStorage.getItem('hh_exercise') || '[]');
+  logs.unshift(entry);
+  localStorage.setItem('hh_exercise', JSON.stringify(logs));
+  hideExLogPanel();
+  renderTodayWorkout();
+  updateScore();
+  alert('Logged: ' + entry.name + '\n' + (weight > 0 ? sets + 'x' + reps + ' @ ' + weight + 'kg' : dur > 0 ? dur + ' min' : sets + 'x' + reps) + (cals > 0 ? '\n~' + cals + ' kcal burned' : ''));
+}
+
+function renderExSummary(dateKey, exercises) {
+  var logs = JSON.parse(localStorage.getItem('hh_exercise') || '[]');
+  var dayLogs = logs.filter(function(l) { return l.date === dateKey; });
+  var totalCals = dayLogs.reduce(function(a,l){return a+(l.cals||0);},0);
+  var totalSets = dayLogs.reduce(function(a,l){return a+(l.sets||0);},0);
+  var totalCardio = dayLogs.reduce(function(a,l){return a+(l.dur||0);},0);
+  var muscles = [];
+  dayLogs.forEach(function(l){if(muscles.indexOf(l.muscle)<0) muscles.push(l.muscle);});
+
+  var planned = exercises ? exercises.length : 0;
+  var done = dayLogs.length;
+  var pct = planned > 0 ? Math.min(100, Math.round(done/planned*100)) : 0;
+
+  var el = document.getElementById('ex-done-count'); if(el) el.textContent = done;
+  el = document.getElementById('ex-planned-count'); if(el) el.textContent = 'of ' + planned + ' planned';
+  el = document.getElementById('ex-total-sets'); if(el) el.textContent = totalSets;
+  el = document.getElementById('ex-total-cals'); if(el) el.textContent = totalCals + ' kcal';
+  el = document.getElementById('ex-total-cardio'); if(el) el.textContent = totalCardio + ' min';
+  el = document.getElementById('ex-completion-pct'); if(el) el.textContent = pct + '%';
+  el = document.getElementById('ex-completion-bar');
+  if(el) { el.style.width = pct + '%'; el.style.background = pct>=80?'var(--green)':pct>=50?'var(--amber)':'var(--red)'; }
+  el = document.getElementById('ex-muscles-today'); if(el) el.textContent = muscles.length > 0 ? 'Muscles: ' + muscles.join(' · ') : '';
+
+  var logEl = document.getElementById('ex-today-log');
+  if (logEl) {
+    if (!dayLogs.length) {
+      logEl.innerHTML = '<div style="color:var(--text3);font-size:12px">No exercises logged yet.</div>';
+    } else {
+      logEl.innerHTML = dayLogs.map(function(l, i) {
+        return '<div class="log-row"><div style="display:flex;justify-content:space-between;align-items:flex-start">' +
+          '<div>' +
+            '<div style="font-weight:500;font-size:12px">' + l.name + '</div>' +
+            '<div style="margin-top:3px">' +
+              (l.sets > 0 && l.reps > 0 ? '<span class="tag tag-g">' + l.sets + 'x' + l.reps + '</span>' : '') +
+              (l.weight > 0 ? '<span class="tag tag-b">' + l.weight + 'kg</span>' : '') +
+              (l.dur > 0 ? '<span class="tag tag-a">' + l.dur + ' min</span>' : '') +
+              (l.cals > 0 ? '<span class="tag tag-p">' + l.cals + ' kcal</span>' : '') +
+              '<span class="tag" style="font-size:9px">' + (l.version==='home'?'🏠':l.version==='gym_cable'?'💪':'🏋️') + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<button data-i="' + i + '" data-date="' + dateKey + '" onclick="deleteExLog(parseInt(this.dataset.i),this.dataset.date)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:4px">✕</button>' +
+        '</div></div>';
+      }).join('');
+    }
+  }
+}
+
+function deleteExLog(idx, dateKey) {
+  var logs = JSON.parse(localStorage.getItem('hh_exercise') || '[]');
+  var dayLogs = logs.filter(function(l){return l.date===dateKey;});
+  var toDelete = dayLogs[idx];
+  var gi = logs.indexOf(toDelete);
+  if (gi > -1) logs.splice(gi, 1);
+  localStorage.setItem('hh_exercise', JSON.stringify(logs));
+  renderTodayWorkout();
+  updateScore();
+}
+
+function renderExWeekly() {
+  var el = document.getElementById('ex-weekly-summary');
+  if (!el) return;
+  var logs = JSON.parse(localStorage.getItem('hh_exercise') || '[]');
+  var days = [];
+  for (var i = 1; i <= 7; i++) {
+    var d = getDateOffset(-i);
+    var dl = logs.filter(function(l){return l.date===d;});
+    if (dl.length > 0) {
+      var cals = dl.reduce(function(a,l){return a+(l.cals||0);},0);
+      var sets = dl.reduce(function(a,l){return a+(l.sets||0);},0);
+      var muscles = [];
+      dl.forEach(function(l){if(muscles.indexOf(l.muscle)<0)muscles.push(l.muscle);});
+      days.push({date:d, count:dl.length, cals:cals, sets:sets, muscles:muscles});
+    }
+  }
+  if (!days.length) { el.innerHTML = '<div style="color:var(--text3);font-size:12px">No workout data yet.</div>'; return; }
+  var totalCals = days.reduce(function(a,d){return a+d.cals;},0);
+  var totalSets = days.reduce(function(a,d){return a+d.sets;},0);
+  var allMuscles = [];
+  days.forEach(function(d){d.muscles.forEach(function(m){if(allMuscles.indexOf(m)<0)allMuscles.push(m);});});
+  el.innerHTML =
+    '<div class="metric-grid" style="margin-bottom:10px">' +
+      '<div class="metric"><div class="metric-label">Days worked out</div><div class="metric-value ok">' + days.length + '/7</div></div>' +
+      '<div class="metric"><div class="metric-label">Total kcal burned</div><div class="metric-value pu">' + totalCals + '</div></div>' +
+      '<div class="metric"><div class="metric-label">Total sets</div><div class="metric-value info">' + totalSets + '</div></div>' +
+      '<div class="metric"><div class="metric-label">Avg kcal/day</div><div class="metric-value warn">' + Math.round(totalCals/days.length) + '</div></div>' +
+    '</div>' +
+    '<div style="font-size:11px;color:var(--text2);margin-bottom:6px">Muscles worked: <span style="color:var(--text)">' + allMuscles.slice(0,6).join(' · ') + '</span></div>' +
+    days.map(function(d){
+      return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px">' +
+        '<span style="color:var(--text3)">' + d.date + '</span>' +
+        '<span>' + d.count + ' exercises · ' + d.sets + ' sets · ' + d.cals + ' kcal</span>' +
+      '</div>';
+    }).join('');
+}
+
+function renderExStreak() {
+  var el = document.getElementById('ex-streak-row');
+  if (!el) return;
+  var logs = JSON.parse(localStorage.getItem('hh_exercise') || '[]');
+  var html = '';
+  for (var i = 29; i >= 0; i--) {
+    var d = getDateOffset(-i);
+    var done = logs.some(function(l){return l.date===d;});
+    var isToday = d === TODAY;
+    html += '<div class="streak-day' + (done?' done':'') + (isToday?' today':'') + '">' + new Date(d+'T00:00:00').getDate() + '</div>';
+  }
+  el.innerHTML = html;
+}
+
+function renderExercise() {
+  var dateEl = document.getElementById('ex-log-date');
+  if (dateEl && !dateEl.value) dateEl.value = TODAY;
+  setExVersion('home');
+}
+
 function initAll() {
   // Set default dates to today
   try { document.getElementById('v-date').value = TODAY; } catch(e) {}
@@ -2988,6 +3462,7 @@ function initAll() {
   renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert();
   showDaySummary(TODAY);
   showWeekAverage();
+  renderExercise();
   setTimeout(initCheckin, 1000);
   renderExercise(); renderExDBList();
   renderVitals(); renderWater();
