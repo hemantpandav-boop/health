@@ -163,7 +163,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v3.5</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v3.6</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -181,6 +181,19 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
       <div class="score-item"><div class="score-item-val" id="sc-sat">-</div><div class="score-item-label">Sat fat g</div></div>
     </div>
   </div>
+  <div class="card">
+    <div class="card-title">daily calorie plan</div>
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-label">BMR (at rest)</div><div class="metric-value info">1,609</div><div class="metric-sub">kcal/day</div></div>
+      <div class="metric"><div class="metric-label">TDEE (with activity)</div><div class="metric-value info">2,220</div><div class="metric-sub">kcal/day</div></div>
+      <div class="metric"><div class="metric-label">Diet target</div><div class="metric-value ok">1,725</div><div class="metric-sub">kcal from food</div></div>
+      <div class="metric"><div class="metric-label">Exercise adds</div><div class="metric-value ok">~275</div><div class="metric-sub">kcal burned extra</div></div>
+      <div class="metric"><div class="metric-label">Diet deficit</div><div class="metric-value warn">-200</div><div class="metric-sub">kcal/day target</div></div>
+      <div class="metric"><div class="metric-label">Total deficit</div><div class="metric-value warn">~-495</div><div class="metric-sub">with exercise</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-top:8px">Exercise calories burned are tracked separately in the Exercise tab and add to your total deficit — not deducted from your food target.</div>
+  </div>
+
   <div class="card">
     <div class="card-title">latest readings</div>
     <div class="metric-grid">
@@ -245,7 +258,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
   <div class="card">
     <div class="card-title">today's nutrition summary</div>
     <div class="progress-wrap">
-      <div class="progress-label"><span>Calories</span><span id="cal-today">0 / 1700 kcal</span></div>
+      <div class="progress-label"><span>Calories</span><span id="cal-today">0 / 2000 kcal</span></div>
       <div class="progress-bar"><div class="progress-fill" id="cal-bar" style="background:var(--accent);width:0%"></div></div>
     </div>
     <div class="progress-wrap">
@@ -274,11 +287,12 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
     <input type="date" id="m-date">
     <label>Meal slot</label>
     <select id="m-type">
-      <option value="Breakfast">Breakfast (~400 kcal)</option>
-      <option value="Morning Snack">Morning Snack (~150 kcal)</option>
-      <option value="Lunch">Lunch (~500 kcal)</option>
-      <option value="Evening Snack">Evening Snack (~150 kcal)</option>
-      <option value="Dinner">Dinner (~500 kcal)</option>
+      <option value="Breakfast">🌅 Breakfast (~500 kcal)</option>
+      <option value="Morning Snack">🍎 Morning Snack (~125 kcal)</option>
+      <option value="Lunch">🍱 Lunch (~575 kcal)</option>
+      <option value="Evening Snack">🥜 Evening Snack (~125 kcal)</option>
+      <option value="Dinner">🌙 Dinner (~300 kcal)</option>
+      <option value="Before Sleep">🌛 Before Sleep (~100 kcal)</option>
     </select>
     <label>Search food</label>
     <div class="food-search-wrap">
@@ -734,6 +748,16 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
     <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div><strong>Flaxseed 1 tbsp in shake</strong> — omega-3 and fibre.</div></div>
     <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div><strong>Dal / rajma / chana daily</strong> — fibre binds cholesterol.</div></div>
   </div>
+  <div class="card">
+    <div class="card-title">before sleep snack — 100 kcal options</div>
+    <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div><strong>6 walnuts</strong> — 90 kcal, omega-3, helps cholesterol and sleep</div></div>
+    <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div><strong>150ml Marmum 90% protein milk</strong> — 60 kcal, 13.5g protein</div></div>
+    <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div><strong>150ml warm low fat milk</strong> — 63 kcal, promotes sleep via tryptophan</div></div>
+    <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div><strong>10 almonds</strong> — 58 kcal, magnesium, good for sleep</div></div>
+    <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div><strong>1 small guava</strong> — 68 kcal, fibre, low glycaemic</div></div>
+    <div class="list-item"><div class="list-dot" style="background:var(--amber)"></div><div>Eat by 9-9:30pm — 60-90 min before sleep at 10:30pm</div></div>
+  </div>
+
   <div class="card">
     <div class="card-title">medication rules</div>
     <div class="alert alert-bad">Rosuvastatin 20mg — EVERY night. Not every 2 days.</div>
@@ -1254,11 +1278,11 @@ function updateTotals() {
   const totProt = today.reduce((a,l)=>a+l.p,0);
   const totSat = today.reduce((a,l)=>a+l.sat,0);
   const totFib = today.reduce((a,l)=>a+l.fi,0);
-  document.getElementById('cal-today').textContent = totCal + ' / 1700 kcal';
+  document.getElementById('cal-today').textContent = totCal + ' / 2000 kcal';
   document.getElementById('prot-today').textContent = totProt.toFixed(0) + ' / 120g';
   document.getElementById('satfat-today').textContent = totSat.toFixed(1) + ' / 13g';
   document.getElementById('fibre-today').textContent = totFib.toFixed(1) + ' / 30g';
-  document.getElementById('cal-bar').style.width = Math.min(100, totCal/17) + '%';
+  document.getElementById('cal-bar').style.width = Math.min(100, totCal/20) + '%';
   document.getElementById('prot-bar').style.width = Math.min(100, totProt/1.2) + '%';
   document.getElementById('satfat-bar').style.width = Math.min(100, totSat/0.13) + '%';
   if(totSat > 13) document.getElementById('satfat-bar').style.background = 'var(--red)';
@@ -2361,10 +2385,10 @@ function showNutritionAlert() {
   }
 
   // CALORIES
-  if (totCal >= 1700) {
-    alerts.push('<div class="alert alert-bad">🔴 <strong>Calories ' + totCal + ' / 1700</strong> — daily target reached. Only water, black tea, or vegetables from here.</div>');
-  } else if (totCal >= 1400) {
-    alerts.push('<div class="alert alert-warn">🟡 <strong>Calories ' + totCal + ' / 1700</strong> — ' + (1700-totCal) + ' kcal remaining. Plan your next meal carefully.</div>');
+  if (totCal >= 2000) {
+    alerts.push('<div class="alert alert-bad">🔴 <strong>Calories ' + totCal + ' / 2000</strong> — daily target reached. Only water, black tea, or vegetables from here.</div>');
+  } else if (totCal >= 1700) {
+    alerts.push('<div class="alert alert-warn">🟡 <strong>Calories ' + totCal + ' / 2000</strong> — ' + (2000-totCal) + ' kcal remaining. Plan your next meal carefully.</div>');
   }
 
   // PROTEIN GAP alert (after 6pm)
@@ -2386,11 +2410,12 @@ function showNutritionAlert() {
 // MEAL SLOT SYSTEM
 // ═══════════════════════════════════
 const MEAL_SLOTS = [
-  {id:'Breakfast',       icon:'🌅', target:400,  color:'#f59e0b'},
-  {id:'Morning Snack',   icon:'🍎', target:150,  color:'#10b981'},
-  {id:'Lunch',           icon:'🍱', target:500,  color:'#3b82f6'},
-  {id:'Evening Snack',   icon:'🥜', target:150,  color:'#8b5cf6'},
-  {id:'Dinner',          icon:'🌙', target:500,  color:'#06b6d4'},
+  {id:'Breakfast',       icon:'🌅', target:500,  color:'#f59e0b'},
+  {id:'Morning Snack',   icon:'🍎', target:125,  color:'#10b981'},
+  {id:'Lunch',           icon:'🍱', target:575,  color:'#3b82f6'},
+  {id:'Evening Snack',   icon:'🥜', target:125,  color:'#8b5cf6'},
+  {id:'Dinner',          icon:'🌙', target:300,  color:'#06b6d4'},
+  {id:'Before Sleep',    icon:'🌛', target:100,  color:'#6366f1'},
 ];
 
 function renderMealSlots(date) {
