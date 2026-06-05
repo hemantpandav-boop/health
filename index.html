@@ -163,7 +163,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v3.7</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v3.8</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -186,12 +186,12 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
     <div class="metric-grid">
       <div class="metric"><div class="metric-label">BMR (at rest)</div><div class="metric-value info">1,609</div><div class="metric-sub">kcal/day</div></div>
       <div class="metric"><div class="metric-label">TDEE (with activity)</div><div class="metric-value info">2,220</div><div class="metric-sub">kcal/day</div></div>
-      <div class="metric"><div class="metric-label">Diet target</div><div class="metric-value ok">1,500</div><div class="metric-sub">prescribed by dietician</div></div>
-      <div class="metric"><div class="metric-label">Diet deficit</div><div class="metric-value warn">-720</div><div class="metric-sub">kcal/day from food</div></div>
-      <div class="metric"><div class="metric-label">Exercise burns</div><div class="metric-value ok">separate</div><div class="metric-sub">adds to deficit</div></div>
-      <div class="metric"><div class="metric-label">Total deficit</div><div class="metric-value warn">720+</div><div class="metric-sub">kcal with exercise</div></div>
+      <div class="metric"><div class="metric-label">Diet target</div><div class="metric-value ok">1,650</div><div class="metric-sub">food intake</div></div>
+      <div class="metric"><div class="metric-label">Walk burns</div><div class="metric-value ok">~215</div><div class="metric-sub">7,500 steps daily</div></div>
+      <div class="metric"><div class="metric-label">Net intake</div><div class="metric-value warn">~1,435</div><div class="metric-sub">matches dietician 1,500</div></div>
+      <div class="metric"><div class="metric-label">Total deficit</div><div class="metric-value warn">~785</div><div class="metric-sub">kcal/day with walk</div></div>
     </div>
-    <div style="font-size:11px;color:var(--text3);margin-top:8px">Diet target of 1,500 kcal is as prescribed by your dietician. Exercise burns are tracked separately in the Exercise tab and add to your total deficit on top of the diet deficit.</div>
+    <div style="font-size:11px;color:var(--text3);margin-top:8px">You eat 1,650 kcal. Your daily walk burns ~215 kcal. Net intake = ~1,435 kcal — matching your dietician's 1,500 target. Exercise burns in the Exercise tab add further deficit on top of this.</div>
   </div>
 
   <div class="card">
@@ -258,7 +258,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
   <div class="card">
     <div class="card-title">today's nutrition summary</div>
     <div class="progress-wrap">
-      <div class="progress-label"><span>Calories</span><span id="cal-today">0 / 1500 kcal</span></div>
+      <div class="progress-label"><span>Calories</span><span id="cal-today">0 / 1650 kcal</span></div>
       <div class="progress-bar"><div class="progress-fill" id="cal-bar" style="background:var(--accent);width:0%"></div></div>
     </div>
     <div class="progress-wrap">
@@ -796,6 +796,46 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 </nav>
 
 <!-- ADD FOOD MODAL -->
+<div id="sos-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-title">🆘 Craving SOS <button class="btn-icon" onclick="hideSOS()">✕</button></div>
+    <div class="alert alert-info" style="margin-bottom:10px">You want aloo vada or samosa. Here's what to eat instead — same flavour, no damage.</div>
+
+    <div style="background:var(--bg3);border-radius:8px;padding:11px;margin-bottom:8px;border:2px solid var(--green)">
+      <div style="font-size:13px;font-weight:600;color:var(--green);margin-bottom:4px">⭐ Best substitute — Aloo Chaat</div>
+      <div style="font-size:12px;color:var(--text)">Boil 1 small potato. Mash slightly. Add chaat masala + jeera + green chutney + lemon. Eat with 2 roasted papads for crunch.</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">~160 kcal · Zero sat fat · Exact same flavour as aloo vada filling</div>
+    </div>
+
+    <div style="background:var(--bg3);border-radius:8px;padding:11px;margin-bottom:8px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px">🍿 Roasted makhana (30g)</div>
+      <div style="font-size:12px;color:var(--text)">Salt + chaat masala + light ghee spray. Crispy, salty, addictive.</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">~104 kcal · Zero sat fat · High fibre</div>
+    </div>
+
+    <div style="background:var(--bg3);border-radius:8px;padding:11px;margin-bottom:8px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px">🫘 Roasted chana (30g)</div>
+      <div style="font-size:12px;color:var(--text)">Crunchy, protein-rich, satisfying. Add lemon and salt.</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">~100 kcal · 7g protein</div>
+    </div>
+
+    <div style="background:var(--bg3);border-radius:8px;padding:11px;margin-bottom:8px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px">🥙 2 Roasted papads + green chutney</div>
+      <div style="font-size:12px;color:var(--text)">Crispy and salty — satisfies crunch craving immediately.</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">~80 kcal · Zero sat fat</div>
+    </div>
+
+    <div style="background:var(--bg3);border-radius:8px;padding:11px;margin-bottom:12px">
+      <div style="font-size:13px;font-weight:600;color:var(--amber);margin-bottom:4px">⚠ If you still want aloo vada or samosa</div>
+      <div style="font-size:12px;color:var(--text)">Have HALF of one. Not a full one. Log it consciously. Move on. No guilt. Once a week is fine.</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">Half aloo vada ~143 kcal · fits in your 200 kcal slot</div>
+    </div>
+
+    <div class="alert alert-ok">Eat your substitute FIRST. Wait 20 minutes. The craving drops 60-70%. This works every time.</div>
+    <button class="btn" onclick="hideSOS()" style="margin-top:8px">Got it — I know what to eat</button>
+  </div>
+</div>
+
 <div id="add-food-modal" class="modal-overlay hidden">
   <div class="modal">
     <div class="modal-title">Add food to database <button class="btn-icon" onclick="hideAddFoodModal()">✕</button></div>
@@ -1278,11 +1318,11 @@ function updateTotals() {
   const totProt = today.reduce((a,l)=>a+l.p,0);
   const totSat = today.reduce((a,l)=>a+l.sat,0);
   const totFib = today.reduce((a,l)=>a+l.fi,0);
-  document.getElementById('cal-today').textContent = totCal + ' / 1500 kcal';
+  document.getElementById('cal-today').textContent = totCal + ' / 1650 kcal';
   document.getElementById('prot-today').textContent = totProt.toFixed(0) + ' / 120g';
   document.getElementById('satfat-today').textContent = totSat.toFixed(1) + ' / 13g';
   document.getElementById('fibre-today').textContent = totFib.toFixed(1) + ' / 30g';
-  document.getElementById('cal-bar').style.width = Math.min(100, totCal/15) + '%';
+  document.getElementById('cal-bar').style.width = Math.min(100, totCal/16.5) + '%';
   document.getElementById('prot-bar').style.width = Math.min(100, totProt/1.2) + '%';
   document.getElementById('satfat-bar').style.width = Math.min(100, totSat/0.13) + '%';
   if(totSat > 13) document.getElementById('satfat-bar').style.background = 'var(--red)';
@@ -1292,6 +1332,8 @@ function updateTotals() {
 }
 
 // ADD FOOD MODAL
+function showSOS() { document.getElementById('sos-modal').classList.remove('hidden'); }
+function hideSOS() { document.getElementById('sos-modal').classList.add('hidden'); }
 function showAddFoodModal() { document.getElementById('add-food-modal').classList.remove('hidden'); }
 function hideAddFoodModal() { document.getElementById('add-food-modal').classList.add('hidden'); }
 function saveNewFood() {
@@ -2385,10 +2427,10 @@ function showNutritionAlert() {
   }
 
   // CALORIES
-  if (totCal >= 1500) {
-    alerts.push('<div class="alert alert-bad">🔴 <strong>Calories ' + totCal + ' / 1500</strong> — daily target reached. Only water, black tea, or vegetables from here.</div>');
-  } else if (totCal >= 1300) {
-    alerts.push('<div class="alert alert-warn">🟡 <strong>Calories ' + totCal + ' / 1500</strong> — ' + (1500-totCal) + ' kcal remaining. One small meal left.</div>');
+  if (totCal >= 1650) {
+    alerts.push('<div class="alert alert-bad">🔴 <strong>Calories ' + totCal + ' / 1650</strong> — daily target reached. Only water, black tea, or vegetables from here.</div>');
+  } else if (totCal >= 1400) {
+    alerts.push('<div class="alert alert-warn">🟡 <strong>Calories ' + totCal + ' / 1650</strong> — ' + (1650-totCal) + ' kcal remaining. Plan your last meal carefully.</div>');
   }
 
   // PROTEIN GAP alert (after 6pm)
@@ -2410,12 +2452,25 @@ function showNutritionAlert() {
 // MEAL SLOT SYSTEM
 // ═══════════════════════════════════
 const MEAL_SLOTS = [
-  {id:'Breakfast',       icon:'🌅', target:400,  color:'#f59e0b'},
-  {id:'Morning Snack',   icon:'🍎', target:100,  color:'#10b981'},
-  {id:'Lunch',           icon:'🍱', target:450,  color:'#3b82f6'},
-  {id:'Evening Snack',   icon:'🥜', target:100,  color:'#8b5cf6'},
-  {id:'Dinner',          icon:'🌙', target:350,  color:'#06b6d4'},
-  {id:'Before Sleep',    icon:'🌛', target:100,  color:'#6366f1'},
+  {id:'Breakfast',     icon:'🌅', target:400, color:'#f59e0b',
+   tip:'Protein shake + chia + flax + walnuts + fruit. Complex carbs OK here.',
+   foods:['2 scoops whey + 150ml Marmum milk','1 tbsp chia seeds + 1 tbsp flaxseed','6 walnuts + 5 almonds','1 fruit — guava, orange or strawberries']},
+  {id:'Morning Snack', icon:'🍎', target:150, color:'#10b981',
+   tip:'Nuts, seeds, small fruit. Light — keep you going till lunch.',
+   foods:['10 almonds + 5 walnuts','1 small guava or orange','1 tbsp pumpkin seeds']},
+  {id:'Lunch',         icon:'🍱', target:475, color:'#3b82f6',
+   tip:'ALL your carbs go here. Rice OR roti. Dal + sabzi + curd. Last carb meal of the day.',
+   foods:['75g rice OR 2 rotis (not both)','150g dal / rajma / chana','100g mixed sabzi','Small bowl curd']},
+  {id:'Evening Snack', icon:'🥜', target:200, color:'#8b5cf6',
+   tip:'Your craving danger zone. Eat this at 5:30pm BEFORE the craving hits. Salty savoury options only.',
+   foods:['Boiled potato + chaat masala + lemon + 2 papads (best aloo vada substitute)','30g roasted makhana with salt + chaat masala','30g roasted chana','2 roasted papads + green chutney','1 fruit + 10 almonds'],
+   sos:true},
+  {id:'Dinner',        icon:'🌙', target:325, color:'#06b6d4',
+   tip:'Zero rice. Zero roti. Pure protein + vegetables only. Light and clean.',
+   foods:['150g paneer (low fat) OR 3 egg whites + 2 whole eggs','Large sabzi — palak, gobi, bhindi, mixed veg','Big salad — cucumber, tomato, radish, lemon','No rice. No roti. No bread.']},
+  {id:'Before Sleep',  icon:'🌛', target:100, color:'#6366f1',
+   tip:'Eat by 9-9:30pm. Promotes sleep. Prevents overnight muscle breakdown.',
+   foods:['6 walnuts (90 kcal)','150ml warm Marmum milk (60 kcal)','150ml warm low fat milk (63 kcal)','10 almonds (58 kcal)']},
 ];
 
 function renderMealSlots(date) {
@@ -2476,7 +2531,12 @@ function renderMealSlots(date) {
         '</div>' +
       '</div>' +
       '<div class="meal-slot-progress"><div class="meal-slot-fill" style="width:' + pct + '%;background:' + overColor + '"></div></div>' +
-      '<div class="meal-slot-body">' + entriesHTML + '</div>' +
+      '<div class="meal-slot-body">' +
+        (slot.tip ? '<div style="font-size:11px;color:var(--text3);margin-bottom:8px;padding:6px 8px;background:var(--bg3);border-radius:6px;border-left:3px solid ' + slot.color + '">' + slot.tip + '</div>' : '') +
+        (slot.sos ? '<button onclick="showSOS()" style="width:100%;background:#2e1065;border:1px solid #8b5cf6;border-radius:8px;color:#c4b5fd;font-size:12px;font-weight:600;padding:8px;cursor:pointer;margin-bottom:8px">🆘 Craving SOS — show safe options</button>' : '') +
+        (slot.foods && !entries.length ? '<div style="font-size:11px;color:var(--text3);margin-bottom:8px"><div style="color:var(--text2);font-weight:600;margin-bottom:4px">Suggested:</div>' + slot.foods.map(function(f){return '<div style="padding:2px 0">• ' + f + '</div>';}).join('') + '</div>' : '') +
+        entriesHTML +
+      '</div>' +
     '</div>';
   });
   container.innerHTML = html;
