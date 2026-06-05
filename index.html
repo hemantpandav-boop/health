@@ -163,7 +163,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v3.8</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v3.9</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -243,6 +243,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 
   <div class="card">
     <div class="card-title">next actions</div>
+    <button class="btn" onclick="openCheckin()" style="background:#1e293b;border:1px solid var(--purple);color:var(--purple);margin-bottom:8px">🌙 Open evening check-in</button>
     <div class="list-item"><div class="list-dot" style="background:var(--red)"></div><div>Next Mounjaro — <strong>13 June 2026</strong></div></div>
     <div class="list-item"><div class="list-dot" style="background:var(--red)"></div><div>Blood test — cholesterol + CPK + glucose — <strong>late June</strong></div></div>
     <div class="list-item"><div class="list-dot" style="background:var(--amber)"></div><div>InBody scan — <strong>end of June</strong></div></div>
@@ -796,6 +797,64 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 </nav>
 
 <!-- ADD FOOD MODAL -->
+<div id="checkin-modal" class="modal-overlay" style="align-items:flex-start;padding-top:20px">
+  <div class="modal" style="border-radius:16px;max-height:90vh;overflow-y:auto">
+    <div style="text-align:center;padding:8px 0 14px">
+      <div style="font-size:32px">🌙</div>
+      <div style="font-size:17px;font-weight:700;margin-top:6px">Evening Check-in</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:3px">30 seconds — log your day</div>
+    </div>
+
+    <!-- WATER QUESTION -->
+    <div style="background:var(--bg3);border-radius:10px;padding:12px;margin-bottom:12px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--accent)">💧 How much water did you drink today?</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px" id="water-btns">
+        <button class="water-opt-btn" onclick="selectWater(this,'500')" data-ml="500" style="padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:12px">Less than 1L</button>
+        <button class="water-opt-btn" onclick="selectWater(this,'1250')" data-ml="1250" style="padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:12px">1 – 1.5L</button>
+        <button class="water-opt-btn" onclick="selectWater(this,'1750')" data-ml="1750" style="padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:12px">1.5 – 2L</button>
+        <button class="water-opt-btn" onclick="selectWater(this,'2250')" data-ml="2250" style="padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:12px">2 – 2.5L</button>
+        <button class="water-opt-btn" onclick="selectWater(this,'2750')" data-ml="2750" style="padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:12px;grid-column:span 2">2.5L or more ✓ Target hit!</button>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:8px;text-align:center" id="water-selected-label">Target: 2.5L (10 glasses)</div>
+    </div>
+
+    <!-- MEDICINES QUESTION -->
+    <div style="background:var(--bg3);border-radius:10px;padding:12px;margin-bottom:12px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px;color:var(--green)">💊 Which medicines did you take today?</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:10px">All ticked = taken. Untick any you missed.</div>
+      <div id="checkin-med-list"></div>
+    </div>
+
+    <!-- STEPS QUESTION -->
+    <div style="background:var(--bg3);border-radius:10px;padding:12px;margin-bottom:12px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--accent2)">👟 Approx steps today?</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+        <button class="steps-opt-btn" onclick="selectSteps(this,'4000')" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">Under 5k</button>
+        <button class="steps-opt-btn" onclick="selectSteps(this,'6000')" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">5k – 7k</button>
+        <button class="steps-opt-btn" onclick="selectSteps(this,'7500')" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px;background:var(--bg3)">7k – 8k ✓</button>
+        <button class="steps-opt-btn" onclick="selectSteps(this,'9000')" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">8k – 10k</button>
+        <button class="steps-opt-btn" onclick="selectSteps(this,'11000')" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">10k+</button>
+        <button class="steps-opt-btn" onclick="selectSteps(this,'0')" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">Rest day</button>
+      </div>
+    </div>
+
+    <!-- WELLBEING -->
+    <div style="background:var(--bg3);border-radius:10px;padding:12px;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--purple)">😊 How are you feeling today?</div>
+      <div style="display:flex;justify-content:space-between;gap:5px">
+        <button class="wb-opt-btn" onclick="selectWB(this,'3')" style="flex:1;padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);cursor:pointer;font-size:16px" title="Poor">😔</button>
+        <button class="wb-opt-btn" onclick="selectWB(this,'5')" style="flex:1;padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);cursor:pointer;font-size:16px" title="OK">😐</button>
+        <button class="wb-opt-btn" onclick="selectWB(this,'7')" style="flex:1;padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);cursor:pointer;font-size:16px" title="Good">🙂</button>
+        <button class="wb-opt-btn" onclick="selectWB(this,'8')" style="flex:1;padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);cursor:pointer;font-size:16px" title="Great">😊</button>
+        <button class="wb-opt-btn" onclick="selectWB(this,'10')" style="flex:1;padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);cursor:pointer;font-size:16px" title="Excellent">😄</button>
+      </div>
+    </div>
+
+    <button class="btn" onclick="saveCheckin()" style="margin-bottom:8px">✓ Save check-in — done for today</button>
+    <button onclick="skipCheckin()" style="width:100%;background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;padding:6px">Skip for tonight</button>
+  </div>
+</div>
+
 <div id="sos-modal" class="modal-overlay hidden">
   <div class="modal">
     <div class="modal-title">🆘 Craving SOS <button class="btn-icon" onclick="hideSOS()">✕</button></div>
@@ -1261,7 +1320,8 @@ function logSelectedFood() {
   selectedFood = null;
   document.getElementById('food-search').value = '';
   document.getElementById('food-selected-panel').classList.add('hidden');
-  renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert(); updateScore(); showNutritionAlert();
+  renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert();
+  setTimeout(initCheckin, 1000); updateScore(); showNutritionAlert();
   alert('Logged: ' + entry.name + ' (' + entry.grams + 'g) — ' + entry.cal + ' kcal');
 }
 
@@ -1308,7 +1368,8 @@ function deleteMeal(idx) {
   const toDelete = todayLogs[idx];
   logs = logs.filter(l => l !== toDelete);
   localStorage.setItem('hh_meals', JSON.stringify(logs));
-  renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert(); updateScore(); showNutritionAlert();
+  renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert();
+  setTimeout(initCheckin, 1000); updateScore(); showNutritionAlert();
 }
 
 function updateTotals() {
@@ -2587,6 +2648,145 @@ function deleteMealByIdx(globalIdx) {
   showNutritionAlert();
 }
 
+// ═══════════════════════════════════
+// EVENING CHECK-IN SYSTEM
+// ═══════════════════════════════════
+var _checkinWater = 0;
+var _checkinSteps = 0;
+var _checkinWB = 7;
+
+function initCheckin() {
+  var hour = new Date().getHours();
+  var skipped = localStorage.getItem('hh_checkin_skip_' + TODAY);
+  var done = localStorage.getItem('hh_checkin_done_' + TODAY);
+  // Show after 9pm if not done or skipped today
+  if (hour >= 21 && !done && !skipped) {
+    showCheckin();
+  }
+}
+
+function showCheckin() {
+  var taken = JSON.parse(localStorage.getItem('hh_meds_' + TODAY) || '{}');
+  var medHTML = '';
+  MEDS.forEach(function(m, idx) {
+    var isTaken = taken[m.id] !== false;
+    medHTML += '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">' +
+      '<div class="med-tick ' + (isTaken ? 'done' : '') + '" id="ci-med-' + idx + '" data-idx="' + idx + '" onclick="toggleCIMed(' + idx + ')" style="width:26px;height:26px;border-radius:50%;border:2px solid ' + (isTaken ? 'var(--green)' : 'var(--border)') + ';background:' + (isTaken ? 'var(--green)' : 'transparent') + ';display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:14px;color:white">' +
+      (isTaken ? '✓' : '') + '</div>' +
+      '<div style="font-size:12px">' + m.name + '<div style="font-size:10px;color:var(--text3)">' + m.time + '</div></div>' +
+      '</div>';
+  });
+  var el = document.getElementById('checkin-med-list');
+  if (el) el.innerHTML = medHTML;
+  document.getElementById('checkin-modal').classList.remove('hidden');
+}
+
+function toggleCIMed(idx) {
+  var el = document.getElementById('ci-med-' + idx);
+  if (!el) return;
+  var isDone = el.classList.contains('done');
+  if (isDone) {
+    el.classList.remove('done');
+    el.innerHTML = '';
+    el.style.background = 'transparent';
+    el.style.borderColor = 'var(--border)';
+    el.style.color = 'white';
+  } else {
+    el.classList.add('done');
+    el.innerHTML = '✓';
+    el.style.background = 'var(--green)';
+    el.style.borderColor = 'var(--green)';
+    el.style.color = 'white';
+  }
+}
+
+function selectWater(btn, ml) {
+  document.querySelectorAll('.water-opt-btn').forEach(function(b) {
+    b.style.background = 'var(--bg2)';
+    b.style.borderColor = 'var(--border)';
+    b.style.color = 'var(--text)';
+  });
+  btn.style.background = '#1d4ed8';
+  btn.style.borderColor = 'var(--accent)';
+  btn.style.color = 'white';
+  _checkinWater = parseInt(ml);
+  var glasses = Math.round(parseInt(ml) / 250);
+  document.getElementById('water-selected-label').textContent = 'Selected: ~' + (parseInt(ml)/1000).toFixed(1) + 'L (' + glasses + ' glasses)';
+}
+
+function selectSteps(btn, steps) {
+  document.querySelectorAll('.steps-opt-btn').forEach(function(b) {
+    b.style.background = 'var(--bg2)';
+    b.style.borderColor = 'var(--border)';
+    b.style.color = 'var(--text)';
+  });
+  btn.style.background = '#065f46';
+  btn.style.borderColor = 'var(--green)';
+  btn.style.color = 'white';
+  _checkinSteps = parseInt(steps);
+}
+
+function selectWB(btn, score) {
+  document.querySelectorAll('.wb-opt-btn').forEach(function(b) {
+    b.style.background = 'var(--bg2)';
+    b.style.borderColor = 'var(--border)';
+  });
+  btn.style.background = '#2e1065';
+  btn.style.borderColor = 'var(--purple)';
+  _checkinWB = parseInt(score);
+}
+
+function saveCheckin() {
+  // Save medicines
+  var taken = {};
+  MEDS.forEach(function(m, idx) {
+    var el = document.getElementById('ci-med-' + idx);
+    taken[m.id] = el ? el.classList.contains('done') : true;
+  });
+  localStorage.setItem('hh_meds_' + TODAY, JSON.stringify(taken));
+
+  // Save water as glasses
+  if (_checkinWater > 0) {
+    var glasses = Math.round(_checkinWater / 250);
+    var waterArr = [];
+    for (var i = 0; i < Math.min(glasses, 10); i++) waterArr.push(true);
+    localStorage.setItem('hh_water_' + TODAY, JSON.stringify(waterArr));
+  }
+
+  // Save steps and wellbeing to vitals
+  if (_checkinSteps > 0 || _checkinWB > 0) {
+    var vitals = JSON.parse(localStorage.getItem('hh_vitals') || '[]');
+    var todayVital = vitals.find(function(v){return v.date===TODAY;}) || {date:TODAY};
+    if (_checkinSteps > 0) todayVital.steps = _checkinSteps;
+    if (_checkinWB > 0) todayVital.wb = _checkinWB;
+    vitals = vitals.filter(function(v){return v.date!==TODAY;});
+    vitals.unshift(todayVital);
+    localStorage.setItem('hh_vitals', JSON.stringify(vitals));
+  }
+
+  localStorage.setItem('hh_checkin_done_' + TODAY, '1');
+  document.getElementById('checkin-modal').classList.add('hidden');
+
+  // Re-render everything
+  renderMeds(); renderStreak(); renderWater(); renderVitals(); updateScore();
+
+  // Show confirmation
+  var medsTaken = Object.values(taken).filter(Boolean).length;
+  var waterL = _checkinWater > 0 ? (_checkinWater/1000).toFixed(1) + 'L' : 'not logged';
+  alert('Check-in saved!\n\nMedicines: ' + medsTaken + '/' + MEDS.length + ' taken\nWater: ' + waterL + '\nSteps: ' + (_checkinSteps>0?_checkinSteps.toLocaleString():'not logged') + '\n\nGood night, Hemant!');
+}
+
+function skipCheckin() {
+  localStorage.setItem('hh_checkin_skip_' + TODAY, '1');
+  document.getElementById('checkin-modal').classList.add('hidden');
+}
+
+function openCheckin() {
+  // Manual open from anywhere
+  _checkinWater = 0; _checkinSteps = 0; _checkinWB = 7;
+  showCheckin();
+}
+
 function initAll() {
   // Set default dates to today
   try { document.getElementById('v-date').value = TODAY; } catch(e) {}
@@ -2598,6 +2798,7 @@ function initAll() {
   try { document.getElementById('ex-date').value = TODAY; } catch(e) {}
   try { document.getElementById('mj-log-date').value = TODAY; } catch(e) {}
   renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert();
+  setTimeout(initCheckin, 1000);
   renderExercise(); renderExDBList();
   renderVitals(); renderWater();
   renderLabResults();
