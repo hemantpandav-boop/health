@@ -163,7 +163,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v4.1</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v4.2</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -630,6 +630,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
     <div class="alert alert-warn">4. Repaglinide — can I stop? HbA1c now normal. Taking once daily, not twice.</div>
     <div class="alert alert-info">5. Cortisol result from December 2025 — what was it?</div>
     <div class="alert alert-info">6. Mounjaro 10mg every 15 days — correct maintenance? Last: 29 May, next: 13 June.</div>
+    <div class="alert alert-info">7. Can we add Iron, Ferritin, Zinc and Folate to next blood panel? Not tested recently.</div>
   </div>
   <div class="card">
     <div class="card-title">full lab report history</div>
@@ -1321,6 +1322,8 @@ function logSelectedFood() {
   document.getElementById('food-search').value = '';
   document.getElementById('food-selected-panel').classList.add('hidden');
   renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert();
+  showDaySummary(TODAY);
+  showWeekAverage();
   setTimeout(initCheckin, 1000); updateScore(); showNutritionAlert();
   alert('Logged: ' + entry.name + ' (' + entry.grams + 'g) — ' + entry.cal + ' kcal');
 }
@@ -1369,6 +1372,8 @@ function deleteMeal(idx) {
   logs = logs.filter(l => l !== toDelete);
   localStorage.setItem('hh_meals', JSON.stringify(logs));
   renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert();
+  showDaySummary(TODAY);
+  showWeekAverage();
   setTimeout(initCheckin, 1000); updateScore(); showNutritionAlert();
 }
 
@@ -2513,73 +2518,74 @@ function showNutritionAlert() {
 // MEAL SLOT SYSTEM
 // ═══════════════════════════════════
 const MEAL_SLOTS = [
-  {id:'Wake Up',       icon:'🌄', target:33,  color:'#64748b',
-   tip:'6:00am — 2 minutes. Non-negotiable. Starts metabolism, hydrates, gives full daily selenium.',
+  {id:'Wake Up', icon:'🌄', target:33, color:'#64748b',
+   tip:'6:00am — 2 minutes. Non-negotiable. Full day selenium in one nut.',
    foods:[
-     '1 Brazil nut — 33 kcal, 1.9g sat fat. Full day selenium in one nut. Supports thyroid + testosterone.',
-     '1 large glass water with pinch chia seeds + juice of half lemon — zero calories, starts digestion.'
+     '1 Brazil nut — weigh 5g (33 kcal)',
+     '200ml water + pinch chia seeds 2g + juice of half lemon — zero calories'
    ]},
-  {id:'Breakfast',     icon:'🌅', target:340, color:'#f59e0b',
-   tip:'8:00am — Protein + good fats + omega-3. No refined carbs. Mix shake first, eat nuts alongside. ROTATE fruit daily to avoid boredom.',
+  {id:'Breakfast', icon:'🌅', target:340, color:'#f59e0b',
+   tip:'8:00am — Weigh everything once, memorise portions after. ROTATE fruit daily.',
    foods:[
-     '1 scoop whey in 150ml Marmum milk — 135 kcal, 27g protein',
-     '10g pumpkin seeds — magnesium, zinc, 56 kcal',
-     '10g flaxseed ground — omega-3, fibre, 53 kcal',
-     '8 soaked peeled almonds — 64 kcal, 2.3g protein',
-     '6 walnuts — 131 kcal. LDL-lowering omega-3. Critical for cholesterol.',
-     'ROTATE fruit (pick one): Apple 100g / Pear 140g / Papaya 200g / Banana 60g / Guava 100g',
-     'NOTE: On days with fruit, skip walnuts OR reduce to 4 to stay in calorie range.'
+     '1 scoop whey 30g in 150ml Marmum milk — 135 kcal, 27g protein',
+     'Pumpkin seeds — weigh 10g exactly — 56 kcal',
+     'Flaxseed ground — weigh 10g exactly — 53 kcal, omega-3',
+     'Almonds soaked peeled — weigh 11g (8 almonds) — 64 kcal',
+     'Walnuts — weigh 20g (6 halves) — 131 kcal, LDL lowering',
+     'ROTATE fruit (pick ONE daily): Apple 100g / Pear 140g / Papaya 200g / Banana 60g / Guava 100g / Orange 120g / Strawberries 100g',
+     'NOTE: On fruit days, reduce walnuts to 10g (3 halves) to stay in calorie range'
    ]},
-  {id:'Pre-Lunch',     icon:'🥗', target:50,  color:'#10b981',
-   tip:'12:30pm — Do this EVERY day without exception. Fibre before meal slows glucose spike 20-30%. Takes 5 minutes.',
+  {id:'Pre-Lunch', icon:'🥗', target:50, color:'#10b981',
+   tip:'12:30pm — EVERY day. Fibre slows glucose spike 20-30%. Takes 5 minutes.',
    foods:[
-     'Isabgol 1 tsp stirred in water — drink 10 min before lunch. Lowers LDL 10-15%.',
-     'Juice of half lemon in glass of water',
-     '1.5 katori cucumber + carrot salad ~225g — eat this fully before sitting for main lunch'
+     'Isabgol psyllium 5g (1 tsp) in water — drink 10 min before lunch. LDL -10-15%',
+     'Half lemon juice squeezed in water',
+     'Cucumber carrot salad — weigh 225g (1.5 katori) — eat all of it before lunch'
    ]},
-  {id:'Lunch',         icon:'🍱', target:470, color:'#3b82f6',
-   tip:'12:35pm — ALL carbs of the day go HERE. Rotate options A-H daily. Last carb meal. Eat slowly.',
+  {id:'Lunch', icon:'🍱', target:470, color:'#3b82f6',
+   tip:'12:35pm — ALL carbs here. Rice OR rotis, not both. Rotate options daily.',
    foods:[
-     'OPTION A: 220g toor dal + 120g brown rice + 150g raita',
-     'OPTION B: 2 wheat rotis + 220g rajma curry + 150g raita',
-     'OPTION C: 2 wheat rotis + 120g kabuli chana masala + 150g veg curry',
-     'OPTION D: 2 wheat rotis + 100g moong dal tadka + 150g cabbage peas sabji',
-     'OPTION E: 120g rajma + 120g brown rice + 150g raita',
-     'OPTION F: 3 katori wheat daliya with mixed veg + 200g curd',
-     'OPTION G: 2 wheat rotis + 220g palak corn sabzi + 200g curd',
-     'OPTION H: 2 wheat rotis + 100g paneer curry low oil + salad (occasional — sat fat watch)',
-     'ALWAYS: Add isabgol if not taken before. Add 150g curd/raita for probiotic + protein.'
+     'OPTION A: Toor dal cooked 220g + brown rice cooked 120g + raita 150g',
+     'OPTION B: Wheat rotis 2 × 30g (60g total) + rajma curry 220g + raita 150g',
+     'OPTION C: Wheat rotis 60g + kabuli chana 120g + veg curry 150g',
+     'OPTION D: Wheat rotis 60g + moong dal tadka 100g + cabbage peas sabji 150g',
+     'OPTION E: Rajma 120g + brown rice 120g + raita 150g',
+     'OPTION F: Wheat daliya 3 katori with mixed veg + curd 200g',
+     'OPTION G: Wheat rotis 60g + palak corn sabzi 220g + curd 200g',
+     'OPTION H: Wheat rotis 60g + paneer curry low oil 100g (occasional — sat fat watch)',
+     'ALWAYS: Isabgol 5g before if not taken. Raita or curd 150g always. Salad alongside.'
    ]},
   {id:'Evening Snack', icon:'🥜', target:215, color:'#8b5cf6',
-   tip:'5:30pm sharp — CRAVING DANGER ZONE. Drink whey shake FIRST before touching any food. Protein suppresses craving within 15 minutes.',
+   tip:'5:30pm sharp — CRAVING DANGER ZONE. Drink whey FIRST. Always.',
    foods:[
-     'STEP 1 — ALWAYS FIRST: 1 scoop whey in water — 110 kcal, 25g protein. Drink completely.',
-     'STEP 2 — Then eat ONE: 30g roasted makhana + chaat masala (104 kcal) — BEST DAILY CHOICE',
-     'OR: Boiled potato + chaat masala + lemon + 2 roasted papads (~160 kcal) — aloo vada substitute',
-     'OR: 30g roasted chana with lemon + salt (100 kcal)',
-     'OR: 100g tofu with lemon + black pepper + chaat masala (76 kcal)',
-     'ONCE A WEEK ONLY: Half aloo vada or half samosa (150 kcal) — log it, no guilt, move on.'
-   ],
-   sos:true},
-  {id:'Dinner',        icon:'🌙', target:300, color:'#06b6d4',
-   tip:'7:00pm — ZERO rotis, ZERO rice, ZERO refined carbs. Pure protein + vegetables only. Finish by 8pm. 20 min walk after.',
+     'STEP 1 — ALWAYS FIRST: 1 scoop whey 30g in water — 110 kcal, 25g protein',
+     'STEP 2 — Then ONE of these:',
+     'Roasted makhana 30g + chaat masala — 104 kcal — BEST DAILY CHOICE',
+     'Boiled potato 100g + chaat masala + lemon + 2 roasted papads 20g — ~160 kcal',
+     'Roasted chana 30g with lemon + salt — 100 kcal',
+     'Tofu 100g with lemon + black pepper — 76 kcal',
+     'ONCE A WEEK MAX: Half aloo vada ~50g or half samosa ~50g — log it, move on'
+   ], sos:true},
+  {id:'Dinner', icon:'🌙', target:300, color:'#06b6d4',
+   tip:'7:00pm — ZERO rotis, ZERO rice. Protein + vegetables only. Done by 8pm.',
    foods:[
-     'BEST COMBO: 150g tofu + 150g moong dal cooked — 23g protein, 1g sat fat, 300 kcal',
-     'OR: 200g sabut moong boiled + 50g sprouts + sabzi',
-     'OR: 150g panchratni dal + 100g sabzi + salad',
-     'AFTER 16 JUN: 3 egg whites + 1 whole egg + sabzi (22g protein, 1.6g sat fat)',
-     'ALWAYS: 100g sabzi — gobi/bhindi/palak/methi/mixed veg',
-     'ALWAYS: Big salad — cucumber + tomato + radish + onion + lemon — eat freely',
-     'NEVER: Rotis, rice, paneer, soya at dinner.'
+     'BEST: Tofu 150g + moong dal cooked 150g — 23g protein, 1g sat fat, 300 kcal',
+     'OR: Sabut moong boiled 200g + sprouts 50g + sabzi 100g',
+     'OR: Panchratni dal 150g + sabzi 100g + salad',
+     'AFTER 16 JUN: 3 egg whites 90g + 1 whole egg 60g + sabzi — 22g protein',
+     'ALWAYS: Mixed sabzi 100g — gobi/bhindi/palak/methi/mixed veg',
+     'ALWAYS: Big salad — cucumber 100g + tomato 80g + radish 50g + onion 30g + lemon',
+     'NEVER: Rotis, rice, paneer, soya at dinner'
    ]},
-  {id:'Before Sleep',  icon:'🌛', target:84,  color:'#6366f1',
-   tip:'9:30pm — Exactly from your dietician. Nutmeg promotes deep sleep. Milk prevents overnight muscle breakdown. Do not skip.',
+  {id:'Before Sleep', icon:'🌛', target:84, color:'#6366f1',
+   tip:'9:30pm — Exactly as dietician prescribed. Nutmeg promotes deep sleep.',
    foods:[
-     '200ml low fat milk — 84 kcal, 7g protein',
-     'Pinch nutmeg powder stirred in — natural sleep promoter',
-     'Optional if still hungry: 5-6 walnuts alongside (90 kcal extra)'
+     'Low fat milk 200ml — 84 kcal, 7g protein',
+     'Pinch nutmeg powder 0.25 tsp stirred in — natural sleep promoter',
+     'Optional if still slightly hungry: walnuts 10g extra — 65 kcal'
    ]},
 ];
+
 
 function renderMealSlots(date) {
   var d = date || TODAY;
@@ -2693,6 +2699,8 @@ function deleteMealByIdx(globalIdx) {
   updateTotals();
   updateScore();
   showNutritionAlert();
+  showDaySummary(TODAY);
+  showWeekAverage();
 }
 
 // ═══════════════════════════════════
@@ -2834,6 +2842,136 @@ function openCheckin() {
   showCheckin();
 }
 
+// ═══════════════════════════════════
+// DAY SUMMARY + 7-DAY AVERAGE
+// ═══════════════════════════════════
+function getDateOffset(days) {
+  var d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split('T')[0];
+}
+
+function getDayNutrition(date) {
+  var logs = JSON.parse(localStorage.getItem('hh_meals') || '[]');
+  var dayLogs = logs.filter(function(l){ return l.date === date; });
+  return {
+    cal:  dayLogs.reduce(function(a,l){return a+(l.cal||0);},0),
+    p:    parseFloat(dayLogs.reduce(function(a,l){return a+(l.p||0);},0).toFixed(1)),
+    c:    parseFloat(dayLogs.reduce(function(a,l){return a+(l.c||0);},0).toFixed(1)),
+    f:    parseFloat(dayLogs.reduce(function(a,l){return a+(l.f||0);},0).toFixed(1)),
+    sat:  parseFloat(dayLogs.reduce(function(a,l){return a+(l.sat||0);},0).toFixed(1)),
+    fi:   parseFloat(dayLogs.reduce(function(a,l){return a+(l.fi||0);},0).toFixed(1)),
+    meals: dayLogs.length,
+    items: dayLogs
+  };
+}
+
+function getNutrientBar(val, target, unit, color) {
+  var pct = Math.min(100, Math.round(val/target*100));
+  var overColor = val > target*1.15 ? 'var(--red)' : val > target ? 'var(--amber)' : color;
+  var status = val > target*1.15 ? '⚠ Over' : val > target ? '↑ High' : val < target*0.7 ? '↓ Low' : '✓ Good';
+  var statusColor = val > target*1.15 ? 'var(--red)' : val > target ? 'var(--amber)' : val < target*0.7 ? 'var(--amber)' : 'var(--green)';
+  return '<div class="progress-wrap" style="margin-bottom:8px">' +
+    '<div class="progress-label">' +
+      '<span style="font-size:12px">' + unit + '</span>' +
+      '<span style="font-size:11px;color:' + statusColor + '">' + val + ' / ' + target + ' ' + unit.split(' ')[0] + ' &nbsp; ' + status + '</span>' +
+    '</div>' +
+    '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%;background:' + overColor + '"></div></div>' +
+  '</div>';
+}
+
+function showDaySummary(date) {
+  var el = document.getElementById('day-summary-panel');
+  var label = document.getElementById('summary-date-label');
+  if (!el) return;
+
+  var n = getDayNutrition(date);
+  var today = new Date().toISOString().split('T')[0];
+  var labelText = date === today ? 'Today' : date === getDateOffset(-1) ? 'Yesterday' : date;
+  if (label) label.textContent = '— ' + labelText;
+
+  if (n.meals === 0) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:12px">No meals logged for ' + labelText + '.</div>';
+    return;
+  }
+
+  // Meal breakdown by slot
+  var slotHTML = '';
+  MEAL_SLOTS.forEach(function(slot) {
+    var slotItems = n.items.filter(function(i){return i.type===slot.id;});
+    if (!slotItems.length) return;
+    var slotCal = slotItems.reduce(function(a,i){return a+i.cal;},0);
+    var slotProt = slotItems.reduce(function(a,i){return a+(i.p||0);},0);
+    slotHTML += '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px">' +
+      '<span>' + slot.icon + ' ' + slot.id + ' (' + slotItems.length + ' item' + (slotItems.length>1?'s':'') + ')</span>' +
+      '<span style="color:var(--text2)">' + slotCal + ' kcal · P:' + slotProt.toFixed(0) + 'g</span>' +
+    '</div>';
+  });
+
+  el.innerHTML =
+    '<div style="background:var(--bg3);border-radius:8px;padding:10px;margin-bottom:10px">' +
+      slotHTML +
+      '<div style="display:flex;justify-content:space-between;padding:7px 0 2px;font-size:13px;font-weight:700">' +
+        '<span>Total</span>' +
+        '<span style="color:var(--accent)">' + n.cal + ' kcal · ' + n.p + 'g protein</span>' +
+      '</div>' +
+    '</div>' +
+    getNutrientBar(n.cal,  1492, 'Calories (kcal)', 'var(--accent)') +
+    getNutrientBar(n.p,    120,  'Protein (g)',      'var(--green)') +
+    getNutrientBar(n.c,    130,  'Carbs (g)',        'var(--amber)') +
+    getNutrientBar(n.sat,  13,   'Sat fat (g)',      'var(--red)') +
+    getNutrientBar(n.fi,   30,   'Fibre (g)',        '#8b5cf6') +
+    '<div style="font-size:11px;color:var(--text3);margin-top:4px">Fat total: ' + n.f + 'g · ' + n.meals + ' items logged</div>';
+}
+
+function showWeekAverage() {
+  var el = document.getElementById('week-average-panel');
+  if (!el) return;
+
+  var days = [];
+  for (var i = 1; i <= 7; i++) {
+    var d = getDateOffset(-i);
+    var n = getDayNutrition(d);
+    if (n.meals > 0) days.push({date: d, n: n});
+  }
+
+  if (days.length === 0) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:12px">No data yet. Log meals for at least 2 days.</div>';
+    return;
+  }
+
+  var avgCal  = Math.round(days.reduce(function(a,d){return a+d.n.cal;},0) / days.length);
+  var avgP    = parseFloat((days.reduce(function(a,d){return a+d.n.p;},0) / days.length).toFixed(1));
+  var avgC    = parseFloat((days.reduce(function(a,d){return a+d.n.c;},0) / days.length).toFixed(1));
+  var avgF    = parseFloat((days.reduce(function(a,d){return a+d.n.f;},0) / days.length).toFixed(1));
+  var avgSat  = parseFloat((days.reduce(function(a,d){return a+d.n.sat;},0) / days.length).toFixed(1));
+  var avgFi   = parseFloat((days.reduce(function(a,d){return a+d.n.fi;},0) / days.length).toFixed(1));
+
+  // Trend — is this week better or worse than last 7 days?
+  var calStatus = avgCal <= 1550 ? '✓ On target' : avgCal <= 1700 ? '↑ Slightly high' : '⚠ Too high';
+  var protStatus = avgP >= 110 ? '✓ Good' : avgP >= 80 ? '↑ Improving' : '⚠ Too low';
+  var satStatus = avgSat <= 10 ? '✓ Good' : avgSat <= 13 ? '↑ Watch' : '⚠ High';
+
+  el.innerHTML =
+    '<div style="font-size:11px;color:var(--text3);margin-bottom:8px">Based on ' + days.length + ' logged day' + (days.length>1?'s':'') + ' (excluding today)</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px">' +
+      '<div class="metric"><div class="metric-label">Avg calories</div><div class="metric-value ' + (avgCal<=1550?'ok':avgCal<=1700?'warn':'bad') + '">' + avgCal + '</div><div class="metric-sub">' + calStatus + '</div></div>' +
+      '<div class="metric"><div class="metric-label">Avg protein</div><div class="metric-value ' + (avgP>=110?'ok':avgP>=80?'warn':'bad') + '">' + avgP + 'g</div><div class="metric-sub">' + protStatus + '</div></div>' +
+      '<div class="metric"><div class="metric-label">Avg carbs</div><div class="metric-value ' + (avgC<=130?'ok':'warn') + '">' + avgC + 'g</div><div class="metric-sub">' + (avgC<=130?'✓ Within limit':'↑ Watch') + '</div></div>' +
+      '<div class="metric"><div class="metric-label">Avg sat fat</div><div class="metric-value ' + (avgSat<=10?'ok':avgSat<=13?'warn':'bad') + '">' + avgSat + 'g</div><div class="metric-sub">' + satStatus + '</div></div>' +
+      '<div class="metric"><div class="metric-label">Avg fibre</div><div class="metric-value ' + (avgFi>=25?'ok':'warn') + '">' + avgFi + 'g</div><div class="metric-sub">' + (avgFi>=25?'✓ Good':'↑ Increase') + '</div></div>' +
+      '<div class="metric"><div class="metric-label">Avg fat</div><div class="metric-value info">' + avgF + 'g</div><div class="metric-sub">total fat</div></div>' +
+    '</div>' +
+    '<div style="font-size:11px;color:var(--text3)">' +
+      days.map(function(d){
+        return '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border)">' +
+          '<span>' + d.date + '</span>' +
+          '<span>' + d.n.cal + ' kcal · P:' + d.n.p + 'g · Sat:' + d.n.sat + 'g</span>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+}
+
 function initAll() {
   // Set default dates to today
   try { document.getElementById('v-date').value = TODAY; } catch(e) {}
@@ -2845,6 +2983,8 @@ function initAll() {
   try { document.getElementById('ex-date').value = TODAY; } catch(e) {}
   try { document.getElementById('mj-log-date').value = TODAY; } catch(e) {}
   renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert();
+  showDaySummary(TODAY);
+  showWeekAverage();
   setTimeout(initCheckin, 1000);
   renderExercise(); renderExDBList();
   renderVitals(); renderWater();
