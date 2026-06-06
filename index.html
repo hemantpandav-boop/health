@@ -163,7 +163,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v6.4</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v6.5</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -1582,8 +1582,8 @@ function logSelectedFood() {
   document.getElementById('food-selected-panel').classList.add('hidden');
   renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert(); updateDeficitCard();
   renderEatingOutGrid(); renderPortionGrid();
-  // Migrate old exercise logs — add isCardio flag to walk/treadmill entries
   migrateExLogs();
+  renderWalkTracker();
   showDaySummary(TODAY);
   showWeekAverage();
   renderExercise();
@@ -1808,8 +1808,8 @@ function deleteMeal(idx) {
   localStorage.setItem('hh_meals', JSON.stringify(logs));
   renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert(); updateDeficitCard();
   renderEatingOutGrid(); renderPortionGrid();
-  // Migrate old exercise logs — add isCardio flag to walk/treadmill entries
   migrateExLogs();
+  renderWalkTracker();
   showDaySummary(TODAY);
   showWeekAverage();
   renderExercise();
@@ -3645,7 +3645,7 @@ const WEEKLY_PLAN = {
       {n:'Dumbbell Lateral Raise',sets:3,reps:12,met:3.0,muscle:'Shoulders (side)',cpk:false,shoulder:false,tip:'Raise to shoulder height. Stop there — no higher. Constant tension.',alt:null},
       {n:'Tricep Kickback',sets:3,reps:12,met:3.0,muscle:'Triceps',cpk:false,shoulder:false,tip:'Hinge forward, upper arm parallel to floor. Extend arm fully back. No overhead.',alt:null},
       {n:'Dumbbell Shrug',sets:3,reps:15,met:3.0,muscle:'Traps',cpk:false,shoulder:false,tip:'Straight up, hold 1 sec, lower slowly.',alt:null},
-      {n:'Walk 25 min',sets:1,reps:0,dur:25,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'After dinner walk best for glucose.',alt:null},
+      
     ],
     gym_machine:[
       {n:'Chest Press Machine',sets:3,reps:12,met:4.0,muscle:'Chest',cpk:false,shoulder:false,tip:'Handles at chest level. Push forward, control return.',alt:null},
@@ -3653,7 +3653,7 @@ const WEEKLY_PLAN = {
       {n:'Lateral Raise Machine',sets:3,reps:15,met:3.0,muscle:'Shoulders (side)',cpk:false,shoulder:false,tip:'Shoulder height only. Right shoulder protection.',alt:null},
       {n:'Tricep Pushdown Machine',sets:3,reps:12,met:3.0,muscle:'Triceps',cpk:false,shoulder:false,tip:'Elbows fixed at sides. Full extension down.',alt:null},
       {n:'Shoulder Press Machine (light)',sets:2,reps:10,met:3.0,muscle:'Shoulders',cpk:false,shoulder:true,tip:'⚠ RIGHT SHOULDER — very light only. Stop if pain.',alt:'Extra lateral raise sets'},
-      {n:'Treadmill 25 min',sets:1,reps:0,dur:25,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'5 km/h moderate. 2% incline optional.',alt:null},
+      
     ],
     gym_cable:[
       {n:'Cable Chest Press (standing dual)',sets:3,reps:12,met:4.0,muscle:'Chest + Core',cpk:false,shoulder:false,tip:'Cables at chest height. Step forward, press. Core activated throughout. Superior to machine.',alt:null},
@@ -3661,7 +3661,7 @@ const WEEKLY_PLAN = {
       {n:'Cable Lateral Raise (one arm)',sets:3,reps:15,met:3.0,muscle:'Shoulders (side)',cpk:false,shoulder:false,tip:'Cable at floor. Raise to shoulder height. Constant tension throughout.',alt:null},
       {n:'Tricep Rope Pushdown',sets:3,reps:12,met:3.2,muscle:'Triceps',cpk:false,shoulder:false,tip:'Rope attachment. Flare wrists at bottom — maximises contraction.',alt:null},
       {n:'Cable Face Pull (rope)',sets:3,reps:15,met:3.0,muscle:'Rear delts + Rotator cuff',cpk:false,shoulder:false,tip:'Cable at face height. Pull rope to face, elbows flare wide. Best right shoulder rehab exercise.',alt:null},
-      {n:'Treadmill 25 min',sets:1,reps:0,dur:25,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'Moderate pace.',alt:null},
+      
     ],
     cooldown:['Shoulder Static Stretch 20sec × 2 both sides','Chest Static Stretch 20sec × 2','Triceps Static Stretch 20sec × 2'],
   },
@@ -3674,7 +3674,7 @@ const WEEKLY_PLAN = {
       {n:'Tricep Kickback',sets:2,reps:12,met:3.0,muscle:'Triceps',cpk:false,shoulder:false,tip:'Hinge forward. Extend arm fully back. No overhead.',alt:null},
       {n:'Standing Knee Raise',sets:2,reps:12,met:3.5,muscle:'Core (lower abs)',cpk:false,shoulder:false,tip:'Alternate knees to hip height. Hold wall if needed. Replaces floor reverse crunch.',alt:null},
       {n:'Standing Oblique Crunch',sets:2,reps:12,met:3.5,muscle:'Core (obliques)',cpk:false,shoulder:false,tip:'Knee up to same-side elbow. Targets love handles and belly directly.',alt:null},
-      {n:'Walk 25 min',sets:1,reps:0,dur:25,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'Essential every session.',alt:null},
+      
     ],
     gym_machine:[
       {n:'Lat Pulldown Machine',sets:3,reps:12,met:4.0,muscle:'Back (lats)',cpk:false,shoulder:false,tip:'Wide grip. Pull to upper chest. Lean back 15 degrees. Squeeze shoulder blades.',alt:null},
@@ -3682,7 +3682,7 @@ const WEEKLY_PLAN = {
       {n:'Bicep Curl Machine',sets:3,reps:12,met:3.0,muscle:'Biceps',cpk:false,shoulder:false,tip:'Upper arms on pad. Curl fully. Lower slowly 3 seconds.',alt:null},
       {n:'Ab Crunch Machine',sets:3,reps:15,met:3.5,muscle:'Core (abs)',cpk:false,shoulder:false,tip:'Slow. Hold 1 sec at full contraction.',alt:null},
       {n:'Oblique Machine',sets:3,reps:15,met:3.5,muscle:'Core (obliques)',cpk:false,shoulder:false,tip:'Slow rotation each side. Targets love handles directly.',alt:null},
-      {n:'Treadmill 25 min',sets:1,reps:0,dur:25,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'Moderate pace.',alt:null},
+      
     ],
     gym_cable:[
       {n:'Cable Lat Pulldown (rope)',sets:3,reps:12,met:4.2,muscle:'Back (lats) + Core',cpk:false,shoulder:false,tip:'Stand and pull down. More core than seated machine. Pull to chest.',alt:null},
@@ -3691,7 +3691,7 @@ const WEEKLY_PLAN = {
       {n:'Cable Hammer Curl (rope)',sets:2,reps:12,met:3.0,muscle:'Biceps + Forearms',cpk:false,shoulder:false,tip:'Rope, neutral grip. Works brachialis alongside bicep.',alt:null},
       {n:'Cable Crunch Standing (rope)',sets:3,reps:15,met:3.8,muscle:'Core (abs)',cpk:false,shoulder:false,tip:'Rope at high cable. Crunch down standing. Best standing abs exercise.',alt:null},
       {n:'Cable Oblique Crunch',sets:3,reps:15,met:3.5,muscle:'Core (obliques)',cpk:false,shoulder:false,tip:'One side cable high. Pull down and across. Directly targets love handles.',alt:null},
-      {n:'Treadmill 25 min',sets:1,reps:0,dur:25,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'Moderate pace.',alt:null},
+      
     ],
     cooldown:['Child Pose Mobility 20sec × 2','Upper Back Static Stretch 20sec × 2','Biceps Static Stretch 15sec × 2','Forearms Static Stretch 15sec × 2'],
   },
@@ -3703,7 +3703,7 @@ const WEEKLY_PLAN = {
       {n:'Dumbbell Calf Raise',sets:2,reps:12,met:2.8,muscle:'Calves',cpk:false,shoulder:false,tip:'Rise fully on toes, hold 2 sec. Lower fully.',alt:null},
       {n:'Dumbbell Deadlift (1 set light — CPK)',sets:1,reps:12,met:5.0,muscle:'Hamstrings + Glutes',cpk:true,shoulder:false,tip:'⚠ CPK ELEVATED — 1 set only, very light. Hinge at hips, back flat.',alt:'Skip if muscle soreness'},
       {n:'Standing Oblique Crunch',sets:2,reps:15,met:3.5,muscle:'Core (obliques)',cpk:false,shoulder:false,tip:'Knee to same-side elbow. Targets belly area.',alt:null},
-      {n:'Walk 25 min',sets:1,reps:0,dur:25,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'Essential.',alt:null},
+      
     ],
     gym_machine:[
       {n:'Leg Press Machine',sets:3,reps:12,met:5.0,muscle:'Quads + Glutes + Hamstrings',cpk:true,shoulder:false,tip:'Feet shoulder-width. Lower to 90 degrees. Do not lock knees.',alt:null},
@@ -3712,7 +3712,7 @@ const WEEKLY_PLAN = {
       {n:'Seated Calf Raise Machine',sets:3,reps:20,met:2.8,muscle:'Calves',cpk:false,shoulder:false,tip:'Full range. High reps for calves.',alt:null},
       {n:'Ab Crunch Machine',sets:3,reps:15,met:3.5,muscle:'Core (abs)',cpk:false,shoulder:false,tip:'Slow and controlled. Hold at contraction.',alt:null},
       {n:'Oblique Machine',sets:3,reps:15,met:3.5,muscle:'Core (obliques)',cpk:false,shoulder:false,tip:'Equal reps each side. Love handles.',alt:null},
-      {n:'Treadmill 25 min',sets:1,reps:0,dur:25,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'Moderate pace.',alt:null},
+      
     ],
     gym_cable:[
       {n:'Cable Squat (rope)',sets:3,reps:12,met:5.0,muscle:'Quads + Glutes + Core',cpk:false,shoulder:false,tip:'Low cable, hold rope, squat. More core activation than machine.',alt:null},
@@ -3720,7 +3720,7 @@ const WEEKLY_PLAN = {
       {n:'Cable Leg Kickback (ankle)',sets:3,reps:12,met:3.5,muscle:'Glutes',cpk:false,shoulder:false,tip:'Cable at ankle. Stand facing machine, kick leg back. Hold wall for balance.',alt:null},
       {n:'Cable Crunch Standing (rope)',sets:3,reps:15,met:3.8,muscle:'Core (abs)',cpk:false,shoulder:false,tip:'Best standing abs exercise.',alt:null},
       {n:'Cable Oblique Crunch',sets:3,reps:15,met:3.5,muscle:'Core (obliques)',cpk:false,shoulder:false,tip:'Targets love handles and belly.',alt:null},
-      {n:'Treadmill 25 min',sets:1,reps:0,dur:25,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'Moderate pace.',alt:null},
+      
     ],
     cooldown:['Abs Static Stretch Cobra 20sec × 2','Quadriceps Static Stretch 20sec × 2','Hamstrings Static Stretch 20sec × 2','Lower Back Static Stretch 20sec × 2'],
   },
@@ -3731,7 +3731,7 @@ const WEEKLY_PLAN = {
       {n:'Tricep Dips (chair)',sets:3,reps:12,met:3.8,muscle:'Triceps',cpk:false,shoulder:false,tip:'Hands on chair edge behind you. Lower down, push back up. Excellent tricep exercise.',alt:null},
       {n:'Tricep Kickback',sets:2,reps:12,met:3.0,muscle:'Triceps',cpk:false,shoulder:false,tip:'Hinge forward. Extend fully back. No overhead.',alt:null},
       {n:'Dumbbell Shrug',sets:2,reps:15,met:3.0,muscle:'Traps',cpk:false,shoulder:false,tip:'Straight up, hold, lower slowly.',alt:null},
-      {n:'Walk 20 min',sets:1,reps:0,dur:20,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'20 min on Thursday — slightly shorter.',alt:null},
+      
     ],
     gym_machine:[
       {n:'Chest Press Machine',sets:3,reps:12,met:4.0,muscle:'Chest',cpk:false,shoulder:false,tip:'Slightly heavier than Monday — second chest day.',alt:null},
@@ -3739,14 +3739,14 @@ const WEEKLY_PLAN = {
       {n:'Tricep Pushdown Machine',sets:3,reps:12,met:3.0,muscle:'Triceps',cpk:false,shoulder:false,tip:'Elbows fixed. Full extension down.',alt:null},
       {n:'Tricep Dips (parallel bars)',sets:3,reps:12,met:3.8,muscle:'Triceps',cpk:false,shoulder:false,tip:'Lower slowly. Do not go too deep — shoulder protection.',alt:null},
       {n:'Back Extension Machine',sets:2,reps:15,met:3.5,muscle:'Lower back',cpk:false,shoulder:false,tip:'Extend to neutral spine only. Posture work.',alt:null},
-      {n:'Treadmill 20 min',sets:1,reps:0,dur:20,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'Moderate pace.',alt:null},
+      
     ],
     gym_cable:[
       {n:'Cable Chest Press (standing)',sets:3,reps:12,met:4.0,muscle:'Chest + Core',cpk:false,shoulder:false,tip:'Dual cable at chest height. Step forward, press. Core activated throughout.',alt:null},
       {n:'Cable Chest Fly (crossover)',sets:3,reps:12,met:3.8,muscle:'Chest (full)',cpk:false,shoulder:false,tip:'Best chest exercise on cables. Full stretch and contraction.',alt:null},
       {n:'Tricep Rope Pushdown',sets:3,reps:12,met:3.2,muscle:'Triceps',cpk:false,shoulder:false,tip:'Flare wrists at bottom for maximum contraction.',alt:null},
       {n:'Cable Face Pull (rope)',sets:3,reps:15,met:3.0,muscle:'Rear delts + Rotator cuff',cpk:false,shoulder:false,tip:'Pull rope to face, elbows high. Excellent shoulder health.',alt:null},
-      {n:'Treadmill 20 min',sets:1,reps:0,dur:20,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'Moderate pace.',alt:null},
+      
     ],
     cooldown:['Shoulder Static Stretch 20sec × 2','Chest Static Stretch 20sec × 2','Triceps Static Stretch 20sec × 2'],
   },
@@ -3786,7 +3786,7 @@ const WEEKLY_PLAN = {
       {n:'Wall Plank',sets:3,reps:0,dur:30,met:3.5,muscle:'Core (all)',cpk:false,shoulder:false,tip:'Hands on wall, body diagonal. Hold 30 sec.',alt:'Table Plank'},
       {n:'Dumbbell Deadlift (1 set light — CPK)',sets:1,reps:12,met:5.0,muscle:'Hamstrings + Glutes',cpk:true,shoulder:false,tip:'⚠ CPK ELEVATED — 1 set only, light until CPK rechecked late June.',alt:'Skip if any muscle soreness'},
       {n:'Standing Oblique Crunch',sets:3,reps:15,met:3.5,muscle:'Core (obliques)',cpk:false,shoulder:false,tip:'3 sets Saturday — belly fat focus day.',alt:null},
-      {n:'Walk 25 min',sets:1,reps:0,dur:25,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'Essential.',alt:null},
+      
     ],
     gym_machine:[
       {n:'Leg Press Machine',sets:4,reps:12,met:5.0,muscle:'Quads + Glutes + Hamstrings',cpk:true,shoulder:false,tip:'4 sets on Saturday — heavier leg day. Do not lock knees.',alt:null},
@@ -3795,7 +3795,7 @@ const WEEKLY_PLAN = {
       {n:'Seated Calf Raise Machine',sets:3,reps:20,met:2.8,muscle:'Calves',cpk:false,shoulder:false,tip:'High reps.',alt:null},
       {n:'Oblique Machine',sets:3,reps:15,met:3.5,muscle:'Obliques',cpk:false,shoulder:false,tip:'Saturday belly fat focus.',alt:null},
       {n:'Ab Crunch Machine',sets:3,reps:15,met:3.5,muscle:'Core',cpk:false,shoulder:false,tip:'Slow and controlled.',alt:null},
-      {n:'Treadmill 25 min',sets:1,reps:0,dur:25,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'Moderate pace.',alt:null},
+      
     ],
     gym_cable:[
       {n:'Cable Squat (rope)',sets:3,reps:12,met:5.0,muscle:'Quads + Glutes + Core',cpk:false,shoulder:false,tip:'Low cable. Squat holding rope. More core than machine.',alt:null},
@@ -3803,7 +3803,7 @@ const WEEKLY_PLAN = {
       {n:'Cable Leg Kickback (ankle)',sets:3,reps:12,met:3.5,muscle:'Glutes',cpk:false,shoulder:false,tip:'Kick leg back against cable. Both sides.',alt:null},
       {n:'Cable Crunch Standing (rope)',sets:3,reps:15,met:3.8,muscle:'Core (abs)',cpk:false,shoulder:false,tip:'Best standing abs exercise.',alt:null},
       {n:'Cable Oblique Crunch',sets:3,reps:15,met:3.5,muscle:'Obliques',cpk:false,shoulder:false,tip:'Saturday belly focus — 3 sets.',alt:null},
-      {n:'Treadmill 25 min',sets:1,reps:0,dur:25,met:3.5,muscle:'Cardio',cpk:false,shoulder:false,tip:'Moderate pace.',alt:null},
+      
     ],
     cooldown:['Abs Static Stretch Cobra 20sec × 2','Quadriceps Static Stretch 20sec × 2','Hamstrings Static Stretch 20sec × 2','Glutes Static Stretch 20sec × 2','Lower Back Static Stretch 20sec × 2'],
   },
@@ -4891,7 +4891,7 @@ function generateWorkoutPlan() {
     html += '<div style="font-size:10px;color:var(--green);margin-left:8px;margin-top:3px">Cooldown: ' + (plan.cooldown||[]).join(' · ') + '</div>';
     html += '</div>';
   });
-  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v6.4</div>';
+  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v6.5</div>';
   html += '</div>';
   el.innerHTML = html;
 }
@@ -5269,30 +5269,26 @@ function updateDeficitCard() {
   var meals = JSON.parse(localStorage.getItem('hh_meals') || '[]');
   var foodCals = meals.filter(function(l){return l.date===today;}).reduce(function(a,l){return a+l.cal;},0);
 
-  // Walk calories from vitals (steps logged in check-in)
+  // Walk calories — from dedicated walk tracker (new system)
+  var walkSessions = JSON.parse(localStorage.getItem('hh_walks') || '[]');
+  var todayWalks = walkSessions.filter(function(s){return s.date===today;});
+  var walkCalsFromTracker = todayWalks.reduce(function(a,s){return a+(s.cals||0);},0);
+  var walkStepsFromTracker = todayWalks.reduce(function(a,s){return a+(s.steps||0);},0);
+
+  // Fallback: check-in steps if walk tracker not used
   var vitals = JSON.parse(localStorage.getItem('hh_vitals') || '[]');
   var todayV = vitals.find(function(v){return v.date===today;}) || {};
-  var walkCalsFromSteps = todayV.walkCals || 0;
+  var walkCalsFromCheckin = todayV.walkCals || 0;
 
-  // Exercise calories — exclude walk exercises if steps already logged
-  // This prevents double-counting walk calories
+  // Use walk tracker first, then check-in fallback
+  var walkCals = walkCalsFromTracker > 0 ? walkCalsFromTracker : walkCalsFromCheckin;
+  var walkCalsFromSteps = walkCals; // for display label
+
+  // Exercise calories — pure gym/strength work only (walks removed from plans)
   var exLogs = JSON.parse(localStorage.getItem('hh_exercise') || '[]');
   var todayEx = exLogs.filter(function(l){return l.date===today;});
-  var walkExNames = ['walk', 'walking', 'treadmill'];
   var walkCalsFromEx = 0;
-  var otherExCals = 0;
-  todayEx.forEach(function(l) {
-    var isWalk = walkExNames.some(function(w){return l.name.toLowerCase().includes(w);});
-    if (isWalk) {
-      walkCalsFromEx += (l.cals || 0);
-    } else {
-      otherExCals += (l.cals || 0);
-    }
-  });
-
-  // Use steps walk cals if logged, otherwise use exercise walk cals
-  // Never both — prevents double counting
-  var walkCals = walkCalsFromSteps > 0 ? walkCalsFromSteps : walkCalsFromEx;
+  var otherExCals = todayEx.reduce(function(a,l){return a+(l.cals||0);},0);
   var exCals = otherExCals;
 
   // Net
@@ -5306,8 +5302,8 @@ function updateDeficitCard() {
   var statusEl = document.getElementById('deficit-status');
 
   if (foodEl) foodEl.textContent = foodCals + ' kcal';
-  var walkSource = walkCalsFromSteps > 0 ? ' (from steps)' : walkCalsFromEx > 0 ? ' (from exercise log)' : '';
-  if (walkEl) walkEl.textContent = walkCals > 0 ? '-' + walkCals + ' kcal' + walkSource : 'not logged yet';
+  var walkSource = walkCalsFromTracker > 0 ? ' (' + (walkStepsFromTracker > 0 ? walkStepsFromTracker.toLocaleString() + ' steps' : todayWalks.length + ' sessions') + ')' : walkCalsFromCheckin > 0 ? ' (from check-in)' : '';
+  if (walkEl) walkEl.textContent = walkCals > 0 ? '-' + walkCals + ' kcal' + walkSource : 'log walk above';
   if (exEl) exEl.textContent = exCals > 0 ? '-' + exCals + ' kcal' : 'not logged yet';
   if (netEl) {
     netEl.textContent = net + ' kcal';
@@ -5637,6 +5633,219 @@ function migrateExLogs() {
   if (changed) localStorage.setItem('hh_exercise', JSON.stringify(logs));
 }
 
+// ═══════════════════════════════════
+// WALK TRACKER — separate from exercise
+// Multiple sessions per day supported
+// ═══════════════════════════════════
+function calcWalkCals(steps, dur, dist, hr) {
+  var cals = 0;
+  if (hr > 0 && dur > 0) {
+    // HR-based — most accurate if read immediately after walk
+    cals = ((62 * 0.2017) + (83.9 * 0.09036) + (hr * 0.6309) - 55.0969) * dur / 4.184;
+    return Math.max(0, Math.round(cals));
+  }
+  if (steps > 0 && dur > 0) {
+    var stepsPerMin = steps / dur;
+    var met = stepsPerMin < 70 ? 2.5 : stepsPerMin < 90 ? 3.0 : stepsPerMin < 110 ? 3.5 : 4.3;
+    return Math.round(met * 83.9 * (dur / 60));
+  }
+  if (dist > 0 && dur > 0) {
+    var speed = dist / (dur / 60);
+    var met2 = speed < 3.5 ? 2.8 : speed < 4.5 ? 3.2 : speed < 5.5 ? 3.8 : 4.5;
+    return Math.round(met2 * 83.9 * (dur / 60));
+  }
+  if (steps > 0) {
+    var estMins = steps / 100;
+    return Math.round(3.5 * 83.9 * (estMins / 60));
+  }
+  if (dur > 0) {
+    return Math.round(3.5 * 83.9 * (dur / 60));
+  }
+  return 0;
+}
+
+function previewWalkCals() {
+  var dur = parseFloat(document.getElementById('walk-dur').value || 0);
+  var steps = parseInt(document.getElementById('walk-steps').value || 0);
+  var dist = parseFloat(document.getElementById('walk-dist').value || 0);
+  var hr = parseInt(document.getElementById('walk-hr').value || 0);
+  var cals = calcWalkCals(steps, dur, dist, hr);
+  var el = document.getElementById('walk-cal-preview');
+  if (el) el.textContent = cals > 0 ? '≈ ' + cals + ' kcal' : '';
+}
+
+function saveWalkSession() {
+  var dur = parseFloat(document.getElementById('walk-dur').value || 0);
+  var steps = parseInt(document.getElementById('walk-steps').value || 0);
+  var dist = parseFloat(document.getElementById('walk-dist').value || 0);
+  var hr = parseInt(document.getElementById('walk-hr').value || 0);
+
+  if (dur <= 0 && steps <= 0) {
+    alert('Please enter at least duration or steps.');
+    return;
+  }
+  if (dur <= 0 && steps > 0) dur = Math.round(steps / 100);
+
+  var cals = calcWalkCals(steps, dur, dist, hr);
+  var now = new Date();
+  var timeStr = now.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
+  var label = now.getHours() < 9 ? 'Morning walk' : now.getHours() < 12 ? 'Mid-morning walk' : now.getHours() < 15 ? 'Lunch walk' : now.getHours() < 18 ? 'Afternoon walk' : now.getHours() < 21 ? 'Evening walk' : 'Night walk';
+
+  var session = {date: TODAY, time: timeStr, label: label, dur: dur, steps: steps, dist: dist, hr: hr, cals: cals};
+
+  var sessions = JSON.parse(localStorage.getItem('hh_walks') || '[]');
+  sessions.unshift(session);
+  localStorage.setItem('hh_walks', JSON.stringify(sessions));
+
+  // Clear inputs
+  document.getElementById('walk-dur').value = '';
+  document.getElementById('walk-steps').value = '';
+  document.getElementById('walk-dist').value = '';
+  document.getElementById('walk-hr').value = '';
+  document.getElementById('walk-cal-preview').textContent = '';
+
+  renderWalkTracker();
+  updateDeficitCard();
+  updateScore();
+
+  alert('Walk logged: ' + dur + ' min · ' + (steps > 0 ? steps.toLocaleString() + ' steps · ' : '') + (dist > 0 ? dist + ' km · ' : '') + cals + ' kcal burned');
+}
+
+function renderWalkTracker() {
+  var sessions = JSON.parse(localStorage.getItem('hh_walks') || '[]');
+  var todaySessions = sessions.filter(function(s) { return s.date === TODAY; });
+
+  // Totals
+  var totalSteps = todaySessions.reduce(function(a,s){return a+(s.steps||0);},0);
+  var totalDist = todaySessions.reduce(function(a,s){return a+(s.dist||0);},0);
+  var totalDur = todaySessions.reduce(function(a,s){return a+(s.dur||0);},0);
+  var totalCals = todaySessions.reduce(function(a,s){return a+(s.cals||0);},0);
+
+  var el = document.getElementById('walk-total-steps');
+  if (el) el.textContent = totalSteps > 0 ? totalSteps.toLocaleString() : '0';
+  el = document.getElementById('walk-total-dist');
+  if (el) el.textContent = totalDist > 0 ? totalDist.toFixed(1) + ' km' : '0 km';
+  el = document.getElementById('walk-total-dur');
+  if (el) el.textContent = totalDur + ' min';
+  el = document.getElementById('walk-total-cals');
+  if (el) { el.textContent = totalCals + ' kcal'; el.className = 'metric-value ' + (totalCals >= 150 ? 'ok' : 'warn'); }
+
+  // Sessions list
+  var listEl = document.getElementById('walk-sessions-list');
+  if (listEl) {
+    if (!todaySessions.length) {
+      listEl.innerHTML = '<div style="color:var(--text3);font-size:12px">No walks logged today. Target: 7,000-8,000 steps.</div>';
+    } else {
+      listEl.innerHTML = todaySessions.map(function(s, i) {
+        return '<div class="log-row" style="padding:8px 0">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center">' +
+            '<div>' +
+              '<div style="font-size:12px;font-weight:600">' + s.label + ' <span style="color:var(--text3);font-weight:400;font-size:10px">' + s.time + '</span></div>' +
+              '<div style="margin-top:3px;display:flex;gap:4px;flex-wrap:wrap">' +
+                '<span class="tag tag-a">⏱ ' + s.dur + ' min</span>' +
+                (s.steps > 0 ? '<span class="tag tag-g">👟 ' + s.steps.toLocaleString() + '</span>' : '') +
+                (s.dist > 0 ? '<span class="tag tag-b">📍 ' + s.dist + ' km</span>' : '') +
+                (s.hr > 0 ? '<span class="tag tag-r">💓 ' + s.hr + ' bpm</span>' : '') +
+                '<span class="tag tag-p">🔥 ' + s.cals + ' kcal</span>' +
+              '</div>' +
+            '</div>' +
+            '<button data-wi="' + i + '" onclick="deleteWalkSession(parseInt(this.dataset.wi))" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:4px">✕</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+  }
+
+  // 7-day bar chart
+  renderWalkWeekChart(sessions);
+
+  // Streak
+  renderWalkStreak(sessions);
+}
+
+function deleteWalkSession(idx) {
+  var sessions = JSON.parse(localStorage.getItem('hh_walks') || '[]');
+  var todaySessions = sessions.filter(function(s){return s.date===TODAY;});
+  var toDelete = todaySessions[idx];
+  var gi = sessions.indexOf(toDelete);
+  if (gi > -1) sessions.splice(gi, 1);
+  localStorage.setItem('hh_walks', JSON.stringify(sessions));
+  renderWalkTracker();
+  updateDeficitCard();
+  updateScore();
+}
+
+function renderWalkWeekChart(sessions) {
+  var canvas = document.getElementById('walk-week-chart');
+  if (!canvas) return;
+  var W = canvas.offsetWidth || 340;
+  var H = canvas.height || 80;
+  canvas.width = W;
+  var ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#1e293b';
+  ctx.fillRect(0, 0, W, H);
+
+  var days = [];
+  for (var i = 6; i >= 0; i--) {
+    var d = getDateOffset(-i);
+    var daySessions = sessions.filter(function(s){return s.date===d;});
+    var steps = daySessions.reduce(function(a,s){return a+(s.steps||0);},0);
+    var dayName = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(d+'T00:00:00').getDay()];
+    days.push({d:d, steps:steps, label:dayName});
+  }
+
+  var maxSteps = Math.max(8000, Math.max.apply(null, days.map(function(d){return d.steps;})));
+  var barW = Math.floor((W - 20) / 7) - 4;
+  var pad = 10;
+
+  days.forEach(function(day, i) {
+    var x = pad + i * ((W - 20) / 7);
+    var barH = day.steps > 0 ? Math.max(4, Math.round((day.steps / maxSteps) * (H - 25))) : 2;
+    var isToday = day.d === TODAY;
+    var reached = day.steps >= 7000;
+
+    ctx.fillStyle = isToday ? '#3b82f6' : reached ? '#10b981' : day.steps > 0 ? '#f59e0b' : '#1e293b';
+    ctx.fillRect(x, H - 18 - barH, barW, barH);
+
+    // Target line at 7000 steps
+    var targetY = H - 18 - Math.round((7000 / maxSteps) * (H - 25));
+    ctx.strokeStyle = '#10b98133';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.moveTo(pad, targetY);
+    ctx.lineTo(W - pad, targetY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '9px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(day.label, x + barW/2, H - 4);
+    if (day.steps > 0) {
+      ctx.fillStyle = isToday ? '#93c5fd' : reached ? '#6ee7b7' : '#fcd34d';
+      ctx.fillText(day.steps >= 1000 ? (day.steps/1000).toFixed(1)+'k' : day.steps, x + barW/2, H - 20 - barH);
+    }
+  });
+}
+
+function renderWalkStreak(sessions) {
+  var el = document.getElementById('walk-streak-row');
+  if (!el) return;
+  var html = '';
+  for (var i = 29; i >= 0; i--) {
+    var d = getDateOffset(-i);
+    var daySessions = sessions.filter(function(s){return s.date===d;});
+    var steps = daySessions.reduce(function(a,s){return a+(s.steps||0);},0);
+    var done = daySessions.length > 0;
+    var reached = steps >= 7000;
+    var isToday = d === TODAY;
+    html += '<div class="streak-day' + (reached?' done':done?' style="background:var(--amber);border-color:var(--amber)"':'') + (isToday?' today':'') + '">' + new Date(d+'T00:00:00').getDate() + '</div>';
+  }
+  el.innerHTML = html;
+}
+
 function initAll() {
   // Set default dates to today
   try { document.getElementById('v-date').value = TODAY; } catch(e) {}
@@ -5657,8 +5866,8 @@ function initAll() {
   try { document.getElementById('mj-log-date').value = TODAY; } catch(e) {}
   renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert(); updateDeficitCard();
   renderEatingOutGrid(); renderPortionGrid();
-  // Migrate old exercise logs — add isCardio flag to walk/treadmill entries
   migrateExLogs();
+  renderWalkTracker();
   showDaySummary(TODAY);
   showWeekAverage();
   renderExercise();
