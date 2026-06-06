@@ -163,7 +163,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v5.1</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v5.2</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -1008,15 +1008,20 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 
     <!-- STEPS QUESTION -->
     <div style="background:var(--bg3);border-radius:10px;padding:12px;margin-bottom:12px">
-      <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--accent2)">👟 Approx steps today?</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
-        <button class="steps-opt-btn" onclick="selectSteps(this,'4000')" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">Under 5k</button>
-        <button class="steps-opt-btn" onclick="selectSteps(this,'6000')" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">5k – 7k</button>
-        <button class="steps-opt-btn" onclick="selectSteps(this,'7500')" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px;background:var(--bg3)">7k – 8k ✓</button>
-        <button class="steps-opt-btn" onclick="selectSteps(this,'9000')" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">8k – 10k</button>
-        <button class="steps-opt-btn" onclick="selectSteps(this,'11000')" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">10k+</button>
-        <button class="steps-opt-btn" onclick="selectSteps(this,'0')" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">Rest day</button>
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--accent2)">👟 Steps today?</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+        <button class="steps-opt-btn" data-steps="3000" onclick="selectSteps(this,this.dataset.steps)" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">Under 4k</button>
+        <button class="steps-opt-btn" data-steps="5000" onclick="selectSteps(this,this.dataset.steps)" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">4k – 6k</button>
+        <button class="steps-opt-btn" data-steps="7000" onclick="selectSteps(this,this.dataset.steps)" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">6k – 8k</button>
+        <button class="steps-opt-btn" data-steps="9000" onclick="selectSteps(this,this.dataset.steps)" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">8k – 10k</button>
+        <button class="steps-opt-btn" data-steps="11000" onclick="selectSteps(this,this.dataset.steps)" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">10k+</button>
+        <button class="steps-opt-btn" data-steps="0" onclick="selectSteps(this,this.dataset.steps)" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">Rest day</button>
       </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <label style="font-size:11px;color:var(--text3);margin:0;white-space:nowrap">Exact steps:</label>
+        <input type="number" id="ci-steps-exact" placeholder="e.g. 6240" oninput="selectStepsExact(this.value)" style="flex:1;margin-bottom:0;font-size:13px;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text)">
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:4px;text-align:center" id="steps-cal-preview"></div>
     </div>
 
     <!-- ISABGOL -->
@@ -3243,6 +3248,32 @@ function selectSteps(btn, steps) {
   btn.style.borderColor = 'var(--green)';
   btn.style.color = 'white';
   _checkinSteps = parseInt(steps);
+  var exactEl = document.getElementById('ci-steps-exact');
+  if (exactEl && parseInt(steps) > 0) exactEl.value = steps;
+  updateStepsCalPreview(_checkinSteps);
+}
+
+function selectStepsExact(val) {
+  var steps = parseInt(val) || 0;
+  _checkinSteps = steps;
+  // Clear button highlights
+  document.querySelectorAll('.steps-opt-btn').forEach(function(b) {
+    b.style.background = 'var(--bg2)';
+    b.style.borderColor = 'var(--border)';
+    b.style.color = 'var(--text)';
+  });
+  updateStepsCalPreview(steps);
+}
+
+function updateStepsCalPreview(steps) {
+  var el = document.getElementById('steps-cal-preview');
+  if (!el || steps <= 0) {
+    if (el) el.textContent = '';
+    return;
+  }
+  var walkMins = (steps / 1000) * 8;
+  var walkCals = Math.round(3.5 * 83.9 * (walkMins / 60));
+  el.textContent = steps.toLocaleString() + ' steps ≈ ' + walkCals + ' kcal burned from walking';
 }
 
 function selectWB(btn, score) {
@@ -4613,7 +4644,7 @@ function generateWorkoutPlan() {
     html += '<div style="font-size:10px;color:var(--green);margin-left:8px;margin-top:3px">Cooldown: ' + (plan.cooldown||[]).join(' · ') + '</div>';
     html += '</div>';
   });
-  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v5.1</div>';
+  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v5.2</div>';
   html += '</div>';
   el.innerHTML = html;
 }
@@ -4991,14 +5022,31 @@ function updateDeficitCard() {
   var meals = JSON.parse(localStorage.getItem('hh_meals') || '[]');
   var foodCals = meals.filter(function(l){return l.date===today;}).reduce(function(a,l){return a+l.cal;},0);
 
-  // Walk calories from vitals
+  // Walk calories from vitals (steps logged in check-in)
   var vitals = JSON.parse(localStorage.getItem('hh_vitals') || '[]');
   var todayV = vitals.find(function(v){return v.date===today;}) || {};
-  var walkCals = todayV.walkCals || 0;
+  var walkCalsFromSteps = todayV.walkCals || 0;
 
-  // Exercise calories
+  // Exercise calories — exclude walk exercises if steps already logged
+  // This prevents double-counting walk calories
   var exLogs = JSON.parse(localStorage.getItem('hh_exercise') || '[]');
-  var exCals = exLogs.filter(function(l){return l.date===today;}).reduce(function(a,l){return a+(l.cals||0);},0);
+  var todayEx = exLogs.filter(function(l){return l.date===today;});
+  var walkExNames = ['walk', 'walking', 'treadmill'];
+  var walkCalsFromEx = 0;
+  var otherExCals = 0;
+  todayEx.forEach(function(l) {
+    var isWalk = walkExNames.some(function(w){return l.name.toLowerCase().includes(w);});
+    if (isWalk) {
+      walkCalsFromEx += (l.cals || 0);
+    } else {
+      otherExCals += (l.cals || 0);
+    }
+  });
+
+  // Use steps walk cals if logged, otherwise use exercise walk cals
+  // Never both — prevents double counting
+  var walkCals = walkCalsFromSteps > 0 ? walkCalsFromSteps : walkCalsFromEx;
+  var exCals = otherExCals;
 
   // Net
   var net = foodCals - walkCals - exCals;
@@ -5011,7 +5059,8 @@ function updateDeficitCard() {
   var statusEl = document.getElementById('deficit-status');
 
   if (foodEl) foodEl.textContent = foodCals + ' kcal';
-  if (walkEl) walkEl.textContent = walkCals > 0 ? '-' + walkCals + ' kcal' : 'not logged yet';
+  var walkSource = walkCalsFromSteps > 0 ? ' (from steps)' : walkCalsFromEx > 0 ? ' (from exercise log)' : '';
+  if (walkEl) walkEl.textContent = walkCals > 0 ? '-' + walkCals + ' kcal' + walkSource : 'not logged yet';
   if (exEl) exEl.textContent = exCals > 0 ? '-' + exCals + ' kcal' : 'not logged yet';
   if (netEl) {
     netEl.textContent = net + ' kcal';
