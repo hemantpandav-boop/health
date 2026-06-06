@@ -163,7 +163,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v7.3</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v7.4</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -1657,6 +1657,8 @@ function logSelectedFood() {
   renderEatingOutGrid(); renderPortionGrid();
   migrateExLogs();
   renderWalkTracker();
+  renderMeds();
+  renderMedStreak();
   showDaySummary(TODAY);
   showWeekAverage();
   renderExercise();
@@ -1883,6 +1885,8 @@ function deleteMeal(idx) {
   renderEatingOutGrid(); renderPortionGrid();
   migrateExLogs();
   renderWalkTracker();
+  renderMeds();
+  renderMedStreak();
   showDaySummary(TODAY);
   showWeekAverage();
   renderExercise();
@@ -2438,6 +2442,22 @@ function renderMeds() {
   document.getElementById('med-bar').style.width = pct + '%';
   updateScore();
 }
+function renderMedStreak() {
+  var el = document.getElementById('med-streak-row');
+  if (!el) return;
+  var html = '';
+  for (var i = 29; i >= 0; i--) {
+    var d = getDateOffset(-i);
+    var taken = JSON.parse(localStorage.getItem('hh_meds_' + d) || '{}');
+    var count = Object.values(taken).filter(Boolean).length;
+    var done = count >= MEDS.length;
+    var partial = count > 0 && count < MEDS.length;
+    var isToday = d === TODAY;
+    html += '<div class="streak-day' + (done?' done':partial?' style="background:var(--amber);border-color:var(--amber)"':'') + (isToday?' today':'') + '">' + new Date(d+'T00:00:00').getDate() + '</div>';
+  }
+  el.innerHTML = html;
+}
+
 function toggleMed(id) {
   let taken = JSON.parse(localStorage.getItem('hh_meds_' + TODAY) || '{}');
   taken[id] = !taken[id];
@@ -4985,7 +5005,7 @@ function generateWorkoutPlan() {
     html += '<div style="font-size:10px;color:var(--green);margin-left:8px;margin-top:3px">Cooldown: ' + (plan.cooldown||[]).join(' · ') + '</div>';
     html += '</div>';
   });
-  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v7.3</div>';
+  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v7.4</div>';
   html += '</div>';
   el.innerHTML = html;
 }
@@ -6065,6 +6085,8 @@ function initAll() {
   renderEatingOutGrid(); renderPortionGrid();
   migrateExLogs();
   renderWalkTracker();
+  renderMeds();
+  renderMedStreak();
   showDaySummary(TODAY);
   showWeekAverage();
   renderExercise();
