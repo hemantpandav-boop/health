@@ -163,7 +163,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v4.6</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v4.7</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -675,38 +675,42 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 
 <!-- TAB 6: REPORTS -->
 <div class="tab" id="tab-reports">
+
+  <!-- WEEKLY AUTO-SUMMARY -->
   <div class="card">
-    <div class="card-title">doctor visit prep — auto summary</div>
-    <button class="btn" onclick="generateDocSummary()">Generate 30-day summary for Dr. Lakhani</button>
-    <div id="doc-summary"></div>
+    <div class="card-title">weekly summary <span style="color:var(--text3);font-size:10px">past 7 complete days</span></div>
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+      <button class="btn-sm" onclick="generateWeeklySummary(0)" style="color:var(--accent);border-color:var(--accent)">This week</button>
+      <button class="btn-sm" onclick="generateWeeklySummary(7)">Last week</button>
+      <button class="btn-sm" onclick="generateWeeklySummary(14)">2 weeks ago</button>
+    </div>
+    <div id="weekly-summary-panel"><div style="color:var(--text3);font-size:12px">Tap a button above to generate your weekly summary.</div></div>
   </div>
+
+  <!-- DOCTOR VISIT REPORT -->
+  <div class="card">
+    <div class="card-title">doctor visit report <span style="color:var(--text3);font-size:10px">30-day summary</span></div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:10px">Generate a clean summary to show Dr. Lakhani at your next appointment. Covers all key metrics from the past 30 days.</div>
+    <button class="btn" onclick="generateDoctorReport()" style="margin-bottom:8px">Generate report for Dr. Lakhani</button>
+    <div id="doctor-report-panel"></div>
+  </div>
+
+  <!-- DOCTOR QUESTIONS -->
   <div class="card">
     <div class="card-title">questions for Dr. Lakhani</div>
-    <div class="alert alert-bad">1. CPK 367 — double limit. Statin myopathy? Recheck when? Modify exercise?</div>
-    <div class="alert alert-bad">2. Cholesterol 252, LDL 133. Will 20mg Rosuvastatin be enough? Add Ezetimibe?</div>
-    <div class="alert alert-warn">3. Fasting glucose 116 but HbA1c 5.2% — why the gap? Concern?</div>
-    <div class="alert alert-warn">4. Repaglinide — can I stop? HbA1c now normal. Taking once daily, not twice.</div>
-    <div class="alert alert-info">5. Cortisol result from December 2025 — what was it?</div>
-    <div class="alert alert-info">6. Mounjaro 10mg every 15 days — correct maintenance? Last: 29 May, next: 13 June.</div>
+    <div class="alert alert-info">1. Repaglinide prescribed twice daily — currently taking once. Is once daily acceptable given HbA1c 5.3% and fasting glucose 116?</div>
+    <div class="alert alert-info">2. Cholesterol Total 252, LDL 133 — started Crestor 20mg daily 3 weeks ago. When should I retest? What LDL target?</div>
+    <div class="alert alert-info">3. CPK 367 U/L — double the limit. Cause? Safe to do gym? When can I retest?</div>
+    <div class="alert alert-info">4. Fasting glucose 116 despite HbA1c 5.3% — dawn phenomenon? Should I log daily glucose?</div>
+    <div class="alert alert-info">5. Vitamin D 48.5 (Jan 2026) — Caldikind Plus sufficient? Retest in July?</div>
+    <div class="alert alert-info">6. Mounjaro 10mg every 15 days — correct maintenance dose? Last: 29 May, next: 13 June.</div>
     <div class="alert alert-info">7. Can we add Iron, Ferritin, Zinc and Folate to next blood panel? Not tested recently.</div>
+    <div class="alert alert-info">8. Cortisol result from December 2025 — was this normal? Any concern?</div>
   </div>
-  <div class="card">
-    <div class="card-title">full lab report history</div>
-    <div class="list-item"><div class="list-dot" style="background:var(--red)"></div><div><strong>10 Apr 2025</strong> — Harley<div style="font-size:10px;color:var(--text3)">Glucose 278, HbA1c 8.7%, Microalbumin 376. Crisis. Mounjaro started.</div></div></div>
-    <div class="list-item"><div class="list-dot" style="background:var(--red)"></div><div><strong>30 May 2025</strong> — Harley<div style="font-size:10px;color:var(--text3)">HbA1c 9.3% peak. GTT glucose 425 at 1hr. Vit D 24 (low).</div></div></div>
-    <div class="list-item"><div class="list-dot" style="background:var(--amber)"></div><div><strong>06 Jul 2025</strong> — Lab247<div style="font-size:10px;color:var(--text3)">HbA1c 8.2%. Fasting 121. Improvement beginning.</div></div></div>
-    <div class="list-item"><div class="list-dot" style="background:var(--amber)"></div><div><strong>16 Aug 2025</strong> — Harley<div style="font-size:10px;color:var(--text3)">HbA1c 6.3%. Microalbumin 44. LDL 106 — best ever.</div></div></div>
-    <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div><strong>04 Sep 2025</strong> — Thumbay<div style="font-size:10px;color:var(--text3)">HbA1c 5.99%. Vit D 30.2.</div></div></div>
-    <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div><strong>07 Oct 2025</strong> — Thumbay<div style="font-size:10px;color:var(--text3)">HbA1c 5.63%. Testosterone 5.46. Vit D 50.6.</div></div></div>
-    <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div><strong>14 Nov 2025</strong> — Harley<div style="font-size:10px;color:var(--text3)">HbA1c 5.1%. Diabetes reversed. CPK 184 first elevated.</div></div></div>
-    <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div><strong>01 Dec 2025</strong> — Harley<div style="font-size:10px;color:var(--text3)">GTT near-normal. HbA1c 5.2%. Insulin normal.</div></div></div>
-    <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div><strong>14 Jan 2026</strong> — Thumbay<div style="font-size:10px;color:var(--text3)">Vit D 48.5. Fasting 89.</div></div></div>
-    <div class="list-item"><div class="list-dot" style="background:var(--amber)"></div><div><strong>18 Mar 2026</strong> — QLabs<div style="font-size:10px;color:var(--text3)">HbA1c 5.2%. Cholesterol rising — 218, LDL 141.</div></div></div>
-    <div class="list-item"><div class="list-dot" style="background:var(--red)"></div><div><strong>11 May 2026</strong> — Harley<div style="font-size:10px;color:var(--text3)">Chol 252, CPK 367. HbA1c 5.3% good. Crestor 20mg started.</div></div></div>
-  </div>
+
 </div>
 
-<!-- TAB 7: MEDS -->
+<!-- TAB 7: MEDS --><!-- TAB 7: MEDS -->
 <div class="tab" id="tab-meds">
   <div class="card">
     <div class="card-title">today's medications <span id="med-score-badge" class="tag tag-b">0/9</span></div>
@@ -1395,6 +1399,7 @@ function logSelectedFood() {
   renderExercise();
   seedHistoricalData();
   setTimeout(function(){renderWeightTrend(); renderGlucoseTrend(); renderCholesterolTrend(); renderIsabgol();}, 400);
+  setTimeout(function(){generateWeeklySummary(0);}, 600);
   setTimeout(initCheckin, 1000); updateScore(); showNutritionAlert();
   alert('Logged: ' + entry.name + ' (' + entry.grams + 'g) — ' + entry.cal + ' kcal');
 }
@@ -1448,6 +1453,7 @@ function deleteMeal(idx) {
   renderExercise();
   seedHistoricalData();
   setTimeout(function(){renderWeightTrend(); renderGlucoseTrend(); renderCholesterolTrend(); renderIsabgol();}, 400);
+  setTimeout(function(){generateWeeklySummary(0);}, 600);
   setTimeout(initCheckin, 1000); updateScore(); showNutritionAlert();
 }
 
@@ -4049,6 +4055,309 @@ function renderIsabgol() {
   streakEl.innerHTML = html;
 }
 
+// ═══════════════════════════════════
+// WEEKLY SUMMARY + DOCTOR REPORT
+// ═══════════════════════════════════
+
+function getDateRange(daysAgo, count) {
+  var dates = [];
+  for (var i = daysAgo + count - 1; i >= daysAgo; i--) {
+    dates.push(getDateOffset(-i));
+  }
+  return dates;
+}
+
+function getWeekStats(dates) {
+  var meals = JSON.parse(localStorage.getItem('hh_meals') || '[]');
+  var exLogs = JSON.parse(localStorage.getItem('hh_exercise') || '[]');
+  var wtLog = JSON.parse(localStorage.getItem('hh_weight_log') || '[]');
+  var glucLog = JSON.parse(localStorage.getItem('hh_glucose_log') || '[]');
+
+  var stats = {
+    dates: dates,
+    daysLogged: 0,
+    avgCal: 0, avgProt: 0, avgSat: 0, avgFibre: 0,
+    totalCalDays: 0,
+    workoutDays: 0, totalExCals: 0, totalSets: 0,
+    medAdherence: 0, medDaysLogged: 0,
+    waterAvg: 0, waterDays: 0,
+    isabgolBoth: 0, isabgolOne: 0,
+    weightStart: null, weightEnd: null, weightChange: null,
+    glucAvg: 0, glucMin: null, glucMax: null, glucCount: 0,
+    allMuscles: [],
+  };
+
+  var totalCal = 0, totalProt = 0, totalSat = 0, totalFibre = 0;
+  var totalMedScore = 0;
+  var totalWater = 0;
+
+  dates.forEach(function(d) {
+    // Meals
+    var dayMeals = meals.filter(function(l){return l.date===d;});
+    if (dayMeals.length > 0) {
+      stats.daysLogged++;
+      var cal = dayMeals.reduce(function(a,l){return a+l.cal;},0);
+      var prot = dayMeals.reduce(function(a,l){return a+(l.p||0);},0);
+      var sat = dayMeals.reduce(function(a,l){return a+(l.sat||0);},0);
+      var fibre = dayMeals.reduce(function(a,l){return a+(l.fi||0);},0);
+      totalCal += cal; totalProt += prot; totalSat += sat; totalFibre += fibre;
+      stats.totalCalDays++;
+    }
+
+    // Exercise
+    var dayEx = exLogs.filter(function(l){return l.date===d;});
+    if (dayEx.length > 0) {
+      stats.workoutDays++;
+      stats.totalExCals += dayEx.reduce(function(a,l){return a+(l.cals||0);},0);
+      stats.totalSets += dayEx.reduce(function(a,l){return a+(l.sets||0);},0);
+      dayEx.forEach(function(l){if(stats.allMuscles.indexOf(l.muscle)<0) stats.allMuscles.push(l.muscle);});
+    }
+
+    // Medicines
+    var meds = JSON.parse(localStorage.getItem('hh_meds_' + d) || 'null');
+    if (meds !== null) {
+      stats.medDaysLogged++;
+      var taken = Object.values(meds).filter(Boolean).length;
+      totalMedScore += MEDS.length > 0 ? taken / MEDS.length : 0;
+    }
+
+    // Water
+    var water = JSON.parse(localStorage.getItem('hh_water_' + d) || 'null');
+    if (water !== null) {
+      stats.waterDays++;
+      totalWater += water.filter(Boolean).length;
+    }
+
+    // Isabgol
+    var isab = JSON.parse(localStorage.getItem('hh_isabgol_' + d) || '{}');
+    if (isab.lunch && isab.dinner) stats.isabgolBoth++;
+    else if (isab.lunch || isab.dinner) stats.isabgolOne++;
+  });
+
+  if (stats.totalCalDays > 0) {
+    stats.avgCal = Math.round(totalCal / stats.totalCalDays);
+    stats.avgProt = parseFloat((totalProt / stats.totalCalDays).toFixed(0));
+    stats.avgSat = parseFloat((totalSat / stats.totalCalDays).toFixed(1));
+    stats.avgFibre = parseFloat((totalFibre / stats.totalCalDays).toFixed(0));
+  }
+  if (stats.medDaysLogged > 0) stats.medAdherence = Math.round(totalMedScore / stats.medDaysLogged * 100);
+  if (stats.waterDays > 0) stats.waterAvg = parseFloat((totalWater / stats.waterDays).toFixed(1));
+
+  // Weight change this week
+  var weekWt = wtLog.filter(function(e){return dates.indexOf(e.date)>=0;});
+  if (weekWt.length >= 2) {
+    stats.weightStart = weekWt[0].wt;
+    stats.weightEnd = weekWt[weekWt.length-1].wt;
+    stats.weightChange = parseFloat((stats.weightEnd - stats.weightStart).toFixed(1));
+  } else if (weekWt.length === 1) {
+    stats.weightEnd = weekWt[0].wt;
+  }
+
+  // Glucose this week
+  var weekGluc = glucLog.filter(function(e){return dates.indexOf(e.date)>=0;});
+  if (weekGluc.length > 0) {
+    stats.glucCount = weekGluc.length;
+    stats.glucAvg = Math.round(weekGluc.reduce(function(a,e){return a+e.gluc;},0) / weekGluc.length);
+    stats.glucMin = Math.min.apply(null, weekGluc.map(function(e){return e.gluc;}));
+    stats.glucMax = Math.max.apply(null, weekGluc.map(function(e){return e.gluc;}));
+  }
+
+  return stats;
+}
+
+function generateWeeklySummary(offsetDays) {
+  var el = document.getElementById('weekly-summary-panel');
+  if (!el) return;
+
+  var dates = getDateRange(offsetDays, 7);
+  var s = getWeekStats(dates);
+  var weekLabel = offsetDays === 0 ? 'This week' : offsetDays === 7 ? 'Last week' : '2 weeks ago';
+  var dateRange = dates[0] + ' to ' + dates[6];
+
+  // Grade each metric
+  function grade(val, good, warn) {
+    if (val >= good) return {color:'var(--green)', icon:'✓'};
+    if (val >= warn) return {color:'var(--amber)', icon:'~'};
+    return {color:'var(--red)', icon:'✗'};
+  }
+
+  var calGrade = grade(s.avgCal, 1200, 800);
+  var protGrade = grade(s.avgProt, 100, 70);
+  var satGrade = s.avgSat <= 10 ? {color:'var(--green)',icon:'✓'} : s.avgSat <= 13 ? {color:'var(--amber)',icon:'~'} : {color:'var(--red)',icon:'✗'};
+  var medGrade = grade(s.medAdherence, 90, 70);
+  var workoutGrade = grade(s.workoutDays, 5, 3);
+  var waterGrade = grade(s.waterAvg, 8, 5);
+  var isabgolPct = s.isabgolBoth / 7 * 100;
+  var isabgolGrade = grade(isabgolPct, 80, 50);
+
+  var wtChangeHTML = '';
+  if (s.weightChange !== null) {
+    var wtColor = s.weightChange <= 0 ? 'var(--green)' : 'var(--red)';
+    wtChangeHTML = '<span style="color:' + wtColor + '">' + (s.weightChange > 0 ? '+' : '') + s.weightChange + ' kg</span>';
+  } else if (s.weightEnd) {
+    wtChangeHTML = '<span style="color:var(--text3)">' + s.weightEnd + ' kg (1 reading)</span>';
+  } else {
+    wtChangeHTML = '<span style="color:var(--text3)">Not logged</span>';
+  }
+
+  var glucHTML = s.glucCount > 0
+    ? s.glucAvg + ' mg/dL avg <span style="font-size:10px;color:var(--text3)">(min ' + s.glucMin + ' max ' + s.glucMax + ')</span>'
+    : '<span style="color:var(--text3)">Not logged</span>';
+
+  // Overall score for the week
+  var overallScore = 0;
+  if (s.totalCalDays > 0) overallScore += 20;
+  if (s.avgProt >= 100) overallScore += 20; else if (s.avgProt >= 70) overallScore += 10;
+  if (s.medAdherence >= 90) overallScore += 20; else if (s.medAdherence >= 70) overallScore += 10;
+  if (s.workoutDays >= 5) overallScore += 20; else if (s.workoutDays >= 3) overallScore += 10;
+  if (s.isabgolBoth >= 5) overallScore += 20; else if (s.isabgolBoth >= 3) overallScore += 10;
+  var weekGradeLabel = overallScore >= 80 ? 'Excellent week 🌟' : overallScore >= 60 ? 'Good week 👍' : overallScore >= 40 ? 'Average week 🆗' : 'Needs improvement';
+  var weekGradeColor = overallScore >= 80 ? 'var(--green)' : overallScore >= 60 ? 'var(--accent)' : overallScore >= 40 ? 'var(--amber)' : 'var(--red)';
+
+  el.innerHTML =
+    '<div style="background:var(--bg3);border-radius:10px;padding:12px;margin-bottom:10px">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
+        '<div><div style="font-size:14px;font-weight:700">' + weekLabel + '</div><div style="font-size:10px;color:var(--text3)">' + dateRange + '</div></div>' +
+        '<div style="text-align:center"><div style="font-size:28px;font-weight:800;color:' + weekGradeColor + '">' + overallScore + '</div><div style="font-size:10px;color:' + weekGradeColor + '">' + weekGradeLabel + '</div></div>' +
+      '</div>' +
+    '</div>' +
+
+    // NUTRITION block
+    '<div style="background:var(--bg3);border-radius:10px;padding:12px;margin-bottom:8px">' +
+      '<div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px">🍱 Nutrition (' + s.totalCalDays + '/' + 7 + ' days logged)</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+        '<div><div style="font-size:10px;color:var(--text3)">Avg calories</div><div style="font-size:14px;font-weight:700;color:' + calGrade.color + '">' + calGrade.icon + ' ' + (s.avgCal || '--') + ' kcal</div><div style="font-size:10px;color:var(--text3)">target 1,200-1,700</div></div>' +
+        '<div><div style="font-size:10px;color:var(--text3)">Avg protein</div><div style="font-size:14px;font-weight:700;color:' + protGrade.color + '">' + protGrade.icon + ' ' + (s.avgProt || '--') + 'g</div><div style="font-size:10px;color:var(--text3)">target 120g</div></div>' +
+        '<div><div style="font-size:10px;color:var(--text3)">Avg sat fat</div><div style="font-size:14px;font-weight:700;color:' + satGrade.color + '">' + satGrade.icon + ' ' + (s.avgSat || '--') + 'g</div><div style="font-size:10px;color:var(--text3)">limit 13g</div></div>' +
+        '<div><div style="font-size:10px;color:var(--text3)">Avg fibre</div><div style="font-size:14px;font-weight:700;color:var(--green)">' + (s.avgFibre || '--') + 'g</div><div style="font-size:10px;color:var(--text3)">target 30g</div></div>' +
+      '</div>' +
+    '</div>' +
+
+    // EXERCISE block
+    '<div style="background:var(--bg3);border-radius:10px;padding:12px;margin-bottom:8px">' +
+      '<div style="font-size:12px;font-weight:700;color:var(--purple);margin-bottom:8px">💪 Exercise</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+        '<div><div style="font-size:10px;color:var(--text3)">Days worked out</div><div style="font-size:14px;font-weight:700;color:' + workoutGrade.color + '">' + workoutGrade.icon + ' ' + s.workoutDays + '/7</div></div>' +
+        '<div><div style="font-size:10px;color:var(--text3)">Calories burned</div><div style="font-size:14px;font-weight:700;color:var(--purple)">' + s.totalExCals + ' kcal</div></div>' +
+        '<div><div style="font-size:10px;color:var(--text3)">Total sets</div><div style="font-size:14px;font-weight:700;color:var(--text)">' + s.totalSets + '</div></div>' +
+        '<div><div style="font-size:10px;color:var(--text3)">Muscles worked</div><div style="font-size:11px;font-weight:600;color:var(--text2)">' + (s.allMuscles.slice(0,3).join(', ') || 'None') + '</div></div>' +
+      '</div>' +
+    '</div>' +
+
+    // HEALTH HABITS block
+    '<div style="background:var(--bg3);border-radius:10px;padding:12px;margin-bottom:8px">' +
+      '<div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:8px">💊 Health habits</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+        '<div><div style="font-size:10px;color:var(--text3)">Medicine adherence</div><div style="font-size:14px;font-weight:700;color:' + medGrade.color + '">' + medGrade.icon + ' ' + (s.medAdherence || '--') + '%</div><div style="font-size:10px;color:var(--text3)">target 100%</div></div>' +
+        '<div><div style="font-size:10px;color:var(--text3)">Isabgol (both doses)</div><div style="font-size:14px;font-weight:700;color:' + isabgolGrade.color + '">' + isabgolGrade.icon + ' ' + s.isabgolBoth + '/7 days</div></div>' +
+        '<div><div style="font-size:10px;color:var(--text3)">Avg water</div><div style="font-size:14px;font-weight:700;color:' + waterGrade.color + '">' + waterGrade.icon + ' ' + (s.waterAvg || '--') + '/10</div></div>' +
+        '<div><div style="font-size:10px;color:var(--text3)">Isabgol (1 dose)</div><div style="font-size:14px;font-weight:700;color:var(--amber)">' + s.isabgolOne + '/7 days</div></div>' +
+      '</div>' +
+    '</div>' +
+
+    // VITALS block
+    '<div style="background:var(--bg3);border-radius:10px;padding:12px">' +
+      '<div style="font-size:12px;font-weight:700;color:var(--amber);margin-bottom:8px">📊 Vitals</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+        '<div><div style="font-size:10px;color:var(--text3)">Weight change</div><div style="font-size:14px;font-weight:700">' + wtChangeHTML + '</div></div>' +
+        '<div><div style="font-size:10px;color:var(--text3)">Fasting glucose avg</div><div style="font-size:14px;font-weight:700;color:' + (s.glucAvg < 100 ? 'var(--green)' : s.glucAvg < 126 ? 'var(--amber)' : 'var(--red)') + '">' + glucHTML + '</div></div>' +
+      '</div>' +
+    '</div>';
+}
+
+function generateDoctorReport() {
+  var el = document.getElementById('doctor-report-panel');
+  if (!el) return;
+
+  var today = new Date().toISOString().split('T')[0];
+  var last30 = getDateRange(0, 30);
+  var s = getWeekStats(last30);
+
+  // Get latest vitals
+  var wtLog = JSON.parse(localStorage.getItem('hh_weight_log') || '[]');
+  var glucLog = JSON.parse(localStorage.getItem('hh_glucose_log') || '[]');
+  var cholLog = JSON.parse(localStorage.getItem('hh_chol_log') || '[]');
+  var vitals = JSON.parse(localStorage.getItem('hh_vitals') || '[]');
+
+  var latestWt = wtLog.length > 0 ? wtLog[wtLog.length-1].wt : 83.9;
+  var latestGluc = glucLog.length > 0 ? glucLog[glucLog.length-1].gluc : 116;
+  var latestChol = cholLog.length > 0 ? cholLog[cholLog.length-1] : {total:252, ldl:133, hdl:71, trig:141, date:'2026-05-11'};
+
+  // BP average from vitals
+  var bpReadings = vitals.filter(function(v){return v.sys && v.dia;}).slice(-10);
+  var avgSys = bpReadings.length > 0 ? Math.round(bpReadings.reduce(function(a,v){return a+v.sys;},0)/bpReadings.length) : 124;
+  var avgDia = bpReadings.length > 0 ? Math.round(bpReadings.reduce(function(a,v){return a+v.dia;},0)/bpReadings.length) : 72;
+
+  // Mounjaro last injection
+  var mjDoses = JSON.parse(localStorage.getItem('hp_mj_doses2') || '[]');
+  var lastMJ = mjDoses.length > 0 ? mjDoses[mjDoses.length-1] : {date:'2026-05-29', dose:'10mg'};
+
+  el.innerHTML =
+    '<div style="background:#0f172a;border:1px solid var(--accent);border-radius:12px;padding:14px;font-family:monospace">' +
+
+    '<div style="text-align:center;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:12px">' +
+      '<div style="font-size:14px;font-weight:700;color:var(--accent)">HEALTH SUMMARY REPORT</div>' +
+      '<div style="font-size:11px;color:var(--text3)">Hemant Pandav · Age 62 · Generated ' + today + '</div>' +
+      '<div style="font-size:11px;color:var(--text3)">For Dr. Lakhani — Harley International Dubai</div>' +
+    '</div>' +
+
+    '<div style="font-size:11px;font-weight:700;color:var(--green);margin-bottom:6px">CURRENT VITALS</div>' +
+    '<div style="font-size:11px;margin-bottom:10px;line-height:1.8">' +
+      'Weight: <strong>' + latestWt + ' kg</strong> (started 97kg · lost ' + (97-latestWt).toFixed(1) + 'kg)<br>' +
+      'BP: <strong>' + avgSys + '/' + avgDia + ' mmHg</strong> (avg last ' + bpReadings.length + ' readings · on Eforge)<br>' +
+      'Fasting glucose: <strong>' + latestGluc + ' mg/dL</strong> (' + (latestGluc < 100 ? 'Normal' : latestGluc < 126 ? 'Pre-diabetic' : 'High') + ')<br>' +
+      'BMI: <strong>' + (latestWt / (1.72*1.72)).toFixed(1) + '</strong><br>' +
+    '</div>' +
+
+    '<div style="font-size:11px;font-weight:700;color:var(--amber);margin-bottom:6px">CHOLESTEROL (last test ' + latestChol.date + ')</div>' +
+    '<div style="font-size:11px;margin-bottom:10px;line-height:1.8">' +
+      'Total: <strong>' + latestChol.total + '</strong> · LDL: <strong style="color:' + (latestChol.ldl < 100 ? 'var(--green)' : 'var(--red)') + '">' + latestChol.ldl + '</strong> · HDL: <strong>' + latestChol.hdl + '</strong> · Trig: <strong>' + latestChol.trig + '</strong><br>' +
+      'On Crestor Rosuvastatin 20mg daily bedtime (started ~3 weeks before last test)<br>' +
+    '</div>' +
+
+    '<div style="font-size:11px;font-weight:700;color:var(--purple);margin-bottom:6px">MEDICATIONS</div>' +
+    '<div style="font-size:11px;margin-bottom:10px;line-height:1.8">' +
+      '1. Repaglinide 1mg · once daily with largest meal (prescribed twice daily)<br>' +
+      '2. Eforge Amlodipine 5mg + Valsartan 160mg · morning<br>' +
+      '3. Crestor Rosuvastatin 20mg · bedtime daily<br>' +
+      '4. Caldikind Plus · night &nbsp; 5. Neurokind RF · morning<br>' +
+      '6. KSM-66 Ashwagandha 600mg · night<br>' +
+      '7. Triple Magnesium 400mg · evening &nbsp; 8. Garlic Pearl · night<br>' +
+      'Adherence last 30 days: <strong>' + (s.medAdherence || '--') + '%</strong><br>' +
+    '</div>' +
+
+    '<div style="font-size:11px;font-weight:700;color:var(--accent2);margin-bottom:6px">MOUNJARO</div>' +
+    '<div style="font-size:11px;margin-bottom:10px;line-height:1.8">' +
+      'Current dose: <strong>10mg every 15 days</strong><br>' +
+      'Last injection: <strong>' + (lastMJ.date || '29 May 2026') + '</strong> · Next due: <strong>13 June 2026</strong><br>' +
+      'Total injections: ~39 · Phase 3 (maintenance)<br>' +
+      'Weight lost since starting: <strong>' + (97-latestWt).toFixed(1) + ' kg</strong><br>' +
+    '</div>' +
+
+    '<div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px">LAST 30 DAYS — DIET AND EXERCISE</div>' +
+    '<div style="font-size:11px;margin-bottom:10px;line-height:1.8">' +
+      'Days diet logged: <strong>' + s.totalCalDays + '/30</strong><br>' +
+      'Avg daily calories: <strong>' + (s.avgCal || '--') + ' kcal</strong> · Avg protein: <strong>' + (s.avgProt || '--') + 'g</strong><br>' +
+      'Avg sat fat: <strong>' + (s.avgSat || '--') + 'g/day</strong> (limit 13g)<br>' +
+      'Workout days: <strong>' + s.workoutDays + '</strong> · Total exercise calories: <strong>' + s.totalExCals + ' kcal</strong><br>' +
+    '</div>' +
+
+    '<div style="font-size:11px;font-weight:700;color:var(--red);margin-bottom:6px">QUESTIONS FOR THIS VISIT</div>' +
+    '<div style="font-size:11px;line-height:1.8;color:var(--text2)">' +
+      '1. Repaglinide — once vs twice daily appropriate at HbA1c 5.3%?<br>' +
+      '2. Cholesterol retest timing + LDL target on Crestor 20mg?<br>' +
+      '3. CPK 367 (double limit) — cause + gym clearance + retest date?<br>' +
+      '4. Fasting glucose 116 despite HbA1c 5.3% — dawn phenomenon?<br>' +
+      '5. Add Iron, Ferritin, Zinc, Folate to next blood panel?<br>' +
+      '6. Mounjaro 10mg every 15 days — correct maintenance?<br>' +
+      '7. Cortisol result Dec 2025 — was it normal?<br>' +
+    '</div>' +
+
+    '<div style="text-align:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:10px;color:var(--text3)">' +
+      'Generated by Hemant Health App · ' + today + '</div>' +
+    '</div>';
+}
+
 function initAll() {
   // Set default dates to today
   try { document.getElementById('v-date').value = TODAY; } catch(e) {}
@@ -4069,6 +4378,7 @@ function initAll() {
   renderExercise();
   seedHistoricalData();
   setTimeout(function(){renderWeightTrend(); renderGlucoseTrend(); renderCholesterolTrend(); renderIsabgol();}, 400);
+  setTimeout(function(){generateWeeklySummary(0);}, 600);
   setTimeout(initCheckin, 1000);
   renderExercise(); renderExDBList();
   renderVitals(); renderWater();
