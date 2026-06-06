@@ -163,7 +163,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v5.9</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v6.0</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -1412,8 +1412,10 @@ function pickFood(i) {
 function renderServingButtons(f) {
   const el = document.getElementById('portion-serving-btns');
   if (!el) return;
-  
-  // If food has predefined servings array, use those directly
+  var baseG = f.g || f.grams || 100;
+  var unit = f.unit || '100g';
+
+  // If food has predefined servings, use those
   if (f.servings && f.servings.length > 0) {
     el.style.display = 'flex';
     el.innerHTML = '<span style="font-size:10px;color:var(--text3);width:100%">Quick servings:</span>' +
@@ -1422,79 +1424,41 @@ function renderServingButtons(f) {
       }).join('');
     return;
   }
-  
-  const servings = [];
-  // Add food-specific serving buttons
-  const n = f.n.toLowerCase();
-  if (n.includes('whey') || n.includes('protein')) {
-    servings.push({label:'1 scoop (29g)', g:29});
-    servings.push({label:'1.5 scoops (43g)', g:43});
-    servings.push({label:'2 scoops (58g)', g:58});
-  } else if (n.includes('egg white')) {
-    servings.push({label:'1 white (30g)', g:30});
-    servings.push({label:'2 whites (60g)', g:60});
-    servings.push({label:'3 whites (90g)', g:90});
-  } else if (n.includes('whole egg') || n.includes('egg (boiled)')) {
-    servings.push({label:'1 egg (63g)', g:63});
-    servings.push({label:'2 eggs (126g)', g:126});
-  } else if (n.includes('walnut')) {
-    servings.push({label:'3 halves (10g)', g:10});
-    servings.push({label:'6 halves (20g)', g:20});
-  } else if (n.includes('almond')) {
-    servings.push({label:'5 almonds (7g)', g:7});
-    servings.push({label:'10 almonds (14g)', g:14});
-    servings.push({label:'20 almonds (28g)', g:28});
-  } else if (n.includes('chia') || n.includes('flax') || n.includes('pumpkin seed')) {
-    servings.push({label:'1 tbsp (10g)', g:10});
-    servings.push({label:'2 tbsp (20g)', g:20});
-  } else if (n.includes('oat')) {
-    servings.push({label:'30g', g:30});
-    servings.push({label:'40g', g:40});
-    servings.push({label:'50g', g:50});
-  } else if (n.includes('rice')) {
-    servings.push({label:'50g', g:50});
-    servings.push({label:'75g', g:75});
-    servings.push({label:'100g', g:100});
-  } else if (n.includes('milk') || n.includes('marmum')) {
-    servings.push({label:'100 ml', g:100});
-    servings.push({label:'150 ml', g:150});
-    servings.push({label:'200 ml', g:200});
-    servings.push({label:'250 ml', g:250});
-  } else if (n.includes('dal') || n.includes('rajma') || n.includes('chana') || n.includes('foul')) {
-    servings.push({label:'100g (small)', g:100});
-    servings.push({label:'150g (medium)', g:150});
-    servings.push({label:'200g (large)', g:200});
-  } else if (n.includes('banana')) {
-    servings.push({label:'Half (60g)', g:60});
-    servings.push({label:'Full (120g)', g:120});
-  } else if (n.includes('papad')) {
-    servings.push({label:'1 papad (10g)', g:10});
-    servings.push({label:'2 papads (20g)', g:20});
-  } else if (n.includes('isabgol')) {
-    servings.push({label:'1 tsp (5g)', g:5});
-    servings.push({label:'2 tsp (10g)', g:10});
-  } else if (n.includes('paneer')) {
-    servings.push({label:'50g', g:50});
-    servings.push({label:'100g', g:100});
-    servings.push({label:'150g', g:150});
-  } else if (n.includes('bread') || n.includes('roti') || n.includes('paratha')) {
-    servings.push({label:'1 piece (40g)', g:40});
-    servings.push({label:'2 pieces (80g)', g:80});
-  } else if (n.includes('cheese')) {
-    servings.push({label:'Half slice (12g)', g:12});
-    servings.push({label:'1 slice (25g)', g:25});
-  }
-  if (servings.length > 0) {
-    el.style.display = 'flex';
-    el.innerHTML = '<span style="font-size:10px;color:var(--text3);width:100%">Quick servings:</span>' +
-      servings.map(function(s) {
-        return '<button class="btn-sm" onclick="setPortion(' + s.g + ')" style="font-size:11px;padding:4px 10px;color:var(--green);border-color:var(--green)">' + s.label + '</button>';
-      }).join('');
+
+  // Generate smart serving buttons based on unit
+  var buttons = [];
+  if (unit === 'piece' || unit === 'square' || unit === 'roti' || unit === 'idli' ||
+      unit === 'chapati' || unit === 'scoop' || unit === 'nut' || unit === 'almond' ||
+      unit === 'papad' || unit === 'egg' || unit === 'white' || unit === 'samosa') {
+    // Count-based foods — show 1, 2, 3, 4 pieces
+    for (var i = 1; i <= 4; i++) {
+      buttons.push({g: baseG * i, label: i + ' ' + unit + (i > 1 ? 's' : '')});
+    }
+  } else if (unit === '100ml' || unit === '100g') {
+    // Standard weight/volume — show sensible portions
+    buttons = [
+      {g: Math.round(baseG * 0.5), label: '50' + (unit==='100ml'?'ml':'g')},
+      {g: baseG, label: '100' + (unit==='100ml'?'ml':'g')},
+      {g: Math.round(baseG * 1.5), label: '150' + (unit==='100ml'?'ml':'g')},
+      {g: baseG * 2, label: '200' + (unit==='100ml'?'ml':'g')},
+    ];
   } else {
-    el.style.display = 'none';
-    el.innerHTML = '';
+    // Other units — show 0.5x, 1x, 1.5x, 2x of base
+    buttons = [
+      {g: Math.round(baseG * 0.5), label: '½ ' + unit},
+      {g: baseG, label: '1 ' + unit},
+      {g: Math.round(baseG * 1.5), label: '1½ ' + unit},
+      {g: baseG * 2, label: '2 ' + unit},
+    ];
   }
+
+  el.style.display = 'flex';
+  el.innerHTML = '<span style="font-size:10px;color:var(--text3);width:100%">Quick portions:</span>' +
+    buttons.map(function(b) {
+      return '<button class="btn-sm" onclick="setPortion(' + b.g + ')" style="font-size:11px;padding:4px 10px;color:var(--green);border-color:var(--green)">' + b.label + '</button>';
+    }).join('');
 }
+
 
 function selectFoodByName(name) {
   const db = getFoodDB();
@@ -1541,7 +1505,8 @@ function getUnit(food) {
 function updatePortion(g) {
   portionGrams = Number(g);
   if (!selectedFood) return;
-  const r = portionGrams / 100;
+  var baseGrams = selectedFood.g || selectedFood.grams || 100;
+  const r = portionGrams / baseGrams;
   const unit = getUnit(selectedFood);
   const portionLabel = document.getElementById('portion-label');
   const sliderLabel = document.getElementById('portion-unit-label');
@@ -4885,7 +4850,7 @@ function generateWorkoutPlan() {
     html += '<div style="font-size:10px;color:var(--green);margin-left:8px;margin-top:3px">Cooldown: ' + (plan.cooldown||[]).join(' · ') + '</div>';
     html += '</div>';
   });
-  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v5.9</div>';
+  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v6.0</div>';
   html += '</div>';
   el.innerHTML = html;
 }
