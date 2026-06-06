@@ -163,7 +163,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v5.8</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v5.9</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -4885,7 +4885,7 @@ function generateWorkoutPlan() {
     html += '<div style="font-size:10px;color:var(--green);margin-left:8px;margin-top:3px">Cooldown: ' + (plan.cooldown||[]).join(' · ') + '</div>';
     html += '</div>';
   });
-  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v5.8</div>';
+  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v5.9</div>';
   html += '</div>';
   el.innerHTML = html;
 }
@@ -5405,6 +5405,8 @@ const INDIAN_FOODS_DB = [
   {name:'Chivda mixture',cal:470,p:10,c:60,f:22,sat:4,fi:4,unit:'100g',grams:100},
   {name:'Mathri',cal:480,p:8,c:57,f:24,sat:5,fi:2.5,unit:'100g',grams:100},
   {name:'Nachos tortilla chips',cal:480,p:7.5,c:62,f:23,sat:3.2,fi:4.5,unit:'100g',grams:100},
+  {name:'Lindt 90% dark chocolate (1 square)',cal:59,p:1.1,c:2.8,f:5.2,sat:3.1,fi:1.5,unit:'square',grams:10},
+  {name:'Dark chocolate 85-90%',cal:598,p:12,c:20,f:55,sat:32,fi:10,unit:'100g',grams:100},
   // ── PROTEIN + SUPPLEMENTS ──
   {name:'Whey protein 1 scoop',cal:110,p:25,c:2,f:0.5,sat:0,fi:0,unit:'scoop',grams:30},
   {name:'Tofu firm',cal:76,p:8,c:1.9,f:4.5,sat:0.7,fi:0.3,unit:'100g',grams:100},
@@ -5571,6 +5573,8 @@ const PORTION_UNITS = {
   // Portions
   'katori dal': {unit:'katori', grams:150, label:'1 katori dal = 150g'},
   'katori rice': {unit:'katori', grams:120, label:'1 katori rice = 120g'},
+  'lindt 90 square': {unit:'square', grams:10, label:'1 Lindt 90% square = 10g'},
+  'dark chocolate square': {unit:'square', grams:10, label:'1 chocolate square = 10g'},
   'katori sabzi': {unit:'katori', grams:100, label:'1 katori sabzi = 100g'},
   'katori raita': {unit:'katori', grams:150, label:'1 katori raita = 150g'},
 };
