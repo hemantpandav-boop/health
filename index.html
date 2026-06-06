@@ -163,7 +163,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v6.7</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v6.8</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -198,14 +198,15 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
         <span style="color:var(--text3)">Food eaten</span><span id="deficit-food" style="font-weight:600">-- kcal</span>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid var(--border)">
-        <span style="color:var(--text3)">Walk burned</span><span id="deficit-walk" style="font-weight:600;color:var(--green)">-- kcal</span>
+        <span style="color:var(--text3)">Walk today</span><span id="deficit-walk" style="font-weight:600;color:var(--text3);font-size:10px">not logged yet</span>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid var(--border)">
-        <span style="color:var(--text3)">Exercise burned</span><span id="deficit-exercise" style="font-weight:600;color:var(--green)">-- kcal</span>
+        <span style="color:var(--text3)">Exercise today</span><span id="deficit-exercise" style="font-weight:600;color:var(--text3);font-size:10px">not logged yet</span>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:12px;padding:5px 0;font-weight:700">
-        <span>Net intake</span><span id="deficit-net" style="color:var(--accent)">-- kcal</span>
+        <span>Calories eaten</span><span id="deficit-net" style="color:var(--accent)">-- kcal</span>
       </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:2px">TDEE 2,220 kcal already includes walk and exercise · deficit = 2,220 − food eaten</div>
       <div style="font-size:10px;color:var(--text3);text-align:center" id="deficit-status"></div>
     </div>
   </div>
@@ -4937,7 +4938,7 @@ function generateWorkoutPlan() {
     html += '<div style="font-size:10px;color:var(--green);margin-left:8px;margin-top:3px">Cooldown: ' + (plan.cooldown||[]).join(' · ') + '</div>';
     html += '</div>';
   });
-  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v6.7</div>';
+  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v6.8</div>';
   html += '</div>';
   el.innerHTML = html;
 }
@@ -5338,8 +5339,9 @@ function updateDeficitCard() {
   var exCals = otherExCals;
 
   // Net
-  var net = foodCals - walkCals - exCals;
-  var deficit = 2220 - net; // vs TDEE
+  // Deficit = TDEE - food eaten. Walk and exercise already in TDEE.
+  var net = foodCals;
+  var deficit = 2220 - foodCals;
 
   var foodEl = document.getElementById('deficit-food');
   var walkEl = document.getElementById('deficit-walk');
@@ -5348,17 +5350,18 @@ function updateDeficitCard() {
   var statusEl = document.getElementById('deficit-status');
 
   if (foodEl) foodEl.textContent = foodCals + ' kcal';
-  var walkSource = walkCalsFromTracker > 0 ? ' (' + (walkStepsFromTracker > 0 ? walkStepsFromTracker.toLocaleString() + ' steps' : todayWalks.length + ' sessions') + ')' : walkCalsFromCheckin > 0 ? ' (from check-in)' : '';
-  if (walkEl) walkEl.textContent = walkCals > 0 ? '-' + walkCals + ' kcal' + walkSource : 'log walk above';
-  if (exEl) exEl.textContent = exCals > 0 ? '-' + exCals + ' kcal' : 'not logged yet';
+  // Walk and exercise info shown as reference only — already inside TDEE
+  var walkInfo = walkCalsFromTracker > 0 ? (walkStepsFromTracker > 0 ? walkStepsFromTracker.toLocaleString() + ' steps logged' : todayWalks.length + ' session(s) logged') : walkCalsFromCheckin > 0 ? 'logged via check-in' : 'not logged yet';
+  if (walkEl) walkEl.textContent = walkInfo;
+  if (exEl) exEl.textContent = exCals > 0 ? exCals + ' kcal logged' : 'not logged yet';
   if (netEl) {
-    netEl.textContent = net + ' kcal';
-    netEl.style.color = net <= 1700 ? 'var(--green)' : net <= 2000 ? 'var(--amber)' : 'var(--red)';
+    netEl.textContent = foodCals + ' kcal';
+    netEl.style.color = foodCals <= 1520 ? 'var(--green)' : foodCals <= 1700 ? 'var(--amber)' : 'var(--red)';
   }
   if (statusEl && foodCals > 0) {
-    if (deficit >= 500) statusEl.textContent = 'Deficit: ' + deficit + ' kcal — excellent fat loss rate';
-    else if (deficit >= 200) statusEl.textContent = 'Deficit: ' + deficit + ' kcal — good';
-    else if (deficit >= 0) statusEl.textContent = 'Deficit: ' + deficit + ' kcal — small deficit today';
+    if (deficit >= 700) statusEl.textContent = 'Deficit: ' + deficit + ' kcal — on target';
+    else if (deficit >= 400) statusEl.textContent = 'Deficit: ' + deficit + ' kcal — slightly over diet target';
+    else if (deficit >= 0) statusEl.textContent = 'Deficit: ' + deficit + ' kcal — close to TDEE';
     else statusEl.textContent = 'Surplus: +' + Math.abs(deficit) + ' kcal — over TDEE today';
   }
 }
