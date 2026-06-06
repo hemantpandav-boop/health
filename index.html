@@ -163,7 +163,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v4.9</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v5.0</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -311,7 +311,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
       <option value="Dinner">🌙 Dinner (~350 kcal)</option>
       <option value="Before Sleep">🌛 Before Sleep (~100 kcal)</option>
     </select>
-    <label>Search food</label>
+    <label>Search food <span style="font-size:10px;color:var(--text3)">(type name — searches our database + USDA)</span></label>
     <div class="food-search-wrap">
       <input type="text" id="food-search" placeholder="Type food name e.g. dal, eggs, oats..." autocomplete="off" oninput="searchFood(this.value)">
       <div class="food-results" id="food-results"></div>
@@ -776,6 +776,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
     <div class="card-title">doctor visit report <span style="color:var(--text3);font-size:10px">30-day summary</span></div>
     <div style="font-size:12px;color:var(--text2);margin-bottom:10px">Generate a clean summary to show Dr. Lakhani at your next appointment. Covers all key metrics from the past 30 days.</div>
     <button class="btn" onclick="generateDoctorReport()" style="margin-bottom:8px">Generate report for Dr. Lakhani</button>
+    <button class="btn" onclick="generateWorkoutPlan()" style="background:var(--bg2);border:1px solid var(--purple);color:var(--purple);margin-bottom:8px">💪 Print weekly workout plan</button>
     <div id="doctor-report-panel"></div>
   </div>
 
@@ -2876,6 +2877,8 @@ function renderMealSlots(date) {
         '</div>' +
       '</div>' +
       '<div class="meal-slot-progress"><div class="meal-slot-fill" style="width:' + pct + '%;background:' + overColor + '"></div></div>' +
+      (slotCal > slot.target * 1.25 ? '<div style="background:#450a0a;border:1px solid var(--red);border-radius:6px;padding:6px 10px;margin:0 13px 6px;font-size:11px;color:#fca5a5">🔴 <strong>' + slot.id + ' over by ' + (slotCal-slot.target) + ' kcal</strong> — ' + slotCal + ' vs target ' + slot.target + ' kcal. Consider lighter options for next meal.</div>' : '') +
+      (slotCal > slot.target && slotCal <= slot.target * 1.25 ? '<div style="background:#431407;border:1px solid var(--amber);border-radius:6px;padding:6px 10px;margin:0 13px 6px;font-size:11px;color:#fcd34d">🟡 <strong>' + slot.id + ' slightly over</strong> — ' + slotCal + ' vs target ' + slot.target + ' kcal (' + (slotCal-slot.target) + ' extra). You can proceed — adjust next slot if needed.</div>' : '') +
       '<div class="meal-slot-body">' +
         (slot.tip ? '<div style="font-size:11px;color:var(--text3);margin-bottom:8px;padding:6px 8px;background:var(--bg3);border-radius:6px;border-left:3px solid ' + slot.color + '">' + slot.tip + '</div>' : '') +
         (slot.sos ? '<button onclick="showSOS()" style="width:100%;background:#2e1065;border:1px solid #8b5cf6;border-radius:8px;color:#c4b5fd;font-size:12px;font-weight:600;padding:8px;cursor:pointer;margin-bottom:8px">🆘 Craving SOS — show safe options</button>' : '') +
@@ -3508,6 +3511,7 @@ function renderTodayWorkout() {
             flags +
             '<div style="font-size:11px;color:var(--text2);margin-top:4px;font-style:italic">' + ex.tip + '</div>' +
             (ex.alt ? '<div style="font-size:10px;color:var(--accent);margin-top:2px">Alt: ' + ex.alt + '</div>' : '') +
+            '<a href="https://www.youtube.com/results?search_query=' + encodeURIComponent(ex.n + ' exercise how to') + '" target="_blank" style="font-size:10px;color:#ef4444;text-decoration:none;margin-top:3px;display:inline-block">▶ Watch on YouTube</a>' +
           '</div>' +
           '<button data-idx="' + idx + '" onclick="openExLogPanel(parseInt(this.dataset.idx))" style="background:' + (done ? 'var(--green)' : 'var(--accent)') + ';border:none;border-radius:6px;color:white;font-size:11px;padding:6px 10px;cursor:pointer;margin-left:8px;flex-shrink:0">' + (done ? '✓' : '+ Log') + '</button>' +
         '</div>' +
@@ -4373,6 +4377,44 @@ function generateWeeklySummary(offsetDays) {
     '</div>';
 }
 
+function generateWorkoutPlan() {
+  var el = document.getElementById('doctor-report-panel');
+  if (!el) return;
+  var dayOrder = ['MON','TUE','WED','THU','FRI','SAT','SUN'];
+  var html = '<div style="background:#0f172a;border:1px solid var(--purple);border-radius:12px;padding:14px;font-family:monospace">';
+  html += '<div style="text-align:center;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:12px">';
+  html += '<div style="font-size:14px;font-weight:700;color:var(--purple)">WEEKLY WORKOUT PLAN</div>';
+  html += '<div style="font-size:11px;color:var(--text3)">Hemant Pandav · 3 versions: 🏠 Home / 🏋️ Gym Machine / 💪 Gym Cable</div>';
+  html += '<div style="font-size:11px;color:var(--amber)">⚠ Right shoulder — no overhead. CPK elevated — deadlifts 1 set light only.</div>';
+  html += '</div>';
+  dayOrder.forEach(function(day) {
+    var plan = WEEKLY_PLAN[day];
+    if (!plan) return;
+    html += '<div style="margin-bottom:12px">';
+    html += '<div style="font-size:12px;font-weight:700;color:var(--accent)">' + plan.icon + ' ' + day + ' — ' + plan.focus + '</div>';
+    ['home','gym_machine','gym_cable'].forEach(function(v) {
+      var label = v==='home'?'🏠 Home':v==='gym_machine'?'🏋️ Machine':'💪 Cable';
+      var exs = plan[v] || [];
+      if (!exs.length) return;
+      html += '<div style="font-size:10px;color:var(--text3);margin-top:4px;margin-left:8px">' + label + ':</div>';
+      exs.forEach(function(ex) {
+        html += '<div style="font-size:10px;margin-left:16px;padding:1px 0;color:var(--text2)">';
+        html += (ex.cpk?'⚠ ':ex.shoulder?'⚠ ':'• ') + ex.n;
+        html += ' — ' + (ex.dur>0?ex.dur+' min':ex.sets+'×'+ex.reps);
+        html += ' [' + ex.muscle + ']';
+        if (ex.cpk) html += ' CPK-light';
+        if (ex.shoulder) html += ' shoulder-care';
+        html += '</div>';
+      });
+    });
+    html += '<div style="font-size:10px;color:var(--green);margin-left:8px;margin-top:3px">Cooldown: ' + (plan.cooldown||[]).join(' · ') + '</div>';
+    html += '</div>';
+  });
+  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v5.0</div>';
+  html += '</div>';
+  el.innerHTML = html;
+}
+
 function generateDoctorReport() {
   var el = document.getElementById('doctor-report-panel');
   if (!el) return;
@@ -4778,6 +4820,131 @@ function updateDeficitCard() {
     else if (deficit >= 0) statusEl.textContent = 'Deficit: ' + deficit + ' kcal — small deficit today';
     else statusEl.textContent = 'Surplus: +' + Math.abs(deficit) + ' kcal — over TDEE today';
   }
+}
+
+// ═══════════════════════════════════
+// EXTENDED INDIAN FOOD DATABASE
+// Source: NIN India Food Composition Tables
+// ═══════════════════════════════════
+const INDIAN_FOODS_DB = [
+  {name:'Aloo vada',cal:285,p:4.2,c:32,f:15,sat:2.1,fi:2.5,unit:'piece',grams:80},
+  {name:'Samosa (veg)',cal:308,p:4.5,c:35,f:17,sat:2.5,fi:3,unit:'piece',grams:90},
+  {name:'Poha (cooked)',cal:158,p:3.2,c:34,f:1.2,sat:0.2,fi:1.8,unit:'100g',grams:100},
+  {name:'Upma (rava)',cal:180,p:4.1,c:32,f:4.2,sat:0.5,fi:1.5,unit:'100g',grams:100},
+  {name:'Idli (steamed)',cal:58,p:2.0,c:12,f:0.2,sat:0,fi:0.5,unit:'piece',grams:40},
+  {name:'Dosa (plain)',cal:168,p:3.5,c:32,f:3.2,sat:0.4,fi:1.2,unit:'piece',grams:80},
+  {name:'Chapati (wheat)',cal:104,p:3.1,c:18.4,f:2.5,sat:0.4,fi:1.9,unit:'piece',grams:40},
+  {name:'Paratha (plain)',cal:200,p:4.2,c:28,f:8,sat:1.2,fi:2,unit:'piece',grams:70},
+  {name:'Rice (cooked white)',cal:130,p:2.7,c:28,f:0.3,sat:0.1,fi:0.4,unit:'100g',grams:100},
+  {name:'Brown rice (cooked)',cal:111,p:2.6,c:23,f:0.9,sat:0.2,fi:1.8,unit:'100g',grams:100},
+  {name:'Toor dal (cooked)',cal:118,p:6.8,c:20,f:0.4,sat:0.1,fi:5.7,unit:'100g',grams:100},
+  {name:'Moong dal (cooked)',cal:105,p:7.0,c:19,f:0.4,sat:0.1,fi:7.6,unit:'100g',grams:100},
+  {name:'Chana dal (cooked)',cal:164,p:8.9,c:27,f:2.7,sat:0.3,fi:8,unit:'100g',grams:100},
+  {name:'Rajma (cooked)',cal:127,p:8.7,c:22.8,f:0.5,sat:0.1,fi:6.4,unit:'100g',grams:100},
+  {name:'Kabuli chana (cooked)',cal:164,p:8.9,c:27.4,f:2.6,sat:0.3,fi:7.6,unit:'100g',grams:100},
+  {name:'Sabut moong (cooked)',cal:105,p:7.0,c:19,f:0.4,sat:0.1,fi:7.6,unit:'100g',grams:100},
+  {name:'Palak (spinach cooked)',cal:23,p:2.9,c:3.6,f:0.4,sat:0.1,fi:2.4,unit:'100g',grams:100},
+  {name:'Paneer (full fat)',cal:265,p:18.3,c:3.4,f:20.8,sat:12.8,fi:0,unit:'100g',grams:100},
+  {name:'Paneer (low fat)',cal:150,p:18,c:3,f:7,sat:4.5,fi:0,unit:'100g',grams:100},
+  {name:'Curd (full fat)',cal:60,p:3.1,c:4.7,f:3.2,sat:2,fi:0,unit:'100g',grams:100},
+  {name:'Curd (low fat)',cal:40,p:3.5,c:4.5,f:0.5,sat:0.3,fi:0,unit:'100g',grams:100},
+  {name:'Makhana (fox nuts)',cal:347,p:9.7,c:76,f:0.1,sat:0,fi:14.5,unit:'100g',grams:100},
+  {name:'Roasted chana',cal:332,p:20.9,c:51,f:5.0,sat:0.5,fi:17.4,unit:'100g',grams:100},
+  {name:'Sev (fried)',cal:508,p:13.7,c:55,f:27,sat:5,fi:5,unit:'100g',grams:100},
+  {name:'Bhindi (okra cooked)',cal:33,p:1.9,c:7.4,f:0.2,sat:0,fi:3.2,unit:'100g',grams:100},
+  {name:'Gobi (cauliflower cooked)',cal:25,p:1.9,c:4.9,f:0.3,sat:0,fi:2.5,unit:'100g',grams:100},
+  {name:'Aloo (potato boiled)',cal:87,p:1.9,c:20,f:0.1,sat:0,fi:1.8,unit:'100g',grams:100},
+  {name:'Methi leaves (fenugreek)',cal:49,p:4.4,c:6,f:0.9,sat:0.2,fi:2.7,unit:'100g',grams:100},
+  {name:'Brinjal (baingan cooked)',cal:25,p:1,c:5.9,f:0.2,sat:0,fi:2.5,unit:'100g',grams:100},
+  {name:'Tomato (raw)',cal:18,p:0.9,c:3.9,f:0.2,sat:0,fi:1.2,unit:'100g',grams:100},
+  {name:'Onion (raw)',cal:40,p:1.1,c:9.3,f:0.1,sat:0,fi:1.7,unit:'100g',grams:100},
+  {name:'Cucumber (raw)',cal:15,p:0.7,c:3.6,f:0.1,sat:0,fi:0.5,unit:'100g',grams:100},
+  {name:'Carrot (raw)',cal:41,p:0.9,c:9.6,f:0.2,sat:0,fi:2.8,unit:'100g',grams:100},
+  {name:'Radish (raw)',cal:16,p:0.7,c:3.4,f:0.1,sat:0,fi:1.6,unit:'100g',grams:100},
+  {name:'Green chutney',cal:60,p:2,c:8,f:2,sat:0.3,fi:2,unit:'2 tbsp',grams:30},
+  {name:'Raita (curd+veg)',cal:50,p:2.5,c:5.5,f:2,sat:1.2,fi:0.5,unit:'100g',grams:100},
+  {name:'Tomato carrot raita',cal:48,p:2.2,c:6,f:1.8,sat:1,fi:0.8,unit:'100g',grams:100},
+  {name:'Whey protein (1 scoop)',cal:110,p:25,c:2,f:0.5,sat:0,fi:0,unit:'scoop',grams:30},
+  {name:'Marmum milk (low fat)',cal:42,p:3.3,c:4.9,f:1,sat:0.6,fi:0,unit:'100ml',grams:100},
+  {name:'Low fat milk',cal:42,p:3.4,c:4.8,f:1,sat:0.6,fi:0,unit:'100ml',grams:100},
+  {name:'Sprouts (mixed)',cal:97,p:9,c:17,f:0.5,sat:0.1,fi:3.8,unit:'100g',grams:100},
+  {name:'Tofu (firm)',cal:76,p:8,c:1.9,f:4.5,sat:0.7,fi:0.3,unit:'100g',grams:100},
+  {name:'Daliya (wheat broken)',cal:346,p:11.6,c:72,f:2,sat:0.3,fi:10,unit:'100g dry',grams:100},
+  {name:'Panchratni dal (cooked)',cal:107,p:7.4,c:17,f:1.8,sat:0.3,fi:5,unit:'100g',grams:100},
+  {name:'Besan (gram flour)',cal:387,p:22.5,c:58,f:6.2,sat:0.6,fi:10.9,unit:'100g',grams:100},
+  {name:'Papad (roasted)',cal:35,p:2.2,c:5.8,f:0.4,sat:0.1,fi:1.2,unit:'piece',grams:10},
+  {name:'Isabgol (psyllium)',cal:20,p:0.2,c:5,f:0.1,sat:0,fi:4.5,unit:'1 tsp',grams:5},
+  {name:'Chia seeds',cal:49,p:1.7,c:4.2,f:3.1,sat:0.3,fi:3.9,unit:'10g',grams:10},
+  {name:'Brazil nut',cal:33,p:0.7,c:0.6,f:3.3,sat:0.8,fi:0.4,unit:'1 nut',grams:5},
+  {name:'Aloo chaat (boiled)',cal:130,p:2.5,c:28,f:0.5,sat:0.1,fi:2,unit:'100g',grams:100},
+];
+
+// ═══════════════════════════════════
+// SMART FOOD SEARCH — LOCAL + USDA
+// ═══════════════════════════════════
+function searchFoodSmart(query) {
+  var q = query.toLowerCase().trim();
+  if (q.length < 2) return [];
+
+  // Search local database first (EX_DB + INDIAN_FOODS_DB)
+  var localResults = [];
+
+  // Search main food database
+  if (typeof FOOD_DB !== 'undefined') {
+    FOOD_DB.forEach(function(f) {
+      if (f.name.toLowerCase().includes(q)) {
+        localResults.push({name:f.name, cal:f.cal, p:f.p, c:f.c, f:f.f, sat:f.sat, fi:f.fi||0, unit:f.unit||'100g', grams:f.grams||100, source:'database'});
+      }
+    });
+  }
+
+  // Search Indian foods
+  INDIAN_FOODS_DB.forEach(function(f) {
+    var exists = localResults.some(function(r){return r.name.toLowerCase()===f.name.toLowerCase();});
+    if (!exists && f.name.toLowerCase().includes(q)) {
+      localResults.push({...f, source:'indian-db'});
+    }
+  });
+
+  // Search custom foods
+  var custom = JSON.parse(localStorage.getItem('hh_custom_foods') || '[]');
+  custom.forEach(function(f) {
+    var exists = localResults.some(function(r){return r.name.toLowerCase()===f.name.toLowerCase();});
+    if (!exists && f.name.toLowerCase().includes(q)) {
+      localResults.push({...f, source:'custom'});
+    }
+  });
+
+  return localResults.slice(0, 10);
+}
+
+function searchUSDA(query, callback) {
+  var url = 'https://api.nal.usda.gov/fdc/v1/foods/search?query=' + encodeURIComponent(query) + '&dataType=SR%20Legacy,Foundation&pageSize=5&api_key=DEMO_KEY';
+  fetch(url)
+    .then(function(r){return r.json();})
+    .then(function(data) {
+      if (!data.foods) { callback([]); return; }
+      var results = data.foods.slice(0,5).map(function(f) {
+        var getNut = function(id) {
+          var n = (f.foodNutrients||[]).find(function(n){return n.nutrientId===id;});
+          return n ? parseFloat(n.value.toFixed(1)) : 0;
+        };
+        return {
+          name: f.description,
+          cal: Math.round(getNut(1008)),
+          p: getNut(1003),
+          c: getNut(1005),
+          f: getNut(1004),
+          sat: getNut(1258),
+          fi: getNut(1079),
+          unit: '100g',
+          grams: 100,
+          source: 'USDA'
+        };
+      }).filter(function(f){return f.cal > 0;});
+      callback(results);
+    })
+    .catch(function(){callback([]);});
 }
 
 function initAll() {
