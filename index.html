@@ -163,7 +163,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v5.2</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v5.3</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -1094,6 +1094,17 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="add-food-modal" class="modal-overlay hidden">
   <div class="modal">
     <div class="modal-title">Add food to database <button class="btn-icon" onclick="hideAddFoodModal()">✕</button></div>
+
+    <div style="background:var(--bg3);border-radius:8px;padding:10px;margin-bottom:10px">
+      <div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:6px">🔍 Auto-lookup nutrition</div>
+      <div style="display:flex;gap:6px">
+        <input type="text" id="af-lookup" placeholder="Type food name to search USDA..." onkeydown="if(event.key==='Enter')lookupFoodNutrition()" style="flex:1;margin-bottom:0;font-size:12px">
+        <button onclick="lookupFoodNutrition()" style="background:var(--accent);border:none;border-radius:8px;color:white;padding:8px 12px;cursor:pointer;font-size:12px;white-space:nowrap">Search</button>
+      </div>
+      <div id="af-lookup-results" style="margin-top:6px"></div>
+    </div>
+
+    <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Or enter manually below — values per 100g:</div>
     <label>Food name</label><input type="text" id="af-name" placeholder="e.g. Methi paratha">
     <label>Per 100g values:</label>
     <div class="row">
@@ -1775,6 +1786,100 @@ function updateTotals() {
 // ADD FOOD MODAL
 function showSOS() { document.getElementById('sos-modal').classList.remove('hidden'); }
 function hideSOS() { document.getElementById('sos-modal').classList.add('hidden'); }
+function lookupFoodNutrition() {
+  var query = document.getElementById('af-lookup').value.trim();
+  if (!query) { alert('Enter a food name to search.'); return; }
+
+  var resultsEl = document.getElementById('af-lookup-results');
+  if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px;color:var(--text3)">Searching...</div>';
+
+  // First search local databases
+  var localResults = searchFoodSmart(query);
+
+  // Also search Indian DB directly for partial matches
+  var extraIndian = INDIAN_FOODS_DB.filter(function(f) {
+    return f.name.toLowerCase().includes(query.toLowerCase());
+  });
+  extraIndian.forEach(function(f) {
+    var exists = localResults.some(function(r){return r.name.toLowerCase()===f.name.toLowerCase();});
+    if (!exists) localResults.push({...f, source:'indian-db'});
+  });
+
+  if (localResults.length > 0) {
+    showLookupResults(localResults, resultsEl);
+    return;
+  }
+
+  // Fall back to USDA API
+  var url = 'https://api.nal.usda.gov/fdc/v1/foods/search?query=' + encodeURIComponent(query) + '&dataType=SR%20Legacy,Foundation&pageSize=6&api_key=DEMO_KEY';
+  fetch(url)
+    .then(function(r){return r.json();})
+    .then(function(data) {
+      if (!data.foods || data.foods.length === 0) {
+        if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px;color:var(--amber)">Not found in database. Enter nutrition manually below.</div>';
+        return;
+      }
+      var results = data.foods.slice(0,6).map(function(f) {
+        var getNut = function(id) {
+          var n = (f.foodNutrients||[]).find(function(n){return n.nutrientId===id;});
+          return n ? parseFloat(n.value.toFixed(1)) : 0;
+        };
+        return {
+          name: f.description,
+          cal: Math.round(getNut(1008)),
+          p: getNut(1003),
+          c: getNut(1005),
+          f: getNut(1004),
+          sat: getNut(1258),
+          fi: getNut(1079),
+          unit: '100g',
+          grams: 100,
+          source: 'USDA'
+        };
+      }).filter(function(f){return f.cal > 0;});
+      showLookupResults(results, resultsEl);
+    })
+    .catch(function(e) {
+      if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px;color:var(--amber)">Search failed — check connection. Enter manually below.</div>';
+    });
+}
+
+function showLookupResults(results, container) {
+  if (!container) return;
+  container.innerHTML = '<div style="font-size:11px;color:var(--text3);margin-bottom:4px">Tap a result to fill the form:</div>' +
+    results.map(function(r, idx) {
+      return '<div style="background:var(--bg2);border-radius:6px;padding:8px;margin-bottom:4px;cursor:pointer;border:1px solid var(--border)" ' +
+        'onclick="fillFoodForm(' + JSON.stringify(r).replace(/'/g,"\'") + ')">' +
+        '<div style="font-size:12px;font-weight:600;color:var(--text)">' + r.name + '</div>' +
+        '<div style="font-size:10px;color:var(--text3);margin-top:2px">' +
+          r.cal + ' kcal · P:' + r.p + 'g · C:' + r.c + 'g · F:' + r.f + 'g · Sat:' + r.sat + 'g' +
+          ' <span style="color:var(--accent)">(' + (r.source||'database') + ')</span>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+}
+
+function fillFoodForm(food) {
+  var nameEl = document.getElementById('af-name');
+  var calEl = document.getElementById('af-cal');
+  var pEl = document.getElementById('af-p');
+  var cEl = document.getElementById('af-c');
+  var fEl = document.getElementById('af-f');
+  var satEl = document.getElementById('af-sat');
+  var fiEl = document.getElementById('af-fi');
+
+  if (nameEl) nameEl.value = food.name;
+  if (calEl) calEl.value = food.cal;
+  if (pEl) pEl.value = food.p;
+  if (cEl) cEl.value = food.c;
+  if (fEl) fEl.value = food.f;
+  if (satEl) satEl.value = food.sat;
+  if (fiEl) fiEl.value = food.fi || 0;
+
+  var resultsEl = document.getElementById('af-lookup-results');
+  if (resultsEl) resultsEl.innerHTML = '<div style="font-size:11px;color:var(--green)">✓ Form filled from ' + (food.source||'database') + ' — review and save below.</div>';
+}
+
 function showAddFoodModal() { document.getElementById('add-food-modal').classList.remove('hidden'); }
 function hideAddFoodModal() { document.getElementById('add-food-modal').classList.add('hidden'); }
 function saveNewFood() {
@@ -4644,7 +4749,7 @@ function generateWorkoutPlan() {
     html += '<div style="font-size:10px;color:var(--green);margin-left:8px;margin-top:3px">Cooldown: ' + (plan.cooldown||[]).join(' · ') + '</div>';
     html += '</div>';
   });
-  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v5.2</div>';
+  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v5.3</div>';
   html += '</div>';
   el.innerHTML = html;
 }
