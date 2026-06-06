@@ -163,7 +163,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v5.7</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v5.8</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -3949,21 +3949,25 @@ function openExLogPanel(idx) {
   var repsEl = document.getElementById('ex-log-reps');
   var weightEl = document.getElementById('ex-log-weight');
 
+  var strengthFields = document.getElementById('ex-strength-fields');
+  var cardioFields = document.getElementById('ex-cardio-fields');
+
   if (isCardio) {
-    // Cardio — show duration prominently, hide sets/reps
-    if (durInput) { durInput.value = currentLogEx.dur || 25; durInput.style.fontSize = '18px'; durInput.style.fontWeight = '700'; }
-    if (setsEl) { setsEl.value = 1; }
-    if (repsEl) { repsEl.value = 0; }
-    if (weightEl) { weightEl.value = 0; weightEl.placeholder = '0'; }
-    // Update label
-    var durLabel = durInput ? durInput.previousElementSibling : null;
-    if (durLabel) durLabel.textContent = 'Duration (minutes) — required for cardio';
+    if (strengthFields) strengthFields.classList.add('hidden');
+    if (cardioFields) cardioFields.classList.remove('hidden');
+    var durCardio = document.getElementById('ex-log-dur-cardio');
+    var stepsEl = document.getElementById('ex-log-steps');
+    var distEl = document.getElementById('ex-log-dist');
+    var hrCardio = document.getElementById('ex-log-hr-cardio');
+    if (durCardio) durCardio.value = currentLogEx.dur || 25;
+    if (stepsEl) stepsEl.value = '';
+    if (distEl) distEl.value = '';
+    if (hrCardio) hrCardio.value = '';
   } else {
-    // Strength — show sets and reps
+    if (strengthFields) strengthFields.classList.remove('hidden');
+    if (cardioFields) cardioFields.classList.add('hidden');
     if (setsEl) setsEl.value = currentLogEx.sets || 3;
-    if (durInput) { durInput.value = 0; durInput.style.fontSize = ''; durInput.style.fontWeight = ''; }
-    var durLabel = durInput ? durInput.previousElementSibling : null;
-    if (durLabel) durLabel.textContent = 'Duration mins (cardio only)';
+    if (durInput) durInput.value = 0;
   }
 
   var panel = document.getElementById('ex-log-panel');
@@ -3992,11 +3996,45 @@ function calcExCals(met, sets, reps, dur, hr) {
 
 function updateExCalPreview() {
   if (!currentLogEx) return;
-  var sets = parseInt(document.getElementById('ex-log-sets').value || 3);
-  var reps = parseInt(document.getElementById('ex-log-reps').value || 12);
-  var dur = parseFloat(document.getElementById('ex-log-dur').value || 0);
-  var hr = parseInt(document.getElementById('ex-log-hr').value || 0);
-  var cals = calcExCals(currentLogEx.met, sets, reps, dur, hr);
+  var isCardio = currentLogEx.dur > 0 ||
+    currentLogEx.muscle.toLowerCase().includes('cardio') ||
+    currentLogEx.n.toLowerCase().includes('walk') ||
+    currentLogEx.n.toLowerCase().includes('treadmill');
+
+  var cals = 0;
+  if (isCardio) {
+    var dur = parseFloat((document.getElementById('ex-log-dur-cardio')||{value:0}).value || 0);
+    var steps = parseInt((document.getElementById('ex-log-steps')||{value:0}).value || 0);
+    var dist = parseFloat((document.getElementById('ex-log-dist')||{value:0}).value || 0);
+    var hr = parseInt((document.getElementById('ex-log-hr-cardio')||{value:0}).value || 0);
+
+    // Best calorie calculation from available data
+    if (steps > 0 && dur > 0) {
+      // Steps + duration — most accurate
+      var stepsPerMin = steps / dur;
+      var met = stepsPerMin < 80 ? 2.5 : stepsPerMin < 100 ? 3.0 : stepsPerMin < 120 ? 3.5 : 4.3;
+      cals = Math.round(met * 83.9 * (dur / 60));
+    } else if (dist > 0 && dur > 0) {
+      // Distance + duration (speed-based)
+      var speed = dist / (dur / 60);
+      var met2 = speed < 4 ? 2.8 : speed < 5 ? 3.5 : speed < 6 ? 4.3 : 5.0;
+      cals = Math.round(met2 * 83.9 * (dur / 60));
+    } else if (steps > 0) {
+      // Steps only — estimate duration
+      var estDur = steps / 100;
+      cals = Math.round(3.5 * 83.9 * (estDur / 60));
+    } else if (dur > 0) {
+      // Duration only — use MET
+      cals = calcExCals(currentLogEx.met, 1, 0, dur, hr);
+    }
+  } else {
+    var sets = parseInt((document.getElementById('ex-log-sets')||{value:3}).value || 3);
+    var reps = parseInt((document.getElementById('ex-log-reps')||{value:12}).value || 12);
+    var dur2 = parseFloat((document.getElementById('ex-log-dur')||{value:0}).value || 0);
+    var hr2 = parseInt((document.getElementById('ex-log-hr')||{value:0}).value || 0);
+    cals = calcExCals(currentLogEx.met, sets, reps, dur2, hr2);
+  }
+
   var el = document.getElementById('ex-log-cal-preview');
   if (el) el.textContent = cals > 0 ? cals + ' kcal' : '--';
 }
@@ -4008,15 +4046,25 @@ function saveExerciseLog() {
     currentLogEx.n.toLowerCase().includes('walk') ||
     currentLogEx.n.toLowerCase().includes('treadmill');
 
-  var dur = parseFloat(document.getElementById('ex-log-dur').value || 0);
-  var sets = isCardio ? 1 : parseInt(document.getElementById('ex-log-sets').value || 3);
-  var reps = isCardio ? 0 : parseInt(document.getElementById('ex-log-reps').value || 12);
-  var weight = isCardio ? 0 : parseFloat(document.getElementById('ex-log-weight').value || 0);
-  var hr = parseInt(document.getElementById('ex-log-hr').value || 0);
-
-  if (isCardio && dur <= 0) {
-    alert('Please enter the duration in minutes for this cardio exercise.');
-    return;
+  var dur, sets, reps, weight, hr, steps, dist;
+  if (isCardio) {
+    dur = parseFloat((document.getElementById('ex-log-dur-cardio')||{value:0}).value || 0);
+    steps = parseInt((document.getElementById('ex-log-steps')||{value:0}).value || 0);
+    dist = parseFloat((document.getElementById('ex-log-dist')||{value:0}).value || 0);
+    hr = parseInt((document.getElementById('ex-log-hr-cardio')||{value:0}).value || 0);
+    sets = 1; reps = 0; weight = 0;
+    if (dur <= 0 && steps <= 0) {
+      alert('Please enter duration or steps for this cardio exercise.');
+      return;
+    }
+    if (dur <= 0 && steps > 0) dur = Math.round(steps / 100); // estimate duration from steps
+  } else {
+    dur = parseFloat((document.getElementById('ex-log-dur')||{value:0}).value || 0);
+    sets = parseInt((document.getElementById('ex-log-sets')||{value:3}).value || 3);
+    reps = parseInt((document.getElementById('ex-log-reps')||{value:12}).value || 12);
+    weight = parseFloat((document.getElementById('ex-log-weight')||{value:0}).value || 0);
+    hr = parseInt((document.getElementById('ex-log-hr')||{value:0}).value || 0);
+    steps = 0; dist = 0;
   }
 
   var cals = calcExCals(currentLogEx.met, sets, reps, dur, hr);
@@ -4030,6 +4078,8 @@ function saveExerciseLog() {
     version: currentExVersion,
     sets: sets, reps: reps, weight: weight, dur: dur, hr: hr, cals: cals,
     isCardio: isCardio,
+    steps: steps || 0,
+    dist: dist || 0,
   };
 
   var logs = JSON.parse(localStorage.getItem('hh_exercise') || '[]');
@@ -4074,9 +4124,11 @@ function renderExSummary(dateKey, exercises) {
           '<div>' +
             '<div style="font-weight:500;font-size:12px">' + l.name + '</div>' +
             '<div style="margin-top:3px">' +
-              (l.sets > 0 && l.reps > 0 ? '<span class="tag tag-g">' + l.sets + 'x' + l.reps + '</span>' : '') +
+              (l.isCardio ? '' : (l.sets > 0 && l.reps > 0 ? '<span class="tag tag-g">' + l.sets + 'x' + l.reps + '</span>' : '')) +
               (l.weight > 0 ? '<span class="tag tag-b">' + l.weight + 'kg</span>' : '') +
               (l.dur > 0 ? '<span class="tag tag-a">' + l.dur + ' min</span>' : '') +
+              (l.steps > 0 ? '<span class="tag tag-g">👟 ' + l.steps.toLocaleString() + ' steps</span>' : '') +
+              (l.dist > 0 ? '<span class="tag tag-b">📍 ' + l.dist + ' km</span>' : '') +
               (l.cals > 0 ? '<span class="tag tag-p">' + l.cals + ' kcal</span>' : '') +
               '<span class="tag" style="font-size:9px">' + (l.version==='home'?'🏠':l.version==='gym_cable'?'💪':'🏋️') + '</span>' +
             '</div>' +
@@ -4833,7 +4885,7 @@ function generateWorkoutPlan() {
     html += '<div style="font-size:10px;color:var(--green);margin-left:8px;margin-top:3px">Cooldown: ' + (plan.cooldown||[]).join(' · ') + '</div>';
     html += '</div>';
   });
-  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v5.7</div>';
+  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v5.8</div>';
   html += '</div>';
   el.innerHTML = html;
 }
