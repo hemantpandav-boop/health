@@ -163,7 +163,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v6.2</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v6.3</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -1555,6 +1555,8 @@ function logSelectedFood() {
   document.getElementById('food-selected-panel').classList.add('hidden');
   renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert(); updateDeficitCard();
   renderEatingOutGrid(); renderPortionGrid();
+  // Migrate old exercise logs — add isCardio flag to walk/treadmill entries
+  migrateExLogs();
   showDaySummary(TODAY);
   showWeekAverage();
   renderExercise();
@@ -1779,6 +1781,8 @@ function deleteMeal(idx) {
   localStorage.setItem('hh_meals', JSON.stringify(logs));
   renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert(); updateDeficitCard();
   renderEatingOutGrid(); renderPortionGrid();
+  // Migrate old exercise logs — add isCardio flag to walk/treadmill entries
+  migrateExLogs();
   showDaySummary(TODAY);
   showWeekAverage();
   renderExercise();
@@ -4860,7 +4864,7 @@ function generateWorkoutPlan() {
     html += '<div style="font-size:10px;color:var(--green);margin-left:8px;margin-top:3px">Cooldown: ' + (plan.cooldown||[]).join(' · ') + '</div>';
     html += '</div>';
   });
-  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v6.2</div>';
+  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v6.3</div>';
   html += '</div>';
   el.innerHTML = html;
 }
@@ -5585,6 +5589,27 @@ function showPortionHelper(foodName) {
   return matches;
 }
 
+function migrateExLogs() {
+  var logs = JSON.parse(localStorage.getItem('hh_exercise') || '[]');
+  var changed = false;
+  logs.forEach(function(l) {
+    if (l.isCardio === undefined) {
+      var name = (l.name || '').toLowerCase();
+      var muscle = (l.muscle || '').toLowerCase();
+      if (name.includes('walk') || name.includes('treadmill') || name.includes('run') || muscle.includes('cardio')) {
+        l.isCardio = true;
+        l.steps = l.steps || 0;
+        l.dist = l.dist || 0;
+        changed = true;
+      } else {
+        l.isCardio = false;
+        changed = true;
+      }
+    }
+  });
+  if (changed) localStorage.setItem('hh_exercise', JSON.stringify(logs));
+}
+
 function initAll() {
   // Set default dates to today
   try { document.getElementById('v-date').value = TODAY; } catch(e) {}
@@ -5605,6 +5630,8 @@ function initAll() {
   try { document.getElementById('mj-log-date').value = TODAY; } catch(e) {}
   renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert(); updateDeficitCard();
   renderEatingOutGrid(); renderPortionGrid();
+  // Migrate old exercise logs — add isCardio flag to walk/treadmill entries
+  migrateExLogs();
   showDaySummary(TODAY);
   showWeekAverage();
   renderExercise();
