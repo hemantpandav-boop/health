@@ -163,7 +163,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v4.7</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v4.8</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -553,13 +553,61 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
     <div id="chol-history" style="margin-top:8px"></div>
   </div>
 
+  <!-- SLEEP TRACKER -->
+  <div class="card">
+    <div class="card-title">sleep tracker</div>
+    <div style="background:var(--bg3);border-radius:8px;padding:10px;margin-bottom:10px">
+      <label>Date</label><input type="date" id="sleep-date">
+      <div class="row">
+        <div class="half"><label>Bedtime</label><input type="time" id="sleep-bedtime" value="22:30"></div>
+        <div class="half"><label>Wake time</label><input type="time" id="sleep-waketime" value="06:30"></div>
+      </div>
+      <div style="text-align:center;padding:8px 0">
+        <span style="font-size:11px;color:var(--text3)">Sleep duration: </span>
+        <span style="font-size:16px;font-weight:700;color:var(--accent)" id="sleep-duration-preview">8.0 hrs</span>
+      </div>
+      <button class="btn btn-green" onclick="saveSleep()" style="margin-bottom:0">Save sleep</button>
+    </div>
+    <div class="metric-grid" style="margin-bottom:10px">
+      <div class="metric"><div class="metric-label">Last night</div><div class="metric-value warn" id="sleep-last">--</div><div class="metric-sub">hours</div></div>
+      <div class="metric"><div class="metric-label">7-day avg</div><div class="metric-value warn" id="sleep-avg">--</div><div class="metric-sub">hours</div></div>
+      <div class="metric"><div class="metric-label">Target</div><div class="metric-value ok">7.0</div><div class="metric-sub">hours</div></div>
+      <div class="metric"><div class="metric-label">Quality</div><div class="metric-value warn" id="sleep-quality">--</div><div class="metric-sub"></div></div>
+    </div>
+    <canvas id="sleep-trend-chart" height="140" style="width:100%"></canvas>
+    <div id="sleep-alert" style="margin-top:8px"></div>
+    <div id="sleep-history" style="margin-top:8px"></div>
+  </div>
+
+  <!-- WAIST TRACKER -->
+  <div class="card">
+    <div class="card-title">waist tracker</div>
+    <div style="background:var(--bg3);border-radius:8px;padding:10px;margin-bottom:10px">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Log monthly — ideally on InBody scan days.</div>
+      <input type="date" id="waist-date">
+      <div class="row">
+        <div class="half"><label>Waist (cm)</label><input type="number" id="waist-cm" placeholder="109" step="0.5" style="margin-bottom:0"></div>
+        <div class="half"><label>Visceral fat level</label><input type="number" id="waist-vf" placeholder="12" style="margin-bottom:0"></div>
+      </div>
+      <button class="btn" onclick="saveWaist()" style="margin-top:8px;margin-bottom:0">Save measurement</button>
+    </div>
+    <div class="metric-grid" style="margin-bottom:10px">
+      <div class="metric"><div class="metric-label">Current</div><div class="metric-value warn" id="waist-current">109 cm</div><div class="metric-sub">waist</div></div>
+      <div class="metric"><div class="metric-label">Started</div><div class="metric-value info">113 cm</div><div class="metric-sub">Sep 2025</div></div>
+      <div class="metric"><div class="metric-label">Reduced</div><div class="metric-value ok" id="waist-reduced">4 cm</div><div class="metric-sub">so far</div></div>
+      <div class="metric"><div class="metric-label">Target</div><div class="metric-value ok">90 cm</div><div class="metric-sub">healthy for men</div></div>
+    </div>
+    <canvas id="waist-trend-chart" height="140" style="width:100%"></canvas>
+    <div id="waist-history" style="margin-top:8px"></div>
+  </div>
+
   <!-- OTHER VITALS -->
   <div class="card">
     <div class="card-title">other vitals log</div>
     <label>Date</label><input type="date" id="v-date">
     <div class="row">
-      <div class="half"><label>Waist (cm)</label><input type="number" id="v-waist" placeholder="109"></div>
-      <div class="half"><label>Sleep (hours)</label><input type="number" id="v-sleep" step="0.5" placeholder="6.5"></div>
+      <div class="half"><label>Waist (cm) — quick entry</label><input type="number" id="v-waist" placeholder="109"></div>
+      <div class="half"><label>Sleep (hours) — quick entry</label><input type="number" id="v-sleep" step="0.5" placeholder="6.5"></div>
     </div>
     <label>Symptoms / notes</label>
     <textarea id="v-note" rows="2" placeholder="Energy, mood, muscle aches, dizziness..."></textarea>
@@ -586,6 +634,26 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
     </div>
     <div class="water-grid" id="water-grid"></div>
     <button class="btn-sm" onclick="resetWater()" style="margin-top:4px">Reset</button>
+  </div>
+
+  <!-- MOUNJARO EFFECTIVENESS -->
+  <div class="card">
+    <div class="card-title">mounjaro effectiveness tracker</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Weight lost per 15-day injection cycle. If loss slows — discuss with Dr. Lakhani.</div>
+    <div class="metric-grid" style="margin-bottom:10px">
+      <div class="metric"><div class="metric-label">Total lost</div><div class="metric-value ok" id="mj-total-lost">13.1 kg</div><div class="metric-sub">from 97 kg</div></div>
+      <div class="metric"><div class="metric-label">Avg per cycle</div><div class="metric-value ok" id="mj-avg-cycle">--</div><div class="metric-sub">kg per 15 days</div></div>
+      <div class="metric"><div class="metric-label">Current dose</div><div class="metric-value info">10 mg</div><div class="metric-sub">every 15 days</div></div>
+      <div class="metric"><div class="metric-label">Total injections</div><div class="metric-value info">~39</div><div class="metric-sub">since May 2025</div></div>
+    </div>
+    <canvas id="mj-effectiveness-chart" height="160" style="width:100%"></canvas>
+    <div style="font-size:11px;color:var(--text3);margin-top:8px">
+      <div style="margin-bottom:4px">Phase breakdown:</div>
+      <div>Phase 1 (5mg, May-Jul 2025): 7 doses · ~4 kg lost</div>
+      <div>Phase 2 (7.5-10mg, Jul 2025-Feb 2026): ~25 doses · ~7 kg lost</div>
+      <div>Phase 3 (10mg maintenance, Feb 2026-now): ~7 doses · ~2.1 kg lost</div>
+    </div>
+    <div id="mj-cycle-table" style="margin-top:10px"></div>
   </div>
 
   <!-- VITALS HISTORY -->
@@ -1400,6 +1468,7 @@ function logSelectedFood() {
   seedHistoricalData();
   setTimeout(function(){renderWeightTrend(); renderGlucoseTrend(); renderCholesterolTrend(); renderIsabgol();}, 400);
   setTimeout(function(){generateWeeklySummary(0);}, 600);
+  setTimeout(function(){renderSleepTracker(); seedWaistData(); renderWaistTracker(); renderMounjaroEffectiveness();}, 800);
   setTimeout(initCheckin, 1000); updateScore(); showNutritionAlert();
   alert('Logged: ' + entry.name + ' (' + entry.grams + 'g) — ' + entry.cal + ' kcal');
 }
@@ -1454,6 +1523,7 @@ function deleteMeal(idx) {
   seedHistoricalData();
   setTimeout(function(){renderWeightTrend(); renderGlucoseTrend(); renderCholesterolTrend(); renderIsabgol();}, 400);
   setTimeout(function(){generateWeeklySummary(0);}, 600);
+  setTimeout(function(){renderSleepTracker(); seedWaistData(); renderWaistTracker(); renderMounjaroEffectiveness();}, 800);
   setTimeout(initCheckin, 1000); updateScore(); showNutritionAlert();
 }
 
@@ -3515,7 +3585,7 @@ function saveExerciseLog() {
   hideExLogPanel();
   renderTodayWorkout();
   updateScore();
-  alert('Logged: ' + entry.name + '\n' + (weight > 0 ? sets + 'x' + reps + ' @ ' + weight + 'kg' : dur > 0 ? dur + ' min' : sets + 'x' + reps) + (cals > 0 ? '\n~' + cals + ' kcal burned' : ''));
+  alert('Logged: ' + entry.name + ' — ' + (weight > 0 ? sets + 'x' + reps + ' @ ' + weight + 'kg' : dur > 0 ? dur + ' min' : sets + 'x' + reps) + (cals > 0 ? ' — ~' + cals + ' kcal burned' : ''));
 }
 
 function renderExSummary(dateKey, exercises) {
@@ -4358,17 +4428,291 @@ function generateDoctorReport() {
     '</div>';
 }
 
+// ═══════════════════════════════════
+// SLEEP TRACKER
+// ═══════════════════════════════════
+function calcSleepDuration(bed, wake) {
+  if (!bed || !wake) return 0;
+  var bParts = bed.split(':').map(Number);
+  var wParts = wake.split(':').map(Number);
+  var bMins = bParts[0]*60 + bParts[1];
+  var wMins = wParts[0]*60 + wParts[1];
+  if (wMins <= bMins) wMins += 24*60; // next day
+  return parseFloat(((wMins - bMins)/60).toFixed(1));
+}
+
+function updateSleepPreview() {
+  var bed = document.getElementById('sleep-bedtime');
+  var wake = document.getElementById('sleep-waketime');
+  var preview = document.getElementById('sleep-duration-preview');
+  if (!bed || !wake || !preview) return;
+  var hrs = calcSleepDuration(bed.value, wake.value);
+  preview.textContent = hrs + ' hrs';
+  preview.style.color = hrs >= 7 ? 'var(--green)' : hrs >= 6 ? 'var(--amber)' : 'var(--red)';
+}
+
+function saveSleep() {
+  var date = document.getElementById('sleep-date').value || TODAY;
+  var bed = document.getElementById('sleep-bedtime').value;
+  var wake = document.getElementById('sleep-waketime').value;
+  var hrs = calcSleepDuration(bed, wake);
+  if (hrs <= 0 || hrs > 14) { alert('Please enter valid sleep and wake times.'); return; }
+
+  var log = JSON.parse(localStorage.getItem('hh_sleep_log') || '[]');
+  log = log.filter(function(e){return e.date !== date;});
+  log.push({date:date, bed:bed, wake:wake, hrs:hrs});
+  log.sort(function(a,b){return a.date.localeCompare(b.date);});
+  localStorage.setItem('hh_sleep_log', JSON.stringify(log));
+
+  renderSleepTracker();
+  updateScore();
+
+  var quality = hrs >= 7.5 ? 'Excellent' : hrs >= 7 ? 'Good' : hrs >= 6 ? 'Fair — try to improve' : 'Poor — raises fasting glucose';
+  alert('Sleep saved: ' + hrs + ' hours — ' + quality);
+}
+
+function renderSleepTracker() {
+  var log = JSON.parse(localStorage.getItem('hh_sleep_log') || '[]');
+
+  // Attach input listeners
+  var bedEl = document.getElementById('sleep-bedtime');
+  var wakeEl = document.getElementById('sleep-waketime');
+  if (bedEl) bedEl.oninput = updateSleepPreview;
+  if (wakeEl) wakeEl.oninput = updateSleepPreview;
+  updateSleepPreview();
+
+  if (log.length === 0) return;
+
+  var last = log[log.length-1];
+  var recent7 = log.filter(function(e){
+    var d = new Date(e.date+'T00:00:00');
+    var c = new Date(); c.setDate(c.getDate()-7);
+    return d >= c;
+  });
+  var avg7 = recent7.length > 0
+    ? parseFloat((recent7.reduce(function(a,e){return a+e.hrs;},0)/recent7.length).toFixed(1))
+    : 0;
+
+  var lastEl = document.getElementById('sleep-last');
+  var avgEl = document.getElementById('sleep-avg');
+  var qualEl = document.getElementById('sleep-quality');
+  if (lastEl) { lastEl.textContent = last.hrs; lastEl.className = 'metric-value '+(last.hrs>=7?'ok':last.hrs>=6?'warn':'bad'); }
+  if (avgEl) { avgEl.textContent = avg7; avgEl.className = 'metric-value '+(avg7>=7?'ok':avg7>=6?'warn':'bad'); }
+  if (qualEl) {
+    var q = last.hrs >= 7.5 ? 'Excellent' : last.hrs >= 7 ? 'Good' : last.hrs >= 6 ? 'Fair' : 'Poor';
+    qualEl.textContent = q;
+    qualEl.className = 'metric-value '+(last.hrs>=7?'ok':last.hrs>=6?'warn':'bad');
+  }
+
+  // Alert
+  var alertEl = document.getElementById('sleep-alert');
+  if (alertEl) {
+    if (last.hrs < 6 && last.date === TODAY) {
+      alertEl.innerHTML = '<div class="alert alert-bad">⚠ Under 6 hours last night — cortisol spikes with poor sleep, directly raising your fasting glucose today. Target 7+ hours tonight.</div>';
+    } else if (avg7 > 0 && avg7 < 6.5) {
+      alertEl.innerHTML = '<div class="alert alert-warn">🟡 7-day average ' + avg7 + ' hours — consistently low sleep is slowing your fat loss and raising fasting glucose. Aim for 7 hours.</div>';
+    } else {
+      alertEl.innerHTML = '';
+    }
+  }
+
+  // Chart
+  var canvas = document.getElementById('sleep-trend-chart');
+  if (canvas && log.length >= 2) {
+    var recent30 = log.slice(-30);
+    var labels = recent30.map(function(e){return e.date.slice(5);});
+    var hours = recent30.map(function(e){return e.hrs;});
+    var target = hours.map(function(){return 7;});
+    drawTrendChart(canvas, labels, [
+      {data:hours, color:'#8b5cf6', label:'Sleep hours', dots:true},
+      {data:target, color:'#10b981', label:'Target 7hrs', dots:false, dashed:true},
+    ], 4, 10, null, null);
+  }
+
+  // History
+  var histEl = document.getElementById('sleep-history');
+  if (histEl) {
+    var recent10 = log.slice(-10).reverse();
+    histEl.innerHTML = '<div style="font-size:11px;color:var(--text3);margin-bottom:4px">Recent sleep:</div>' +
+      recent10.map(function(e) {
+        var q = e.hrs >= 7 ? 'ok' : e.hrs >= 6 ? 'warn' : 'bad';
+        return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px">' +
+          '<span style="color:var(--text3)">' + e.date + '</span>' +
+          '<span><strong class="' + q + '">' + e.hrs + ' hrs</strong> &nbsp;' +
+            (e.bed ? '<span style="font-size:10px;color:var(--text3)">' + e.bed + ' → ' + e.wake + '</span>' : '') +
+          '</span>' +
+        '</div>';
+      }).join('');
+  }
+}
+
+// ═══════════════════════════════════
+// WAIST TRACKER
+// ═══════════════════════════════════
+function seedWaistData() {
+  var log = JSON.parse(localStorage.getItem('hh_waist_log') || '[]');
+  if (log.length === 0) {
+    log = [
+      {date:'2025-09-01', cm:113, vf:null},
+      {date:'2025-10-07', cm:109, vf:12},
+    ];
+    localStorage.setItem('hh_waist_log', JSON.stringify(log));
+  }
+}
+
+function saveWaist() {
+  var date = document.getElementById('waist-date').value || TODAY;
+  var cm = parseFloat(document.getElementById('waist-cm').value);
+  var vf = parseFloat(document.getElementById('waist-vf').value);
+  if (!cm || cm < 50 || cm > 200) { alert('Please enter a valid waist measurement.'); return; }
+
+  var log = JSON.parse(localStorage.getItem('hh_waist_log') || '[]');
+  log = log.filter(function(e){return e.date !== date;});
+  log.push({date:date, cm:cm, vf:vf||null});
+  log.sort(function(a,b){return a.date.localeCompare(b.date);});
+  localStorage.setItem('hh_waist_log', JSON.stringify(log));
+
+  document.getElementById('waist-cm').value = '';
+  document.getElementById('waist-vf').value = '';
+
+  renderWaistTracker();
+  var reduced = 113 - cm;
+  alert('Waist saved: ' + cm + ' cm — reduced ' + reduced.toFixed(1) + ' cm from 113 cm — ' + (cm-90).toFixed(1) + ' cm to target 90');
+}
+
+function renderWaistTracker() {
+  seedWaistData();
+  var log = JSON.parse(localStorage.getItem('hh_waist_log') || '[]');
+  if (log.length === 0) return;
+
+  var latest = log[log.length-1];
+  var reduced = 113 - latest.cm;
+
+  var curEl = document.getElementById('waist-current');
+  var redEl = document.getElementById('waist-reduced');
+  if (curEl) { curEl.textContent = latest.cm + ' cm'; curEl.className = 'metric-value '+(latest.cm<=90?'ok':latest.cm<=100?'warn':'bad'); }
+  if (redEl) { redEl.textContent = reduced.toFixed(1) + ' cm'; redEl.className = 'metric-value '+(reduced>0?'ok':'warn'); }
+
+  // Chart
+  var canvas = document.getElementById('waist-trend-chart');
+  if (canvas && log.length >= 2) {
+    var labels = log.map(function(e){return e.date.slice(5);});
+    var cms = log.map(function(e){return e.cm;});
+    var target = cms.map(function(){return 90;});
+    drawTrendChart(canvas, labels, [
+      {data:cms, color:'#f59e0b', label:'Waist cm', dots:true},
+      {data:target, color:'#10b981', label:'Target 90cm', dots:false, dashed:true},
+    ], 80, 120, null, null);
+  }
+
+  // History
+  var histEl = document.getElementById('waist-history');
+  if (histEl) {
+    histEl.innerHTML = '<div style="font-size:11px;color:var(--text3);margin-bottom:4px">Waist history:</div>' +
+      log.slice().reverse().map(function(e, i, arr) {
+        var prev = arr[i+1];
+        var change = prev ? (e.cm - prev.cm) : 0;
+        return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px">' +
+          '<span style="color:var(--text3)">' + e.date + '</span>' +
+          '<span><strong>' + e.cm + ' cm</strong>' +
+            (prev ? ' <span style="color:'+(change<=0?'var(--green)':'var(--red)')+';font-size:10px">'+(change>0?'+':'')+change.toFixed(1)+'cm</span>' : ' <span style="font-size:10px;color:var(--text3)">(start)</span>') +
+            (e.vf ? ' <span class="tag tag-b" style="font-size:10px">VF: '+e.vf+'</span>' : '') +
+          '</span>' +
+        '</div>';
+      }).join('');
+  }
+}
+
+// ═══════════════════════════════════
+// MOUNJARO EFFECTIVENESS
+// ═══════════════════════════════════
+function renderMounjaroEffectiveness() {
+  var wtLog = JSON.parse(localStorage.getItem('hh_weight_log') || '[]');
+  var mjDoses = JSON.parse(localStorage.getItem('hp_mj_doses2') || '[]');
+
+  // Use known milestone weights matched to injection phases
+  var milestones = [
+    {date:'2025-05-01', wt:97.0, label:'Start (5mg)'},
+    {date:'2025-07-06', wt:93.0, label:'Phase 2 (7.5mg)'},
+    {date:'2025-10-07', wt:88.5, label:'Mid Phase 2'},
+    {date:'2026-02-01', wt:86.0, label:'Phase 3 (10mg)'},
+    {date:'2026-05-11', wt:83.9, label:'Latest'},
+  ];
+
+  // Add any actual weight log data
+  wtLog.forEach(function(e) {
+    var exists = milestones.some(function(m){return m.date === e.date;});
+    if (!exists) milestones.push({date:e.date, wt:e.wt, label:null});
+  });
+  milestones.sort(function(a,b){return a.date.localeCompare(b.date);});
+
+  // Calculate total lost and avg per cycle
+  var totalLost = (97 - 83.9).toFixed(1);
+  var weeksOnMounjaro = Math.round((new Date('2026-05-11') - new Date('2025-05-01')) / (1000*60*60*24*7));
+  var cyclesApprox = Math.round(weeksOnMounjaro / 2.14); // ~15 days per cycle
+  var avgPerCycle = (parseFloat(totalLost) / cyclesApprox).toFixed(2);
+
+  var totalEl = document.getElementById('mj-total-lost');
+  var avgEl = document.getElementById('mj-avg-cycle');
+  if (totalEl) totalEl.textContent = totalLost + ' kg';
+  if (avgEl) avgEl.textContent = avgPerCycle + ' kg';
+
+  // Chart — weight over time with phase markers
+  var canvas = document.getElementById('mj-effectiveness-chart');
+  if (canvas && milestones.length >= 2) {
+    var labels = milestones.map(function(e){return e.date.slice(5);});
+    var weights = milestones.map(function(e){return e.wt;});
+    var target = weights.map(function(){return 75;});
+    drawTrendChart(canvas, labels, [
+      {data:weights, color:'#06b6d4', label:'Weight kg', dots:true},
+      {data:target, color:'#10b981', label:'Target 75kg', dots:false, dashed:true},
+    ], 70, 100, null, null);
+  }
+
+  // Phase table
+  var tableEl = document.getElementById('mj-cycle-table');
+  if (tableEl) {
+    var phases = [
+      {phase:'Phase 1 — 5mg', period:'May-Jul 2025', doses:7, startWt:97.0, endWt:93.0},
+      {phase:'Phase 2 — 7.5-10mg', period:'Jul 2025-Feb 2026', doses:25, startWt:93.0, endWt:86.0},
+      {phase:'Phase 3 — 10mg maint.', period:'Feb 2026-now', doses:7, startWt:86.0, endWt:83.9},
+    ];
+    tableEl.innerHTML = '<div style="font-size:11px;color:var(--text3);margin-bottom:6px">Phase summary:</div>' +
+      phases.map(function(p) {
+        var lost = (p.startWt - p.endWt).toFixed(1);
+        var perDose = (parseFloat(lost)/p.doses).toFixed(2);
+        return '<div style="background:var(--bg3);border-radius:8px;padding:8px;margin-bottom:6px">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center">' +
+            '<div>' +
+              '<div style="font-size:12px;font-weight:600">' + p.phase + '</div>' +
+              '<div style="font-size:10px;color:var(--text3)">' + p.period + ' · ' + p.doses + ' injections</div>' +
+            '</div>' +
+            '<div style="text-align:right">' +
+              '<div style="font-size:14px;font-weight:700;color:var(--green)">-' + lost + ' kg</div>' +
+              '<div style="font-size:10px;color:var(--text3)">' + perDose + ' kg/dose</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('') +
+      '<div style="font-size:11px;color:var(--amber);margin-top:6px">⚠ If weight loss drops below 0.3 kg per cycle for 3 cycles running — flag this to Dr. Lakhani. May indicate dose adjustment needed.</div>';
+  }
+}
+
 function initAll() {
   // Set default dates to today
   try { document.getElementById('v-date').value = TODAY; } catch(e) {}
   try { document.getElementById('v-quick-date').value = TODAY; } catch(e) {}
   try { document.getElementById('chol-date').value = TODAY; } catch(e) {}
+  try { document.getElementById('sleep-date').value = TODAY; } catch(e) {}
+  try { document.getElementById('waist-date').value = TODAY; } catch(e) {}
   try { document.getElementById('m-date').value = TODAY; } catch(e) {}
   try { document.getElementById('ex-date').value = TODAY; } catch(e) {}
   // Set default dates
   try { document.getElementById('v-date').value = TODAY; } catch(e) {}
   try { document.getElementById('v-quick-date').value = TODAY; } catch(e) {}
   try { document.getElementById('chol-date').value = TODAY; } catch(e) {}
+  try { document.getElementById('sleep-date').value = TODAY; } catch(e) {}
+  try { document.getElementById('waist-date').value = TODAY; } catch(e) {}
   try { document.getElementById('m-date').value = TODAY; } catch(e) {}
   try { document.getElementById('ex-date').value = TODAY; } catch(e) {}
   try { document.getElementById('mj-log-date').value = TODAY; } catch(e) {}
@@ -4379,6 +4723,7 @@ function initAll() {
   seedHistoricalData();
   setTimeout(function(){renderWeightTrend(); renderGlucoseTrend(); renderCholesterolTrend(); renderIsabgol();}, 400);
   setTimeout(function(){generateWeeklySummary(0);}, 600);
+  setTimeout(function(){renderSleepTracker(); seedWaistData(); renderWaistTracker(); renderMounjaroEffectiveness();}, 800);
   setTimeout(initCheckin, 1000);
   renderExercise(); renderExDBList();
   renderVitals(); renderWater();
