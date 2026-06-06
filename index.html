@@ -163,7 +163,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v5.0</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v5.1</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -297,9 +297,42 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
   <!-- MEAL SLOTS -->
   <div id="meal-slots-container"></div>
 
+  <!-- EATING OUT QUICK LOG -->
+  <div class="card">
+    <div class="card-title">🍽️ eating out — quick log</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:8px">At airport, office or restaurant — tap a preset to log instantly. All values are estimates ± 15%.</div>
+    <select id="eating-out-slot" style="margin-bottom:8px">
+      <option value="Breakfast">🌅 Breakfast</option>
+      <option value="Morning Snack">🍎 Morning Snack</option>
+      <option value="Lunch" selected>🍱 Lunch</option>
+      <option value="Evening Snack">🥜 Evening Snack</option>
+      <option value="Dinner">🌙 Dinner</option>
+      <option value="Before Sleep">🌛 Before Sleep</option>
+    </select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px" id="eating-out-grid">
+    </div>
+  </div>
+
+  <!-- PORTION COUNTER -->
+  <div class="card">
+    <div class="card-title">🔢 log by count — not weight</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:8px">When you cannot weigh food — count pieces instead.</div>
+    <select id="portion-slot" style="margin-bottom:8px">
+      <option value="Breakfast">🌅 Breakfast</option>
+      <option value="Morning Snack">🍎 Morning Snack</option>
+      <option value="Lunch" selected>🍱 Lunch</option>
+      <option value="Evening Snack">🥜 Evening Snack</option>
+      <option value="Dinner">🌙 Dinner</option>
+      <option value="Before Sleep">🌛 Before Sleep</option>
+    </select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px" id="portion-grid">
+    </div>
+    <div id="portion-selected" style="margin-top:8px"></div>
+  </div>
+
   <!-- LOG FOOD PANEL -->
   <div class="card" id="log-food-card">
-    <div class="card-title" id="log-food-title">log food</div>
+    <div class="card-title" id="log-food-title">log food — by weight</div>
     <label>Date</label>
     <input type="date" id="m-date">
     <label>Meal slot</label>
@@ -1479,6 +1512,7 @@ function logSelectedFood() {
   document.getElementById('food-search').value = '';
   document.getElementById('food-selected-panel').classList.add('hidden');
   renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert(); updateDeficitCard();
+  renderEatingOutGrid(); renderPortionGrid();
   showDaySummary(TODAY);
   showWeekAverage();
   renderExercise();
@@ -1488,6 +1522,174 @@ function logSelectedFood() {
   setTimeout(function(){renderSleepTracker(); seedWaistData(); renderWaistTracker(); renderMounjaroEffectiveness();}, 800);
   setTimeout(initCheckin, 1000); updateScore(); showNutritionAlert();
   alert('Logged: ' + entry.name + ' (' + entry.grams + 'g) — ' + entry.cal + ' kcal');
+}
+
+function renderEatingOutGrid() {
+  var grid = document.getElementById('eating-out-grid');
+  if (!grid) return;
+  grid.innerHTML = EATING_OUT_PRESETS.map(function(p, idx) {
+    return '<button data-idx="' + idx + '" onclick="logEatingOut(parseInt(this.dataset.idx))" style="text-align:left;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);cursor:pointer;font-size:11px">' +
+      '<div style="font-weight:600;color:var(--text);margin-bottom:2px">' + p.label + '</div>' +
+      '<div style="color:var(--accent)">' + p.cal + ' kcal · P:' + p.p + 'g</div>' +
+      '<div style="font-size:9px;color:var(--text3)">' + p.note + '</div>' +
+    '</button>';
+  }).join('');
+}
+
+function logEatingOut(idx) {
+  var p = EATING_OUT_PRESETS[idx];
+  if (!p) return;
+  var slot = document.getElementById('eating-out-slot');
+  var slotVal = slot ? slot.value : 'Lunch';
+  var dateEl = document.getElementById('m-date');
+  var date = dateEl ? (dateEl.value || TODAY) : TODAY;
+
+  var entry = {
+    date: date,
+    time: new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
+    type: slotVal,
+    name: p.label + ' (est.)',
+    grams: 0,
+    unit: 'portion',
+    cal: p.cal, p: p.p, c: p.c, f: p.f, sat: p.sat, fi: p.fi,
+  };
+
+  var logs = JSON.parse(localStorage.getItem('hh_meals') || '[]');
+  logs.unshift(entry);
+  localStorage.setItem('hh_meals', JSON.stringify(logs));
+  renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert();
+  showDaySummary(TODAY); showWeekAverage(); updateDeficitCard();
+  alert('Logged: ' + p.label + ' — ' + p.cal + ' kcal to ' + slotVal + ' (estimated)');
+}
+
+function renderPortionGrid() {
+  var grid = document.getElementById('portion-grid');
+  if (!grid) return;
+
+  var commonPortions = [
+    {name:'Roti', key:'roti', icon:'🫓'},
+    {name:'Idli', key:'idli', icon:'🍚'},
+    {name:'Dosa', key:'dosa', icon:'🥞'},
+    {name:'Samosa', key:'samosa', icon:'🔺'},
+    {name:'Aloo vada', key:'aloo vada', icon:'🟡'},
+    {name:'Egg (whole)', key:'egg whole', icon:'🥚'},
+    {name:'Egg white', key:'egg white', icon:'🥚'},
+    {name:'Walnut half', key:'walnut half', icon:'🌰'},
+    {name:'Almond', key:'almond', icon:'🥜'},
+    {name:'Brazil nut', key:'brazil nut', icon:'🌰'},
+    {name:'Glass milk', key:'glass milk', icon:'🥛'},
+    {name:'Cup chai', key:'cup tea', icon:'☕'},
+    {name:'Papad', key:'papad', icon:'🫓'},
+    {name:'Banana (medium)', key:'banana medium', icon:'🍌'},
+    {name:'Apple (medium)', key:'apple medium', icon:'🍎'},
+    {name:'Orange', key:'orange medium', icon:'🍊'},
+    {name:'Katori dal', key:'katori dal', icon:'🥣'},
+    {name:'Katori rice', key:'katori rice', icon:'🍚'},
+    {name:'Scoop whey', key:'scoop', icon:'💪'},
+  ];
+
+  grid.innerHTML = commonPortions.map(function(item) {
+    var pu = PORTION_UNITS[item.key];
+    if (!pu) return '';
+    return '<button data-key="' + item.key + '" onclick="openPortionCounter(this.dataset.key)" style="text-align:center;padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);cursor:pointer">' +
+      '<div style="font-size:20px">' + item.icon + '</div>' +
+      '<div style="font-size:10px;font-weight:600;color:var(--text);margin-top:2px">' + item.name + '</div>' +
+      '<div style="font-size:9px;color:var(--text3)">' + pu.label + '</div>' +
+    '</button>';
+  }).join('');
+}
+
+function openPortionCounter(key) {
+  var pu = PORTION_UNITS[key];
+  if (!pu) return;
+
+  var panel = document.getElementById('portion-selected');
+  if (!panel) return;
+
+  panel.innerHTML =
+    '<div style="background:var(--bg3);border-radius:10px;padding:12px">' +
+      '<div style="font-size:13px;font-weight:700;margin-bottom:6px">' + key.charAt(0).toUpperCase() + key.slice(1) + '</div>' +
+      '<div style="font-size:11px;color:var(--text3);margin-bottom:10px">' + pu.label + '</div>' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">' +
+        '<button onclick="changePortionCount(-1)" style="width:36px;height:36px;border-radius:50%;border:2px solid var(--border);background:var(--bg2);font-size:20px;cursor:pointer;color:var(--text)">−</button>' +
+        '<div style="flex:1;text-align:center">' +
+          '<div style="font-size:28px;font-weight:800;color:var(--accent)" id="portion-count">1</div>' +
+          '<div style="font-size:11px;color:var(--text3)" id="portion-grams">' + pu.grams + 'g total</div>' +
+        '</div>' +
+        '<button onclick="changePortionCount(1)" style="width:36px;height:36px;border-radius:50%;border:2px solid var(--border);background:var(--bg2);font-size:20px;cursor:pointer;color:var(--text)">+</button>' +
+      '</div>' +
+      '<div style="font-size:11px;color:var(--text2);text-align:center;margin-bottom:10px" id="portion-cal-preview">Calculating...</div>' +
+      '<button class="btn btn-green" data-key="' + key + '" onclick="logPortionEntry(this.dataset.key)">Log this</button>' +
+    '</div>';
+
+  window._portionCount = 1;
+  window._portionKey = key;
+  updatePortionPreview(key, 1);
+  panel.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function changePortionCount(delta) {
+  window._portionCount = Math.max(0.5, (window._portionCount || 1) + delta);
+  updatePortionPreview(window._portionKey, window._portionCount);
+}
+
+function updatePortionPreview(key, count) {
+  var pu = PORTION_UNITS[key];
+  if (!pu) return;
+  var totalGrams = Math.round(pu.grams * count);
+
+  var countEl = document.getElementById('portion-count');
+  var gramsEl = document.getElementById('portion-grams');
+  var calEl = document.getElementById('portion-cal-preview');
+
+  if (countEl) countEl.textContent = count;
+  if (gramsEl) gramsEl.textContent = totalGrams + 'g total';
+
+  // Find nutrition from food DB
+  var foodName = key;
+  var results = searchFoodSmart(foodName.split(' ')[0]);
+  if (results.length > 0) {
+    var f = results[0];
+    var factor = totalGrams / (f.grams || 100);
+    var cal = Math.round(f.cal * factor);
+    var prot = parseFloat((f.p * factor).toFixed(1));
+    if (calEl) calEl.textContent = cal + ' kcal · ' + prot + 'g protein · ' + totalGrams + 'g';
+    window._portionNutrition = {cal:cal, p:prot, c:parseFloat((f.c*factor).toFixed(1)), f:parseFloat((f.f*factor).toFixed(1)), sat:parseFloat((f.sat*factor).toFixed(1)), fi:parseFloat(((f.fi||0)*factor).toFixed(1)), grams:totalGrams};
+  } else {
+    if (calEl) calEl.textContent = totalGrams + 'g — nutrition not found, will log without values';
+    window._portionNutrition = {cal:0, p:0, c:0, f:0, sat:0, fi:0, grams:totalGrams};
+  }
+}
+
+function logPortionEntry(key) {
+  var pu = PORTION_UNITS[key];
+  if (!pu) return;
+  var n = window._portionNutrition || {cal:0,p:0,c:0,f:0,sat:0,fi:0,grams:pu.grams};
+  var count = window._portionCount || 1;
+  var slot = document.getElementById('portion-slot');
+  var slotVal = slot ? slot.value : 'Lunch';
+  var dateEl = document.getElementById('m-date');
+  var date = dateEl ? (dateEl.value || TODAY) : TODAY;
+  var unitLabel = count + ' ' + pu.unit + (count > 1 ? 's' : '');
+
+  var entry = {
+    date: date,
+    time: new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
+    type: slotVal,
+    name: key.charAt(0).toUpperCase() + key.slice(1) + ' (' + unitLabel + ')',
+    grams: n.grams,
+    unit: pu.unit,
+    cal: n.cal, p: n.p, c: n.c, f: n.f, sat: n.sat, fi: n.fi,
+  };
+
+  var logs = JSON.parse(localStorage.getItem('hh_meals') || '[]');
+  logs.unshift(entry);
+  localStorage.setItem('hh_meals', JSON.stringify(logs));
+  renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert();
+  showDaySummary(TODAY); showWeekAverage(); updateDeficitCard();
+
+  document.getElementById('portion-selected').innerHTML = '';
+  alert('Logged: ' + unitLabel + ' ' + key + (n.cal > 0 ? ' — ' + n.cal + ' kcal' : '') + ' to ' + slotVal);
 }
 
 function renderMeals() {
@@ -1534,6 +1736,7 @@ function deleteMeal(idx) {
   logs = logs.filter(l => l !== toDelete);
   localStorage.setItem('hh_meals', JSON.stringify(logs));
   renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert(); updateDeficitCard();
+  renderEatingOutGrid(); renderPortionGrid();
   showDaySummary(TODAY);
   showWeekAverage();
   renderExercise();
@@ -4410,7 +4613,7 @@ function generateWorkoutPlan() {
     html += '<div style="font-size:10px;color:var(--green);margin-left:8px;margin-top:3px">Cooldown: ' + (plan.cooldown||[]).join(' · ') + '</div>';
     html += '</div>';
   });
-  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v5.0</div>';
+  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v5.1</div>';
   html += '</div>';
   el.innerHTML = html;
 }
@@ -4947,6 +5150,89 @@ function searchUSDA(query, callback) {
     .catch(function(){callback([]);});
 }
 
+// ═══════════════════════════════════
+// PORTION UNITS — natural counting units
+// Weight = grams per unit for auto-conversion
+// ═══════════════════════════════════
+const PORTION_UNITS = {
+  // Breads and grains
+  'roti': {unit:'roti', grams:30, label:'1 roti = 30g'},
+  'chapati': {unit:'chapati', grams:30, label:'1 chapati = 30g'},
+  'paratha': {unit:'paratha', grams:70, label:'1 paratha = 70g'},
+  'idli': {unit:'idli', grams:40, label:'1 idli = 40g'},
+  'dosa': {unit:'dosa', grams:80, label:'1 dosa = 80g'},
+  'scoop': {unit:'scoop', grams:30, label:'1 scoop whey = 30g'},
+  'slice': {unit:'slice', grams:25, label:'1 bread slice = 25g'},
+
+  // Nuts — per piece
+  'brazil nut': {unit:'nut', grams:5, label:'1 Brazil nut = 5g'},
+  'walnut half': {unit:'half', grams:3.5, label:'1 walnut half = 3.5g'},
+  'walnut whole': {unit:'whole', grams:7, label:'1 whole walnut = 7g'},
+  'almond': {unit:'almond', grams:1.4, label:'1 almond = 1.4g'},
+
+  // Eggs
+  'egg whole': {unit:'egg', grams:60, label:'1 whole egg = 60g'},
+  'egg white': {unit:'white', grams:30, label:'1 egg white = 30g'},
+
+  // Street food
+  'samosa': {unit:'samosa', grams:90, label:'1 samosa = 90g'},
+  'aloo vada': {unit:'piece', grams:80, label:'1 aloo vada = 80g'},
+  'papad': {unit:'papad', grams:10, label:'1 papad = 10g'},
+  'idli': {unit:'idli', grams:40, label:'1 idli = 40g'},
+
+  // Liquids
+  'glass milk': {unit:'glass', grams:200, label:'1 glass = 200ml'},
+  'cup tea': {unit:'cup', grams:180, label:'1 cup = 180ml'},
+  'cup coffee': {unit:'cup', grams:180, label:'1 cup = 180ml'},
+
+  // Fruits — small/medium/large
+  'banana small': {unit:'small', grams:60, label:'1 small banana = 60g'},
+  'banana medium': {unit:'medium', grams:90, label:'1 medium banana = 90g'},
+  'banana large': {unit:'large', grams:120, label:'1 large banana = 120g'},
+  'apple small': {unit:'small', grams:100, label:'1 small apple = 100g'},
+  'apple medium': {unit:'medium', grams:150, label:'1 medium apple = 150g'},
+  'guava small': {unit:'small', grams:80, label:'1 small guava = 80g'},
+  'guava medium': {unit:'medium', grams:120, label:'1 medium guava = 120g'},
+  'orange medium': {unit:'orange', grams:120, label:'1 medium orange = 120g'},
+
+  // Portions
+  'katori dal': {unit:'katori', grams:150, label:'1 katori dal = 150g'},
+  'katori rice': {unit:'katori', grams:120, label:'1 katori rice = 120g'},
+  'katori sabzi': {unit:'katori', grams:100, label:'1 katori sabzi = 100g'},
+  'katori raita': {unit:'katori', grams:150, label:'1 katori raita = 150g'},
+};
+
+// EATING OUT ESTIMATOR
+const EATING_OUT_PRESETS = [
+  {label:'Indian thali (restaurant)', cal:750, p:22, c:110, f:22, sat:6, fi:8, note:'2 rotis + dal + 2 sabzis + rice + raita — estimated'},
+  {label:'Indian thali (small/light)', cal:500, p:15, c:75, f:14, sat:4, fi:6, note:'1 roti + dal + sabzi + curd — estimated'},
+  {label:'Dal rice (restaurant)', cal:480, p:14, c:85, f:8, sat:1.5, fi:7, note:'Dal makhani + rice — estimated'},
+  {label:'Veg biryani (restaurant)', cal:550, p:10, c:90, f:14, sat:3, fi:4, note:'Portion = 350g approx — estimated'},
+  {label:'Airport sandwich (veg)', cal:350, p:10, c:45, f:12, sat:2, fi:3, note:'Standard airport veg sandwich — estimated'},
+  {label:'Airport salad box', cal:200, p:6, c:28, f:7, sat:1, fi:5, note:'Mixed veg salad with dressing — estimated'},
+  {label:'Office canteen lunch (veg)', cal:520, p:16, c:80, f:12, sat:3, fi:6, note:'Typical office meal — estimated'},
+  {label:'Fruit plate (medium)', cal:120, p:2, c:30, f:0.5, sat:0, fi:4, note:'Mixed seasonal fruits — estimated'},
+  {label:'Chai with milk (1 cup)', cal:60, p:2, c:8, f:2, sat:1.2, fi:0, note:'Standard Indian tea with milk + sugar'},
+  {label:'Black coffee / green tea', cal:5, p:0, c:1, f:0, sat:0, fi:0, note:'Without milk or sugar'},
+  {label:'Masala chai (1 cup)', cal:80, p:2, c:10, f:3, sat:1.8, fi:0, note:'With milk and sugar — estimated'},
+  {label:'Butter naan (1 piece)', cal:260, p:6, c:42, f:8, sat:3.5, fi:2, note:'Restaurant naan with butter — estimated'},
+  {label:'Paneer tikka (6 pieces)', cal:320, p:18, c:8, f:24, sat:8, fi:1, note:'Grilled paneer starter — estimated'},
+  {label:'Veg soup (bowl)', cal:80, p:3, c:14, f:1.5, sat:0.3, fi:3, note:'Clear veg or tomato soup — estimated'},
+  {label:'Mixed dry nuts (small pack)', cal:180, p:5, c:8, f:15, sat:2, fi:2, note:'Airline or airport nut pack ~30g — estimated'},
+];
+
+function showPortionHelper(foodName) {
+  // Find matching portion units
+  var matches = [];
+  var nameLower = foodName.toLowerCase();
+  Object.keys(PORTION_UNITS).forEach(function(key) {
+    if (key.includes(nameLower) || nameLower.includes(key.split(' ')[0])) {
+      matches.push({key:key, ...PORTION_UNITS[key]});
+    }
+  });
+  return matches;
+}
+
 function initAll() {
   // Set default dates to today
   try { document.getElementById('v-date').value = TODAY; } catch(e) {}
@@ -4966,6 +5252,7 @@ function initAll() {
   try { document.getElementById('ex-date').value = TODAY; } catch(e) {}
   try { document.getElementById('mj-log-date').value = TODAY; } catch(e) {}
   renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert(); updateDeficitCard();
+  renderEatingOutGrid(); renderPortionGrid();
   showDaySummary(TODAY);
   showWeekAverage();
   renderExercise();
