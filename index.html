@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Hemant Health v8.0</title>
+<title>Hemant Health v8.1</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -166,7 +166,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v8.0</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v8.1</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -3431,7 +3431,7 @@ function showCheckin() {
   MEDS.forEach(function(m, idx) {
     var isTaken = taken[m.id] !== false;
     medHTML += '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">' +
-      '<div class="med-tick ' + (isTaken ? 'done' : '') + '" id="ci-med-' + idx + '" data-idx="' + idx + '" onclick="toggleCIMed(' + idx + ')" style="width:26px;height:26px;border-radius:50%;border:2px solid ' + (isTaken ? 'var(--green)' : 'var(--border)') + ';background:' + (isTaken ? 'var(--green)' : 'transparent') + ';display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:14px;color:white">' +
+      '<div class="med-tick ' + (isTaken ? 'done' : '') + '" id="ci-med-' + idx + '" data-idx="' + idx + '" data-done="' + (isTaken ? '1' : '0') + '" onclick="toggleCIMed(' + idx + ')" style="width:26px;height:26px;border-radius:50%;border:2px solid ' + (isTaken ? 'var(--green)' : 'var(--border)') + ';background:' + (isTaken ? 'var(--green)' : 'transparent') + ';display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:14px;color:white">' +
       (isTaken ? '✓' : '') + '</div>' +
       '<div style="font-size:12px">' + m.name + '<div style="font-size:10px;color:var(--text3)">' + m.time + '</div></div>' +
       '</div>';
@@ -3471,20 +3471,24 @@ function toggleCIIsabgol(meal) {
 function toggleCIMed(idx) {
   var el = document.getElementById('ci-med-' + idx);
   if (!el) return;
-  var isDone = el.classList.contains('done');
-  if (isDone) {
-    el.classList.remove('done');
-    el.innerHTML = '';
-    el.style.background = 'transparent';
-    el.style.borderColor = 'var(--border)';
-    el.style.color = 'white';
-  } else {
-    el.classList.add('done');
-    el.innerHTML = '✓';
-    el.style.background = 'var(--green)';
-    el.style.borderColor = 'var(--green)';
-    el.style.color = 'white';
-  }
+
+  // Use data attribute as source of truth — not class
+  var isDone = el.getAttribute('data-done') === '1';
+  var newDone = !isDone;
+
+  el.setAttribute('data-done', newDone ? '1' : '0');
+  el.innerHTML = newDone ? '✓' : '';
+  el.style.background = newDone ? 'var(--green)' : 'transparent';
+  el.style.borderColor = newDone ? 'var(--green)' : 'var(--border)';
+
+  // Save immediately to localStorage
+  var taken = {};
+  MEDS.forEach(function(m, i) {
+    var btn = document.getElementById('ci-med-' + i);
+    taken[m.id] = btn ? btn.getAttribute('data-done') === '1' : true;
+  });
+  localStorage.setItem('hh_meds_' + TODAY, JSON.stringify(taken));
+  updateScore();
 }
 
 function selectWater(btn, ml) {
@@ -3554,7 +3558,7 @@ function saveCheckin() {
   var taken = {};
   MEDS.forEach(function(m, idx) {
     var el = document.getElementById('ci-med-' + idx);
-    taken[m.id] = el ? el.classList.contains('done') : true;
+    taken[m.id] = el ? el.getAttribute('data-done') === '1' : true;
   });
   localStorage.setItem('hh_meds_' + TODAY, JSON.stringify(taken));
 
@@ -4988,7 +4992,7 @@ function generateWorkoutPlan() {
     html += '<div style="font-size:10px;color:var(--green);margin-left:8px;margin-top:3px">Cooldown: ' + (plan.cooldown||[]).join(' · ') + '</div>';
     html += '</div>';
   });
-  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v8.0</div>';
+  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v8.1</div>';
   html += '</div>';
   el.innerHTML = html;
 }
