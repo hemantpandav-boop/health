@@ -163,7 +163,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v6.9</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v7.0</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -4959,7 +4959,7 @@ function generateWorkoutPlan() {
     html += '<div style="font-size:10px;color:var(--green);margin-left:8px;margin-top:3px">Cooldown: ' + (plan.cooldown||[]).join(' · ') + '</div>';
     html += '</div>';
   });
-  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v6.9</div>';
+  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v7.0</div>';
   html += '</div>';
   el.innerHTML = html;
 }
@@ -5331,234 +5331,133 @@ function renderMounjaroEffectiveness() {
 // NET DEFICIT CARD
 // ═══════════════════════════════════
 function updateDeficitCard() {
+  updateDailyTDEE();
+}
+
+function updateDailyTDEE() {
   var today = new Date().toISOString().split('T')[0];
+  var BMR = 1609;
 
-  // Food calories
-  var meals = JSON.parse(localStorage.getItem('hh_meals') || '[]');
-  var foodCals = meals.filter(function(l){return l.date===today;}).reduce(function(a,l){return a+l.cal;},0);
-
-  // Walk calories — from dedicated walk tracker (new system)
+  // Walk calories from walk tracker
   var walkSessions = JSON.parse(localStorage.getItem('hh_walks') || '[]');
   var todayWalks = walkSessions.filter(function(s){return s.date===today;});
-  var walkCalsFromTracker = todayWalks.reduce(function(a,s){return a+(s.cals||0);},0);
-  var walkStepsFromTracker = todayWalks.reduce(function(a,s){return a+(s.steps||0);},0);
+  var walkCals = todayWalks.reduce(function(a,s){return a+(s.cals||0);},0);
+  var walkSteps = todayWalks.reduce(function(a,s){return a+(s.steps||0);},0);
+  var walkDur = todayWalks.reduce(function(a,s){return a+(s.dur||0);},0);
 
-  // Fallback: check-in steps if walk tracker not used
-  var vitals = JSON.parse(localStorage.getItem('hh_vitals') || '[]');
-  var todayV = vitals.find(function(v){return v.date===today;}) || {};
-  var walkCalsFromCheckin = todayV.walkCals || 0;
-
-  // Use walk tracker first, then check-in fallback
-  var walkCals = walkCalsFromTracker > 0 ? walkCalsFromTracker : walkCalsFromCheckin;
-  var walkCalsFromSteps = walkCals; // for display label
-
-  // Exercise calories — pure gym/strength work only (walks removed from plans)
+  // Exercise calories from exercise log
   var exLogs = JSON.parse(localStorage.getItem('hh_exercise') || '[]');
   var todayEx = exLogs.filter(function(l){return l.date===today;});
-  var walkCalsFromEx = 0;
-  var otherExCals = todayEx.reduce(function(a,l){return a+(l.cals||0);},0);
-  var exCals = otherExCals;
+  var exCals = todayEx.reduce(function(a,l){return a+(l.cals||0);},0);
 
-  // Net
-  // Deficit = TDEE - food eaten. Walk and exercise already in TDEE.
-  var net = foodCals;
-  var deficit = 2220 - foodCals;
+  // Food calories from meal log
+  var meals = JSON.parse(localStorage.getItem('hh_meals') || '[]');
+  var todayMeals = meals.filter(function(l){return l.date===today;});
+  var foodCals = todayMeals.reduce(function(a,l){return a+l.cal;},0);
 
+  // Real TDEE = BMR + walk + exercise
+  var realTDEE = BMR + walkCals + exCals;
+
+  // Deficit = TDEE - food eaten
+  var deficit = realTDEE - foodCals;
+  var deficitPct = foodCals > 0 ? Math.round((deficit / realTDEE) * 100) : 0;
+  var fatLossG = deficit > 0 ? parseFloat((deficit / 7700 * 1000).toFixed(0)) : 0;
+
+  // Update BMR card elements
+  var walkCalEl = document.getElementById('tdee-walk-cals');
+  var walkSubEl = document.getElementById('tdee-walk-sub');
+  var exCalEl = document.getElementById('tdee-ex-cals');
+  var exSubEl = document.getElementById('tdee-ex-sub');
+  var tdeeEl = document.getElementById('tdee-today');
+  var ateEl = document.getElementById('tdee-ate');
+  var defEl = document.getElementById('tdee-deficit');
+  var defSubEl = document.getElementById('tdee-deficit-sub');
+  var noteEl = document.getElementById('tdee-note');
+
+  if (walkCalEl) {
+    walkCalEl.textContent = walkCals > 0 ? walkCals + ' kcal' : '-- kcal';
+    walkCalEl.className = 'metric-value ' + (walkCals >= 150 ? 'ok' : walkCals > 0 ? 'warn' : 'info');
+  }
+  if (walkSubEl) {
+    walkSubEl.textContent = walkCals > 0
+      ? (walkSteps > 0 ? walkSteps.toLocaleString() + ' steps · ' : '') + walkDur + ' min'
+      : 'log walk above';
+  }
+
+  if (exCalEl) {
+    exCalEl.textContent = exCals > 0 ? exCals + ' kcal' : '-- kcal';
+    exCalEl.className = 'metric-value ' + (exCals >= 200 ? 'ok' : exCals > 0 ? 'warn' : 'info');
+  }
+  if (exSubEl) {
+    exSubEl.textContent = exCals > 0
+      ? todayEx.length + ' exercise' + (todayEx.length > 1 ? 's' : '') + ' logged'
+      : 'log exercise tab';
+  }
+
+  if (tdeeEl) {
+    tdeeEl.textContent = realTDEE.toLocaleString();
+    tdeeEl.className = 'metric-value info';
+  }
+
+  if (ateEl) {
+    ateEl.textContent = foodCals > 0 ? foodCals + ' kcal' : '-- kcal';
+    ateEl.className = 'metric-value ' + (foodCals <= 1520 ? 'ok' : foodCals <= 1700 ? 'warn' : 'bad');
+  }
+
+  if (defEl) {
+    if (foodCals === 0) {
+      defEl.textContent = '--';
+      defEl.className = 'metric-value info';
+      if (defSubEl) defSubEl.textContent = 'log meals to see deficit';
+    } else if (deficit > 0) {
+      defEl.textContent = deficit + ' kcal';
+      defEl.className = 'metric-value ok';
+      if (defSubEl) defSubEl.textContent = '≈ ' + fatLossG + 'g fat burned today';
+    } else {
+      defEl.textContent = '+' + Math.abs(deficit) + ' kcal surplus';
+      defEl.className = 'metric-value bad';
+      if (defSubEl) defSubEl.textContent = 'over TDEE today';
+    }
+  }
+
+  // Note text
+  if (noteEl && foodCals > 0 && (walkCals > 0 || exCals > 0)) {
+    var weeklyKg = parseFloat((deficit * 7 / 7700).toFixed(2));
+    noteEl.textContent = 'At today rate — deficit ' + deficit + ' kcal — you would lose ' + weeklyKg + ' kg this week. TDEE grows when you are more active.';
+    noteEl.style.color = deficit > 0 ? 'var(--green)' : 'var(--red)';
+  } else if (noteEl && foodCals === 0) {
+    noteEl.textContent = 'Log your meals and activity to see your real daily deficit.';
+    noteEl.style.color = 'var(--text3)';
+  } else if (noteEl) {
+    noteEl.textContent = 'BMR 1,609 kcal is your resting burn. Log walks and exercise to see your full TDEE.';
+    noteEl.style.color = 'var(--text3)';
+  }
+
+  // Also update the deficit card on Home
   var foodEl = document.getElementById('deficit-food');
   var walkEl = document.getElementById('deficit-walk');
   var exEl = document.getElementById('deficit-exercise');
   var netEl = document.getElementById('deficit-net');
   var statusEl = document.getElementById('deficit-status');
 
-  if (foodEl) foodEl.textContent = foodCals + ' kcal';
-  // Walk and exercise info shown as reference only — already inside TDEE
-  var walkInfo = walkCalsFromTracker > 0 ? (walkStepsFromTracker > 0 ? walkStepsFromTracker.toLocaleString() + ' steps logged' : todayWalks.length + ' session(s) logged') : walkCalsFromCheckin > 0 ? 'logged via check-in' : 'not logged yet';
-  if (walkEl) walkEl.textContent = walkInfo;
-  if (exEl) exEl.textContent = exCals > 0 ? exCals + ' kcal logged' : 'not logged yet';
+  if (foodEl) foodEl.textContent = foodCals > 0 ? foodCals + ' kcal' : '-- kcal';
+  if (walkEl) walkEl.textContent = walkCals > 0
+    ? (walkSteps > 0 ? walkSteps.toLocaleString() + ' steps · ' : '') + walkCals + ' kcal'
+    : 'not logged yet';
+  if (exEl) exEl.textContent = exCals > 0 ? exCals + ' kcal · ' + todayEx.length + ' exercises' : 'not logged yet';
   if (netEl) {
-    netEl.textContent = foodCals + ' kcal';
-    netEl.style.color = foodCals <= 1520 ? 'var(--green)' : foodCals <= 1700 ? 'var(--amber)' : 'var(--red)';
+    netEl.textContent = foodCals > 0 ? foodCals + ' kcal eaten' : '-- kcal';
+    if (netEl.style) netEl.style.color = foodCals <= 1520 ? 'var(--green)' : foodCals <= 1700 ? 'var(--amber)' : 'var(--red)';
   }
   if (statusEl && foodCals > 0) {
-    if (deficit >= 700) statusEl.textContent = 'Deficit: ' + deficit + ' kcal — on target';
-    else if (deficit >= 400) statusEl.textContent = 'Deficit: ' + deficit + ' kcal — slightly over diet target';
-    else if (deficit >= 0) statusEl.textContent = 'Deficit: ' + deficit + ' kcal — close to TDEE';
-    else statusEl.textContent = 'Surplus: +' + Math.abs(deficit) + ' kcal — over TDEE today';
+    if (deficit >= 500) statusEl.textContent = 'Great deficit: ' + deficit + ' kcal — strong fat loss day';
+    else if (deficit >= 200) statusEl.textContent = 'Good deficit: ' + deficit + ' kcal';
+    else if (deficit >= 0) statusEl.textContent = 'Small deficit: ' + deficit + ' kcal — add more activity';
+    else statusEl.textContent = 'Surplus: +' + Math.abs(deficit) + ' kcal over TDEE today';
   }
 }
 
-// ═══════════════════════════════════
-// EXTENDED INDIAN FOOD DATABASE
-// Source: NIN India Food Composition Tables
-// ═══════════════════════════════════
-const INDIAN_FOODS_DB = [
-  // ── BREADS ──
-  {name:'Chapati / Roti (wheat)',cal:104,p:3.1,c:18.4,f:2.5,sat:0.4,fi:1.9,unit:'piece',grams:40},
-  {name:'Paratha (plain)',cal:200,p:4.2,c:28,f:8,sat:1.2,fi:2,unit:'piece',grams:70},
-  {name:'Paratha (aloo stuffed)',cal:220,p:4.5,c:32,f:8.5,sat:1.3,fi:2.5,unit:'piece',grams:80},
-  {name:'Naan (plain)',cal:262,p:8.7,c:45,f:5,sat:0.7,fi:1.6,unit:'piece',grams:90},
-  {name:'Naan (butter)',cal:320,p:8.7,c:45,f:9,sat:3,fi:1.6,unit:'piece',grams:90},
-  {name:'Puri (fried)',cal:180,p:3,c:22,f:9,sat:1.5,fi:1,unit:'piece',grams:45},
-  {name:'Bhatura',cal:300,p:7,c:42,f:12,sat:2,fi:1.5,unit:'piece',grams:90},
-  // ── RICE ──
-  {name:'Rice cooked (white)',cal:130,p:2.7,c:28,f:0.3,sat:0.1,fi:0.4,unit:'100g',grams:100},
-  {name:'Brown rice cooked',cal:111,p:2.6,c:23,f:0.9,sat:0.2,fi:1.8,unit:'100g',grams:100},
-  {name:'Basmati rice cooked',cal:121,p:2.5,c:26,f:0.4,sat:0.1,fi:0.4,unit:'100g',grams:100},
-  {name:'Jeera rice',cal:180,p:3,c:32,f:5,sat:0.8,fi:0.5,unit:'100g',grams:100},
-  {name:'Veg biryani',cal:160,p:4,c:28,f:4,sat:0.8,fi:2,unit:'100g',grams:100},
-  // ── DALS ──
-  {name:'Toor dal cooked',cal:118,p:6.8,c:20,f:0.4,sat:0.1,fi:5.7,unit:'100g',grams:100},
-  {name:'Moong dal cooked',cal:105,p:7.0,c:19,f:0.4,sat:0.1,fi:7.6,unit:'100g',grams:100},
-  {name:'Chana dal cooked',cal:164,p:8.9,c:27,f:2.7,sat:0.3,fi:8,unit:'100g',grams:100},
-  {name:'Masoor dal cooked',cal:116,p:9,c:20,f:0.4,sat:0.1,fi:7.9,unit:'100g',grams:100},
-  {name:'Urad dal cooked',cal:105,p:7.5,c:18,f:0.5,sat:0.1,fi:6,unit:'100g',grams:100},
-  {name:'Dal makhani',cal:140,p:6.5,c:17,f:5.5,sat:2.5,fi:5,unit:'100g',grams:100},
-  {name:'Panchratni dal cooked',cal:107,p:7.4,c:17,f:1.8,sat:0.3,fi:5,unit:'100g',grams:100},
-  // ── LEGUMES ──
-  {name:'Rajma cooked',cal:127,p:8.7,c:22.8,f:0.5,sat:0.1,fi:6.4,unit:'100g',grams:100},
-  {name:'Kabuli chana cooked',cal:164,p:8.9,c:27.4,f:2.6,sat:0.3,fi:7.6,unit:'100g',grams:100},
-  {name:'Kala chana cooked',cal:168,p:8.9,c:28,f:2.6,sat:0.3,fi:8,unit:'100g',grams:100},
-  {name:'Sabut moong cooked',cal:105,p:7.0,c:19,f:0.4,sat:0.1,fi:7.6,unit:'100g',grams:100},
-  {name:'Sprouted moong',cal:30,p:3.0,c:5.9,f:0.2,sat:0,fi:1.8,unit:'100g',grams:100},
-  {name:'Mixed sprouts',cal:97,p:9,c:17,f:0.5,sat:0.1,fi:3.8,unit:'100g',grams:100},
-  // ── VEGETABLES ──
-  {name:'Palak spinach cooked',cal:23,p:2.9,c:3.6,f:0.4,sat:0.1,fi:2.4,unit:'100g',grams:100},
-  {name:'Bhindi okra cooked',cal:33,p:1.9,c:7.4,f:0.2,sat:0,fi:3.2,unit:'100g',grams:100},
-  {name:'Gobi cauliflower cooked',cal:25,p:1.9,c:4.9,f:0.3,sat:0,fi:2.5,unit:'100g',grams:100},
-  {name:'Aloo potato boiled',cal:87,p:1.9,c:20,f:0.1,sat:0,fi:1.8,unit:'100g',grams:100},
-  {name:'Methi fenugreek cooked',cal:49,p:4.4,c:6,f:0.9,sat:0.2,fi:2.7,unit:'100g',grams:100},
-  {name:'Brinjal baingan cooked',cal:25,p:1,c:5.9,f:0.2,sat:0,fi:2.5,unit:'100g',grams:100},
-  {name:'Karela bitter gourd',cal:17,p:1,c:3.7,f:0.2,sat:0,fi:2.8,unit:'100g',grams:100},
-  {name:'Lauki bottle gourd cooked',cal:15,p:0.6,c:3.4,f:0.1,sat:0,fi:1.2,unit:'100g',grams:100},
-  {name:'Matar peas cooked',cal:84,p:5.4,c:15,f:0.4,sat:0.1,fi:5.5,unit:'100g',grams:100},
-  {name:'Green peas fresh raw',cal:81,p:5.4,c:14.5,f:0.4,sat:0.1,fi:5.1,unit:'100g',grams:100},
-  {name:'Green peas frozen cooked',cal:69,p:5.2,c:12.5,f:0.2,sat:0,fi:4.4,unit:'100g',grams:100},
-  {name:'Broad beans fava cooked',cal:110,p:7.6,c:19.7,f:0.4,sat:0.1,fi:9,unit:'100g',grams:100},
-  {name:'Broad beans fava raw',cal:88,p:7.9,c:15.7,f:0.7,sat:0.1,fi:8,unit:'100g',grams:100},
-  {name:'Capsicum bell pepper',cal:20,p:0.9,c:4.6,f:0.2,sat:0,fi:1.7,unit:'100g',grams:100},
-  {name:'Tomato raw',cal:18,p:0.9,c:3.9,f:0.2,sat:0,fi:1.2,unit:'100g',grams:100},
-  {name:'Onion raw',cal:40,p:1.1,c:9.3,f:0.1,sat:0,fi:1.7,unit:'100g',grams:100},
-  {name:'Cucumber raw',cal:15,p:0.7,c:3.6,f:0.1,sat:0,fi:0.5,unit:'100g',grams:100},
-  {name:'Carrot raw',cal:41,p:0.9,c:9.6,f:0.2,sat:0,fi:2.8,unit:'100g',grams:100},
-  {name:'Radish raw',cal:16,p:0.7,c:3.4,f:0.1,sat:0,fi:1.6,unit:'100g',grams:100},
-  {name:'Corn sweet cooked',cal:108,p:3.4,c:25,f:1.3,sat:0.2,fi:2.8,unit:'100g',grams:100},
-  // ── DAIRY ──
-  {name:'Paneer full fat',cal:265,p:18.3,c:3.4,f:20.8,sat:12.8,fi:0,unit:'100g',grams:100},
-  {name:'Paneer low fat',cal:150,p:18,c:3,f:7,sat:4.5,fi:0,unit:'100g',grams:100},
-  {name:'Curd full fat',cal:60,p:3.1,c:4.7,f:3.2,sat:2,fi:0,unit:'100g',grams:100},
-  {name:'Curd low fat',cal:40,p:3.5,c:4.5,f:0.5,sat:0.3,fi:0,unit:'100g',grams:100},
-  {name:'Raita curd vegetable',cal:50,p:2.5,c:5.5,f:2,sat:1.2,fi:0.5,unit:'100g',grams:100},
-  {name:'Low fat milk',cal:42,p:3.4,c:4.8,f:1,sat:0.6,fi:0,unit:'100ml',grams:100},
-  {name:'Full fat milk',cal:61,p:3.2,c:4.8,f:3.3,sat:1.9,fi:0,unit:'100ml',grams:100},
-  {name:'Marmum low fat milk',cal:42,p:3.5,c:4.9,f:1,sat:0.6,fi:0,unit:'100ml',grams:100},
-  {name:'Marmum protein milk 90%',cal:40,p:9,c:4,f:0.1,sat:0,fi:0,unit:'100ml',grams:100},
-  {name:'Lassi sweet',cal:76,p:3,c:10.5,f:2.5,sat:1.5,fi:0,unit:'100ml',grams:100},
-  {name:'Buttermilk chaas',cal:40,p:3.3,c:4.8,f:0.9,sat:0.6,fi:0,unit:'100ml',grams:100},
-  {name:'Khoya mawa',cal:421,p:12,c:38,f:25,sat:15,fi:0,unit:'100g',grams:100},
-  // ── STREET FOOD ──
-  {name:'Samosa veg',cal:308,p:4.5,c:35,f:17,sat:2.5,fi:3,unit:'piece',grams:90},
-  {name:'Aloo vada',cal:285,p:4.2,c:32,f:15,sat:2.1,fi:2.5,unit:'piece',grams:80},
-  {name:'Pani puri golgappa',cal:42,p:1,c:7,f:1.2,sat:0.2,fi:0.5,unit:'piece',grams:15},
-  {name:'Bhel puri',cal:190,p:4.5,c:32,f:5.5,sat:0.8,fi:3,unit:'100g',grams:100},
-  {name:'Pav bhaji',cal:195,p:4.8,c:28,f:7.5,sat:2.5,fi:3.5,unit:'100g',grams:100},
-  {name:'Idli steamed',cal:58,p:2.0,c:12,f:0.2,sat:0,fi:0.5,unit:'piece',grams:40},
-  {name:'Dosa plain',cal:168,p:3.5,c:32,f:3.2,sat:0.4,fi:1.2,unit:'piece',grams:80},
-  {name:'Masala dosa',cal:225,p:4.5,c:38,f:7,sat:1,fi:2,unit:'piece',grams:110},
-  {name:'Uttapam',cal:175,p:4.2,c:30,f:4.5,sat:0.7,fi:2,unit:'piece',grams:90},
-  {name:'Poha cooked',cal:158,p:3.2,c:34,f:1.2,sat:0.2,fi:1.8,unit:'100g',grams:100},
-  {name:'Upma rava cooked',cal:180,p:4.1,c:32,f:4.2,sat:0.5,fi:1.5,unit:'100g',grams:100},
-  {name:'Khichdi dal rice',cal:124,p:4.7,c:21,f:2.5,sat:0.5,fi:2,unit:'100g',grams:100},
-  // ── SNACKS ──
-  {name:'Makhana fox nuts',cal:347,p:9.7,c:76,f:0.1,sat:0,fi:14.5,unit:'100g',grams:100},
-  {name:'Roasted chana',cal:332,p:20.9,c:51,f:5.0,sat:0.5,fi:17.4,unit:'100g',grams:100},
-  {name:'Papad roasted',cal:35,p:2.2,c:5.8,f:0.4,sat:0.1,fi:1.2,unit:'piece',grams:10},
-  {name:'Sev fried',cal:508,p:13.7,c:55,f:27,sat:5,fi:5,unit:'100g',grams:100},
-  {name:'Murmura puffed rice',cal:402,p:6.3,c:90,f:0.5,sat:0.1,fi:0.6,unit:'100g',grams:100},
-  {name:'Chivda mixture',cal:470,p:10,c:60,f:22,sat:4,fi:4,unit:'100g',grams:100},
-  {name:'Mathri',cal:480,p:8,c:57,f:24,sat:5,fi:2.5,unit:'100g',grams:100},
-  {name:'Nachos tortilla chips',cal:480,p:7.5,c:62,f:23,sat:3.2,fi:4.5,unit:'100g',grams:100},
-  {name:'Lindt 90% dark chocolate (1 square)',cal:59,p:1.1,c:2.8,f:5.2,sat:3.1,fi:1.5,unit:'square',grams:10},
-  {name:'Dark chocolate 85-90%',cal:598,p:12,c:20,f:55,sat:32,fi:10,unit:'100g',grams:100},
-  // ── PROTEIN + SUPPLEMENTS ──
-  {name:'Whey protein 1 scoop',cal:110,p:25,c:2,f:0.5,sat:0,fi:0,unit:'scoop',grams:30},
-  {name:'Tofu firm',cal:76,p:8,c:1.9,f:4.5,sat:0.7,fi:0.3,unit:'100g',grams:100},
-  {name:'Soya chunks dry',cal:336,p:52,c:33,f:0.5,sat:0.1,fi:13,unit:'100g',grams:100},
-  {name:'Peanut butter',cal:588,p:25,c:20,f:50,sat:9,fi:6,unit:'100g',grams:100},
-  // ── NUTS AND SEEDS ──
-  {name:'Almonds raw',cal:579,p:21,c:22,f:50,sat:3.8,fi:12.5,unit:'100g',grams:100},
-  {name:'Walnuts',cal:654,p:15.2,c:13.7,f:65,sat:6.1,fi:6.7,unit:'100g',grams:100},
-  {name:'Cashews raw',cal:553,p:18,c:30,f:44,sat:7.8,fi:3.3,unit:'100g',grams:100},
-  {name:'Peanuts roasted',cal:567,p:25.8,c:16.1,f:49.2,sat:6.8,fi:8.5,unit:'100g',grams:100},
-  {name:'Pumpkin seeds',cal:559,p:30,c:10.7,f:49,sat:8.7,fi:6,unit:'100g',grams:100},
-  {name:'Sunflower seeds',cal:584,p:20.8,c:20,f:51.5,sat:4.5,fi:8.6,unit:'100g',grams:100},
-  {name:'Chia seeds',cal:486,p:17,c:42,f:31,sat:3.3,fi:34,unit:'100g',grams:100},
-  {name:'Flaxseed ground',cal:534,p:18.3,c:28.9,f:42.2,sat:3.7,fi:27.3,unit:'100g',grams:100},
-  {name:'Brazil nut',cal:659,p:14.3,c:12.3,f:67,sat:16,fi:7.5,unit:'100g',grams:100},
-  {name:'Pistachio',cal:560,p:20,c:28,f:45,sat:5.6,fi:10.3,unit:'100g',grams:100},
-  // ── FRUITS ──
-  {name:'Apple',cal:52,p:0.3,c:13.8,f:0.2,sat:0,fi:2.4,unit:'100g',grams:100},
-  {name:'Banana',cal:89,p:1.1,c:22.8,f:0.3,sat:0.1,fi:2.6,unit:'100g',grams:100},
-  {name:'Guava',cal:68,p:2.6,c:14.3,f:1,sat:0.3,fi:5.4,unit:'100g',grams:100},
-  {name:'Orange',cal:47,p:0.9,c:11.8,f:0.1,sat:0,fi:2.4,unit:'100g',grams:100},
-  {name:'Mango',cal:60,p:0.8,c:14.98,f:0.4,sat:0.1,fi:1.6,unit:'100g',grams:100},
-  {name:'Papaya',cal:43,p:0.5,c:10.8,f:0.3,sat:0.1,fi:1.7,unit:'100g',grams:100},
-  {name:'Watermelon',cal:30,p:0.6,c:7.6,f:0.2,sat:0,fi:0.4,unit:'100g',grams:100},
-  {name:'Pear',cal:57,p:0.4,c:15.2,f:0.1,sat:0,fi:3.1,unit:'100g',grams:100},
-  {name:'Pomegranate',cal:83,p:1.7,c:18.7,f:1.2,sat:0.1,fi:4,unit:'100g',grams:100},
-  {name:'Grapes',cal:69,p:0.7,c:18,f:0.2,sat:0,fi:0.9,unit:'100g',grams:100},
-  {name:'Strawberry',cal:32,p:0.7,c:7.7,f:0.3,sat:0,fi:2,unit:'100g',grams:100},
-  {name:'Dates fresh',cal:282,p:2.5,c:75,f:0.4,sat:0,fi:8,unit:'100g',grams:100},
-  // ── EGGS ──
-  {name:'Egg whole boiled',cal:155,p:12.6,c:1.1,f:10.6,sat:3.3,fi:0,unit:'100g',grams:100},
-  {name:'Egg white only',cal:52,p:10.9,c:0.7,f:0.2,sat:0,fi:0,unit:'100g',grams:100},
-  {name:'Egg yolk',cal:322,p:15.9,c:3.6,f:26.5,sat:7.7,fi:0,unit:'100g',grams:100},
-  {name:'Omelette plain',cal:154,p:10.6,c:0.9,f:11.6,sat:3.1,fi:0,unit:'100g',grams:100},
-  // ── BEVERAGES ──
-  {name:'Tea with milk no sugar',cal:15,p:0.7,c:1.6,f:0.6,sat:0.4,fi:0,unit:'100ml',grams:100},
-  {name:'Masala chai with milk sugar',cal:44,p:1.1,c:7,f:1.4,sat:0.9,fi:0,unit:'100ml',grams:100},
-  {name:'Black coffee no sugar',cal:2,p:0.3,c:0,f:0,sat:0,fi:0,unit:'100ml',grams:100},
-  {name:'Coffee with milk no sugar',cal:18,p:0.9,c:2,f:0.8,sat:0.5,fi:0,unit:'100ml',grams:100},
-  {name:'Fresh lime water no sugar',cal:8,p:0.1,c:2.6,f:0,sat:0,fi:0.1,unit:'100ml',grams:100},
-  {name:'Coconut water',cal:19,p:0.7,c:3.7,f:0.2,sat:0,fi:1.1,unit:'100ml',grams:100},
-  {name:'Orange juice fresh',cal:45,p:0.7,c:10.4,f:0.2,sat:0,fi:0.2,unit:'100ml',grams:100},
-  // ── GRAINS AND FLOURS ──
-  {name:'Oats rolled cooked',cal:71,p:2.5,c:12,f:1.5,sat:0.3,fi:1.7,unit:'100g',grams:100},
-  {name:'Daliya wheat broken cooked',cal:124,p:4.7,c:23,f:2,sat:0.3,fi:3.5,unit:'100g',grams:100},
-  {name:'Besan gram flour',cal:387,p:22.5,c:58,f:6.2,sat:0.6,fi:10.9,unit:'100g',grams:100},
-  {name:'Quinoa cooked',cal:120,p:4.4,c:21.3,f:1.9,sat:0.2,fi:2.8,unit:'100g',grams:100},
-  {name:'Isabgol psyllium husk',cal:20,p:0.2,c:5,f:0.1,sat:0,fi:4.5,unit:'1 tsp 5g',grams:5},
-  // ── CONDIMENTS AND EXTRAS ──
-  {name:'Green chutney',cal:60,p:2,c:8,f:2,sat:0.3,fi:2,unit:'2 tbsp 30g',grams:30},
-  {name:'Coconut chutney',cal:130,p:1.3,c:6,f:11.5,sat:9.5,fi:3,unit:'100g',grams:100},
-  {name:'Tomato ketchup',cal:101,p:1.1,c:25.9,f:0.1,sat:0,fi:0.3,unit:'100g',grams:100},
-  {name:'Ghee clarified butter',cal:900,p:0,c:0,f:99.5,sat:61,fi:0,unit:'100g',grams:100},
-  {name:'Olive oil',cal:884,p:0,c:0,f:100,sat:13.8,fi:0,unit:'100g',grams:100},
-  {name:'Honey',cal:304,p:0.3,c:82,f:0,sat:0,fi:0.2,unit:'100g',grams:100},
-  // ── AIRPORT / RESTAURANT FOODS ──
-  {name:'Veg sandwich (airport)',cal:220,p:7.5,c:38,f:5.5,sat:1.2,fi:3,unit:'100g',grams:100},
-  {name:'Veg burger',cal:290,p:9,c:42,f:9.5,sat:2.5,fi:3,unit:'piece',grams:150},
-  {name:'Caesar salad no dressing',cal:45,p:3.5,c:6,f:1.5,sat:0.5,fi:2,unit:'100g',grams:100},
-  {name:'Mixed nuts airline pack',cal:600,p:16,c:20,f:52,sat:7,fi:5,unit:'30g pack',grams:30},
-  {name:'Fruit cup mixed',cal:55,p:0.8,c:13,f:0.3,sat:0,fi:1.8,unit:'100g',grams:100},
-  {name:'Granola bar',cal:471,p:9,c:64,f:20,sat:3.5,fi:4,unit:'piece 40g',grams:40},
-  {name:'Protein bar (generic)',cal:380,p:20,c:45,f:12,sat:4,fi:3,unit:'piece 60g',grams:60},
-  {name:'Greek yogurt plain',cal:59,p:10,c:3.6,f:0.4,sat:0.1,fi:0,unit:'100g',grams:100},
-  {name:'Hummus',cal:177,p:7.9,c:20,f:8.6,sat:1.3,fi:6,unit:'100g',grams:100},
-  {name:'Falafel',cal:333,p:13.3,c:31.8,f:17.8,sat:2.3,fi:4.9,unit:'100g',grams:100},
-  {name:'Shawarma veg wrap',cal:280,p:8,c:40,f:9,sat:2,fi:3.5,unit:'piece',grams:180},
-  // ── DUBAI SPECIFIC ──
-  {name:'Laban drink',cal:45,p:3.3,c:5.8,f:1,sat:0.7,fi:0,unit:'100ml',grams:100},
-  {name:'Pita bread plain',cal:275,p:9.1,c:55.7,f:1.2,sat:0.2,fi:2.2,unit:'100g',grams:100},
-  {name:'Tabouleh salad',cal:74,p:2.5,c:11,f:2.5,sat:0.3,fi:2.5,unit:'100g',grams:100},
-  {name:'Fattoush salad',cal:80,p:2,c:12,f:3,sat:0.5,fi:2.5,unit:'100g',grams:100},
-  {name:'Lentil soup',cal:64,p:4.2,c:10.8,f:0.9,sat:0.1,fi:3.5,unit:'100g',grams:100},
-];
 
-// ═══════════════════════════════════
-// SMART FOOD SEARCH — LOCAL ONLY
-// (USDA API removed — blocked)
-// ═══════════════════════════════════ — LOCAL + USDA
-// ═══════════════════════════════════
 function searchFoodSmart(query) {
   var q = query.toLowerCase().trim();
   if (q.length < 2) return [];
