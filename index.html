@@ -163,7 +163,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v7.2</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v7.3</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -407,7 +407,10 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
       <option value="Dinner">🌙 Dinner (~350 kcal)</option>
       <option value="Before Sleep">🌛 Before Sleep (~100 kcal)</option>
     </select>
-    <label>Search food <span style="font-size:10px;color:var(--text3)">(type name — searches our database + USDA)</span></label>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <label style="margin:0">Search food</label>
+      <button onclick="openAddFoodWithName('')" style="background:var(--accent);border:none;border-radius:6px;color:white;font-size:11px;padding:5px 10px;cursor:pointer;font-weight:600">+ Add new food</button>
+    </div>
     <div class="food-search-wrap">
       <input type="text" id="food-search" placeholder="Type food name e.g. dal, eggs, oats..." autocomplete="off" oninput="searchFood(this.value)">
       <div class="food-results" id="food-results"></div>
@@ -1470,16 +1473,19 @@ function searchFood(q) {
 
 function openAddFoodWithName(name) {
   showAddFoodModal();
-  // Pre-fill the lookup field and trigger search
   var lookupEl = document.getElementById('af-lookup');
   var nameEl = document.getElementById('af-name');
-  if (lookupEl) lookupEl.value = name;
+  if (lookupEl) { lookupEl.value = name; }
   if (nameEl) nameEl.value = name;
-  // Auto-trigger lookup after modal opens
-  setTimeout(function() { lookupFoodNutrition(); }, 100);
-  // Hide food results dropdown
   var res = document.getElementById('food-results');
   if (res) res.style.display = 'none';
+  // Scroll modal to top and auto-lookup
+  setTimeout(function() {
+    lookupFoodNutrition();
+    var modal = document.getElementById('add-food-modal');
+    if (modal) modal.scrollTop = 0;
+    if (lookupEl) lookupEl.focus();
+  }, 150);
 }
 
 function pickFood(i) {
@@ -1593,12 +1599,23 @@ function updatePortion(g) {
   portionGrams = Number(g);
   if (!selectedFood) return;
   var baseGrams = selectedFood.g || selectedFood.grams || 100;
+  var unit = selectedFood.unit || '100g';
   const r = portionGrams / baseGrams;
-  const unit = getUnit(selectedFood);
+
+  // Show natural count for piece/unit foods
   const portionLabel = document.getElementById('portion-label');
   const sliderLabel = document.getElementById('portion-unit-label');
-  if (portionLabel) portionLabel.textContent = portionGrams + ' ' + unit;
-  if (sliderLabel) sliderLabel.textContent = unit;
+  var displayCount = parseFloat((portionGrams / baseGrams).toFixed(1));
+  var isPiece = ['piece','square','roti','chapati','idli','dosa','scoop','nut','almond','half','whole','egg','white','samosa','papad','glass','cup','katori','slice','paratha'].indexOf(unit) > -1;
+
+  if (portionLabel) {
+    if (isPiece) {
+      portionLabel.textContent = displayCount + ' ' + unit + (displayCount > 1 && unit.slice(-1) !== 's' ? 's' : '') + ' (' + portionGrams + 'g)';
+    } else {
+      portionLabel.textContent = portionGrams + (unit.includes('ml') ? 'ml' : 'g');
+    }
+  }
+  if (sliderLabel) sliderLabel.textContent = isPiece ? unit : (unit.includes('ml') ? 'ml' : 'g');
   document.getElementById('sel-cal').textContent = Math.round(selectedFood.cal * r);
   document.getElementById('sel-prot').textContent = (selectedFood.p * r).toFixed(1);
   document.getElementById('sel-carb').textContent = (selectedFood.c * r).toFixed(1);
@@ -4968,7 +4985,7 @@ function generateWorkoutPlan() {
     html += '<div style="font-size:10px;color:var(--green);margin-left:8px;margin-top:3px">Cooldown: ' + (plan.cooldown||[]).join(' · ') + '</div>';
     html += '</div>';
   });
-  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v7.2</div>';
+  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v7.3</div>';
   html += '</div>';
   el.innerHTML = html;
 }
