@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Hemant Health v9.2</title>
+<title>Hemant Health v9.3</title>
 <link rel="manifest" href="data:application/json;charset=utf-8,{
   &quot;name&quot;: &quot;Hemant Health&quot;,
   &quot;short_name&quot;: &quot;H Health&quot;,
@@ -185,6 +185,11 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
     <div class="card-title">daily calorie plan</div>
     <div class="metric-grid">
       <div class="metric"><div class="metric-label">BMR (at rest)</div><div class="metric-value info">1,609</div><div class="metric-sub">kcal/day</div></div>
+      <div class="metric"><div class="metric-label">Walk burned</div><div class="metric-value ok" id="tdee-walk-cals">--</div><div class="metric-sub" id="tdee-walk-sub">log walk on home</div></div>
+      <div class="metric"><div class="metric-label">Exercise burned</div><div class="metric-value ok" id="tdee-ex-cals">--</div><div class="metric-sub" id="tdee-ex-sub">log exercise tab</div></div>
+      <div class="metric"><div class="metric-label">TDEE today</div><div class="metric-value info" id="tdee-today">1,609</div><div class="metric-sub">BMR + activity</div></div>
+      <div class="metric"><div class="metric-label">Ate today</div><div class="metric-value warn" id="tdee-ate">--</div><div class="metric-sub">from meal log</div></div>
+      <div class="metric"><div class="metric-label">Deficit</div><div class="metric-value ok" id="tdee-deficit">--</div><div class="metric-sub" id="tdee-deficit-sub">TDEE minus food</div></div>
       <div class="metric"><div class="metric-label">TDEE (with activity)</div><div class="metric-value info">2,220</div><div class="metric-sub">kcal/day</div></div>
       <div class="metric"><div class="metric-label">Diet target</div><div class="metric-value ok">1,520</div><div class="metric-sub">7 meals per day</div></div>
       <div class="metric"><div class="metric-label">Steps today</div><div class="metric-value ok" id="home-steps-today">--</div><div class="metric-sub" id="home-steps-sub">from walk tracker</div></div>
@@ -385,7 +390,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
   <div class="card" id="log-food-card">
     <div class="card-title" id="log-food-title">log food — by weight</div>
     <label>Date</label>
-    <input type="date" id="m-date">
+    <input type="date" id="m-date" onchange="changeMealDate(this.value)">
     <label>Meal slot</label>
     <select id="m-type">
       <option value="Breakfast">🌅 Breakfast (~400 kcal)</option>
@@ -1084,22 +1089,11 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
       <div id="checkin-med-list"></div>
     </div>
 
-    <!-- STEPS QUESTION -->
+        <!-- STEPS — auto from walk tracker -->
     <div style="background:var(--bg3);border-radius:10px;padding:12px;margin-bottom:12px">
-      <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--accent2)">👟 Steps today?</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
-        <button class="steps-opt-btn" data-steps="3000" onclick="selectSteps(this,this.dataset.steps)" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">Under 4k</button>
-        <button class="steps-opt-btn" data-steps="5000" onclick="selectSteps(this,this.dataset.steps)" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">4k – 6k</button>
-        <button class="steps-opt-btn" data-steps="7000" onclick="selectSteps(this,this.dataset.steps)" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">6k – 8k</button>
-        <button class="steps-opt-btn" data-steps="9000" onclick="selectSteps(this,this.dataset.steps)" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">8k – 10k</button>
-        <button class="steps-opt-btn" data-steps="11000" onclick="selectSteps(this,this.dataset.steps)" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">10k+</button>
-        <button class="steps-opt-btn" data-steps="0" onclick="selectSteps(this,this.dataset.steps)" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">Rest day</button>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <label style="font-size:11px;color:var(--text3);margin:0;white-space:nowrap">Exact steps:</label>
-        <input type="number" id="ci-steps-exact" placeholder="type your steps" oninput="selectStepsExact(this.value)" style="flex:1;margin-bottom:0;font-size:13px;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text)">
-      </div>
-      <div style="font-size:10px;color:var(--text3);margin-top:4px;text-align:center" id="steps-cal-preview"></div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:6px;color:var(--accent2)">👟 Steps today</div>
+      <div id="ci-steps-from-tracker" style="font-size:13px;color:var(--text2)">Loading...</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">Auto-read from Walk Tracker. Log walks on Home tab.</div>
     </div>
 
     <!-- ISABGOL -->
@@ -1819,6 +1813,7 @@ function deleteMeal(idx) {
   showWeekAverage();
   renderExercise();
   seedHistoricalData();
+  try{updateDailyTDEE();}catch(e){}
   setTimeout(function(){renderWeightTrend(); renderGlucoseTrend(); renderCholesterolTrend(); renderIsabgol();}, 400);
   setTimeout(function(){generateWeeklySummary(0);}, 600);
   setTimeout(function(){renderSleepTracker(); seedWaistData(); renderWaistTracker(); renderMounjaroEffectiveness();}, 800);
@@ -2351,6 +2346,21 @@ const MEDS = [
   {id:'ashwa', name:'Ashwagandha KSM-66 600mg', dose:'600mg', time:'Bedtime', note:''},
   {id:'mounjaro', name:'Mounjaro 10mg', dose:'10mg', time:'Every 15 days', note:'Next: 13 June 2026'},
 ];
+function renderMedStreak() {
+  var el = document.getElementById('streak-row');
+  if (!el) return;
+  var html = '';
+  for (var i = 29; i >= 0; i--) {
+    var d = getDateOffset(-i);
+    var taken = JSON.parse(localStorage.getItem('hh_meds_' + d) || '{}');
+    var count = MEDS.filter(function(m){return taken[m.id];}).length;
+    var pct = MEDS.length > 0 ? count/MEDS.length : 0;
+    var col = pct >= 0.8 ? 'var(--green)' : pct >= 0.5 ? 'var(--amber)' : i===0 ? 'var(--bg3)' : 'var(--red)';
+    html += '<div style="width:8px;height:24px;border-radius:3px;background:'+col+';flex-shrink:0" title="'+d+': '+count+'/'+MEDS.length+'"></div>';
+  }
+  el.innerHTML = html;
+}
+
 function renderMeds() {
   var taken = JSON.parse(localStorage.getItem('hh_meds_' + TODAY) || '{}');
   var el = document.getElementById('med-list');
@@ -4397,9 +4407,9 @@ function renderWeightTrend() {
 
   // Metrics
   if (sorted.length > 0) {
-    var latest = sorted[sorted.length-1].kg;
+    var latest = sorted[sorted.length-1].kg || sorted[sorted.length-1].wt;
     var el = document.getElementById('wt-current');
-    if (el) el.textContent = latest.toFixed(1);
+    if (el && latest) el.textContent = parseFloat(latest).toFixed(1);
     el = document.getElementById('wt-lost');
     if (el) el.textContent = (97 - latest).toFixed(1) + ' kg';
 
@@ -5803,6 +5813,49 @@ function renderWalkStreak(sessions) {
     html += '<div class="streak-day' + (reached?' done':done?' style="background:var(--amber);border-color:var(--amber)"':'') + (isToday?' today':'') + '">' + new Date(d+'T00:00:00').getDate() + '</div>';
   }
   el.innerHTML = html;
+}
+
+function changeMealDate(dateStr) {
+  if (!dateStr) return;
+  var logs = JSON.parse(localStorage.getItem('hh_meals') || '[]');
+  var dayLogs = logs.filter(function(l){return l.date===dateStr;});
+  var logEl = document.getElementById('meal-list');
+  if (!logEl) return;
+  if (!dayLogs.length) {
+    logEl.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:8px 0">No meals logged for ' + dateStr + '</div>';
+    return;
+  }
+  logEl.innerHTML = dayLogs.map(function(l, i) {
+    return '<div class="log-row" style="padding:8px 0;border-bottom:1px solid var(--border)">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start">' +
+        '<div>' +
+          '<div style="font-size:11px;color:var(--text3)">' + l.type + (l.time ? ' · '+l.time : '') + '</div>' +
+          '<div style="font-weight:500;font-size:13px">' + l.name + ' (' + l.grams + 'g)</div>' +
+          '<div style="margin-top:3px">' +
+            '<span class="tag tag-a">' + l.cal + ' kcal</span> ' +
+            '<span class="tag tag-g">P:' + (l.p||0).toFixed(0) + 'g</span> ' +
+            '<span class="tag tag-b">C:' + (l.c||0).toFixed(0) + 'g</span>' +
+          '</div>' +
+        '</div>' +
+        '<button data-li="' + i + '" data-date="' + dateStr + '" onclick="deleteMealEntry(parseInt(this.dataset.li),this.dataset.date)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:18px;padding:4px">✕</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function deleteMealEntry(idx, dateStr) {
+  var logs = JSON.parse(localStorage.getItem('hh_meals') || '[]');
+  var dayLogs = logs.filter(function(l){return l.date===dateStr;});
+  var toDelete = dayLogs[idx];
+  var gi = -1;
+  for (var i=0;i<logs.length;i++){
+    if(logs[i].date===toDelete.date&&logs[i].name===toDelete.name&&logs[i].time===toDelete.time){gi=i;break;}
+  }
+  if (gi > -1) logs.splice(gi, 1);
+  localStorage.setItem('hh_meals', JSON.stringify(logs));
+  changeMealDate(dateStr);
+  try{updateTotals();}catch(e){}
+  try{updateScore();}catch(e){}
 }
 
 function initAll() {
