@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Hemant Health v8.2</title>
+<title>Hemant Health v8.3</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -166,7 +166,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v8.2</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v8.3</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -1638,21 +1638,27 @@ function logSelectedFood() {
   selectedFood = null;
   document.getElementById('food-search').value = '';
   document.getElementById('food-selected-panel').classList.add('hidden');
-  renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert(); updateDeficitCard();
-  renderEatingOutGrid(); renderPortionGrid();
-  migrateExLogs();
-  renderWalkTracker();
-  renderMeds();
-  renderMedStreak();
+  try{renderMeals();}catch(e){}
+  try{renderMealSlots();}catch(e){}
+  try{updateTotals();}catch(e){}
+  try{showNutritionAlert();}catch(e){}
+  try{updateDeficitCard();}catch(e){}
+  try{renderEatingOutGrid();}catch(e){}
+  try{renderPortionGrid();}catch(e){}
+  try{migrateExLogs();}catch(e){}
+  try{renderWalkTracker();}catch(e){}
+  try{renderMeds();}catch(e){}
+  try{renderMedStreak();}catch(e){}
   showDaySummary(TODAY);
   showWeekAverage();
   renderExercise();
-  seedHistoricalData();
-  updateDailyTDEE();
-  setTimeout(function(){renderWeightTrend(); renderGlucoseTrend(); renderCholesterolTrend(); renderIsabgol();}, 400);
-  setTimeout(function(){generateWeeklySummary(0);}, 600);
-  setTimeout(function(){renderSleepTracker(); seedWaistData(); renderWaistTracker(); renderMounjaroEffectiveness();}, 800);
-  setTimeout(initCheckin, 1000); updateScore(); showNutritionAlert();
+  try{seedHistoricalData();}catch(e){}
+  try{updateDailyTDEE();}catch(e){}
+  setTimeout(function(){
+  try{renderWeightTrend();}catch(e){} try{renderGlucoseTrend();}catch(e){} try{renderCholesterolTrend();}catch(e){} try{renderIsabgol();}catch(e){}}, 400);
+  setTimeout(function(){try{generateWeeklySummary(0);}catch(e){}}, 600);
+  setTimeout(function(){try{renderSleepTracker();}catch(e){} seedWaistData(); try{renderWaistTracker();}catch(e){} try{renderMounjaroEffectiveness();}catch(e){}}, 800);
+  setTimeout(initCheckin, 1000); try{updateScore();}catch(e){} showNutritionAlert();
   alert('Logged: ' + entry.name + ' (' + entry.grams + 'g) — ' + entry.cal + ' kcal');
 }
 
@@ -1690,7 +1696,7 @@ function logEatingOut(idx) {
   logs.unshift(entry);
   localStorage.setItem('hh_meals', JSON.stringify(logs));
   renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert();
-  showDaySummary(TODAY); showWeekAverage(); updateDeficitCard();
+  try{showDaySummary(TODAY);}catch(e){} try{showWeekAverage();}catch(e){} updateDeficitCard();
   alert('Logged: ' + p.label + ' — ' + p.cal + ' kcal to ' + slotVal + ' (estimated)');
 }
 
@@ -1867,18 +1873,24 @@ function deleteMeal(idx) {
   const toDelete = todayLogs[idx];
   logs = logs.filter(l => l !== toDelete);
   localStorage.setItem('hh_meals', JSON.stringify(logs));
-  renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert(); updateDeficitCard();
-  renderEatingOutGrid(); renderPortionGrid();
-  migrateExLogs();
-  renderWalkTracker();
-  renderMeds();
-  renderMedStreak();
+  try{renderMeals();}catch(e){}
+  try{renderMealSlots();}catch(e){}
+  try{updateTotals();}catch(e){}
+  try{showNutritionAlert();}catch(e){}
+  try{updateDeficitCard();}catch(e){}
+  try{renderEatingOutGrid();}catch(e){}
+  try{renderPortionGrid();}catch(e){}
+  try{migrateExLogs();}catch(e){}
+  try{renderWalkTracker();}catch(e){}
+  try{renderMeds();}catch(e){}
+  try{renderMedStreak();}catch(e){}
   showDaySummary(TODAY);
   showWeekAverage();
-  renderExercise();
-  seedHistoricalData();
-  updateDailyTDEE();
-  setTimeout(function(){renderWeightTrend(); renderGlucoseTrend(); renderCholesterolTrend(); renderIsabgol();}, 400);
+  try{renderExercise();}catch(e){}
+  try{seedHistoricalData();}catch(e){}
+  try{updateDailyTDEE();}catch(e){}
+  setTimeout(function(){
+  try{renderWeightTrend();}catch(e){} renderGlucoseTrend(); renderCholesterolTrend(); renderIsabgol();}, 400);
   setTimeout(function(){generateWeeklySummary(0);}, 600);
   setTimeout(function(){renderSleepTracker(); seedWaistData(); renderWaistTracker(); renderMounjaroEffectiveness();}, 800);
   setTimeout(initCheckin, 1000); updateScore(); showNutritionAlert();
@@ -2968,7 +2980,7 @@ function showTab(id, btn) {
   // Refresh tab content when switching
   if (id === 'meds') { setTimeout(function(){renderMeds(); renderMedStreak();}, 50); }
   if (id === 'vitals') { setTimeout(function(){renderWeightTrend();renderGlucoseTrend();renderCholesterolTrend();renderSleepTracker();renderWaistTracker();renderMounjaroEffectiveness();renderIsabgol();},100); }
-  if (id === 'exercise') { setTimeout(function(){renderTodayWorkout();},50); }
+  if (id === 'exercise') { setTimeout(function(){try{renderTodayWorkout();}catch(e){}},50); }
   if (id === 'reports') { setTimeout(function(){generateWeeklySummary(0);},50); }
   if (id === 'home') { setTimeout(function(){updateScore(); updateDailyTDEE(); renderWalkTracker();},50); }
   if (id === 'meals') { setTimeout(function(){renderMeals(); renderMealSlots(); updateTotals();},50); }
@@ -4042,7 +4054,7 @@ function renderTodayWorkout() {
   }
 
   renderExSummary(dateKey, exercises);
-  renderExWeekly();
+  try{renderExWeekly();}catch(e){}
   renderExStreak();
 }
 
@@ -5014,7 +5026,7 @@ function generateWorkoutPlan() {
     html += '<div style="font-size:10px;color:var(--green);margin-left:8px;margin-top:3px">Cooldown: ' + (plan.cooldown||[]).join(' · ') + '</div>';
     html += '</div>';
   });
-  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v8.2</div>';
+  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v8.3</div>';
   html += '</div>';
   el.innerHTML = html;
 }
@@ -6137,18 +6149,24 @@ function initAll() {
   try { document.getElementById('m-date').value = TODAY; } catch(e) {}
   try { document.getElementById('ex-date').value = TODAY; } catch(e) {}
   try { document.getElementById('mj-log-date').value = TODAY; } catch(e) {}
-  renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert(); updateDeficitCard();
-  renderEatingOutGrid(); renderPortionGrid();
-  migrateExLogs();
-  renderWalkTracker();
-  renderMeds();
-  renderMedStreak();
+  try{renderMeals();}catch(e){}
+  try{renderMealSlots();}catch(e){}
+  try{updateTotals();}catch(e){}
+  try{showNutritionAlert();}catch(e){}
+  try{updateDeficitCard();}catch(e){}
+  try{renderEatingOutGrid();}catch(e){}
+  try{renderPortionGrid();}catch(e){}
+  try{migrateExLogs();}catch(e){}
+  try{renderWalkTracker();}catch(e){}
+  try{renderMeds();}catch(e){}
+  try{renderMedStreak();}catch(e){}
   showDaySummary(TODAY);
   showWeekAverage();
   renderExercise();
-  seedHistoricalData();
-  updateDailyTDEE();
-  setTimeout(function(){renderWeightTrend(); renderGlucoseTrend(); renderCholesterolTrend(); renderIsabgol();}, 400);
+  try{seedHistoricalData();}catch(e){}
+  try{updateDailyTDEE();}catch(e){}
+  setTimeout(function(){
+  try{renderWeightTrend();}catch(e){} renderGlucoseTrend(); renderCholesterolTrend(); renderIsabgol();}, 400);
   setTimeout(function(){generateWeeklySummary(0);}, 600);
   setTimeout(function(){renderSleepTracker(); seedWaistData(); renderWaistTracker(); renderMounjaroEffectiveness();}, 800);
   setTimeout(initCheckin, 1000);
