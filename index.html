@@ -11,10 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Hemant Health v9.1</title>
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
+<title>Hemant Health v9.2</title>
 <link rel="manifest" href="data:application/json;charset=utf-8,{
   &quot;name&quot;: &quot;Hemant Health&quot;,
   &quot;short_name&quot;: &quot;H Health&quot;,
@@ -115,7 +112,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 .score-item-label{font-size:10px;color:var(--text3);margin-top:2px}
 /* FOOD SEARCH */
 .food-search-wrap{position:relative}
-.food-results{background:var(--bg3);border:1px solid var(--accent);border-radius:8px;max-height:260px;overflow-y:auto;margin-top:4px;margin-bottom:8px;display:none;z-index:999}
+.food-results{background:var(--bg3);border:1px solid var(--accent);border-radius:8px;max-height:220px;overflow-y:auto;margin-top:-5px;margin-bottom:7px;display:none}
 .food-result-item{padding:9px 11px;cursor:pointer;border-bottom:1px solid var(--border);font-size:12.5px}
 .food-result-item:last-child{border-bottom:none}
 .food-result-item:hover,.food-result-item:active{background:var(--bg4)}
@@ -166,29 +163,119 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v9.1</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v9.2</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
 <!-- TAB 1: HOME -->
 <div class="tab active" id="tab-home">
   <div class="card">
+    <div class="card-title">today's health score<span id="score-badge" class="tag tag-b">--</span></div>
+    <div class="score-ring"><div class="score-num" id="score-num" style="color:var(--accent)">--</div><div class="score-label">out of 100</div></div>
+    <div class="score-grid">
+      <div class="score-item"><div class="score-item-val" id="sc-meds">-</div><div class="score-item-label">Meds taken</div></div>
+      <div class="score-item"><div class="score-item-val" id="sc-steps">-</div><div class="score-item-label">Steps</div></div>
+      <div class="score-item"><div class="score-item-val" id="sc-water">-</div><div class="score-item-label">Water</div></div>
+      <div class="score-item"><div class="score-item-val" id="sc-sleep">-</div><div class="score-item-label">Sleep hrs</div></div>
+      <div class="score-item"><div class="score-item-val" id="sc-meals">-</div><div class="score-item-label">Meals logged</div></div>
+      <div class="score-item"><div class="score-item-val" id="sc-sat">-</div><div class="score-item-label">Sat fat g</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">daily calorie plan</div>
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-label">BMR (at rest)</div><div class="metric-value info">1,609</div><div class="metric-sub">kcal/day</div></div>
+      <div class="metric"><div class="metric-label">TDEE (with activity)</div><div class="metric-value info">2,220</div><div class="metric-sub">kcal/day</div></div>
+      <div class="metric"><div class="metric-label">Diet target</div><div class="metric-value ok">1,520</div><div class="metric-sub">7 meals per day</div></div>
+      <div class="metric"><div class="metric-label">Steps today</div><div class="metric-value ok" id="home-steps-today">--</div><div class="metric-sub" id="home-steps-sub">from walk tracker</div></div>
+      
+      <div class="metric"><div class="metric-label">Total deficit</div><div class="metric-value warn">~915</div><div class="metric-sub">kcal/day with walk</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-top:8px">You eat 1,650 kcal. Your daily walk burns ~215 kcal. Net intake = ~1,435 kcal — matching your dietician's 1,500 target. Exercise burns add further deficit on top.</div>
+    <div style="background:var(--bg3);border-radius:8px;padding:10px;margin-top:8px" id="deficit-card">
+      <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px">today's energy balance</div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--text3)">Food eaten</span><span id="deficit-food" style="font-weight:600">-- kcal</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--text3)">Walk today</span><span id="deficit-walk" style="font-weight:600;color:var(--text3);font-size:10px">not logged yet</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--text3)">Exercise today</span><span id="deficit-exercise" style="font-weight:600;color:var(--text3);font-size:10px">not logged yet</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;padding:5px 0;font-weight:700">
+        <span>Calories eaten</span><span id="deficit-net" style="color:var(--accent)">-- kcal</span>
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:2px">TDEE 2,220 kcal already includes walk and exercise · deficit = 2,220 − food eaten</div>
+      <div style="font-size:10px;color:var(--text3);text-align:center" id="deficit-status"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">latest readings</div>
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-label">Weight</div><div class="metric-value info" id="hm-wt">83.9 kg</div><div class="metric-sub">Started 97 kg (-13.1 kg)</div></div>
+      <div class="metric"><div class="metric-label">HbA1c</div><div class="metric-value ok">5.3%</div><div class="metric-sub">Was 9.3% (May 25)</div></div>
+      <div class="metric"><div class="metric-label">BP</div><div class="metric-value ok" id="hm-bp">124/72</div><div class="metric-sub">Was 180-190</div></div>
+      <div class="metric"><div class="metric-label">Cholesterol</div><div class="metric-value bad">252</div><div class="metric-sub">LDL 133 — on Crestor</div></div>
+      <div class="metric"><div class="metric-label">Body Fat</div><div class="metric-value warn">31.1%</div><div class="metric-sub">Target 20-22%</div></div>
+      <div class="metric"><div class="metric-label">Muscle SMM</div><div class="metric-value ok">32.1 kg</div><div class="metric-sub">↑ from 31.4</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">mounjaro tracker</div>
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-label">Dose</div><div class="metric-value info">10 mg</div><div class="metric-sub">Every 15 days</div></div>
+      <div class="metric"><div class="metric-label">Next due</div><div class="metric-value warn">13 Jun</div><div class="metric-sub">2026</div></div>
+    </div>
+    <div class="progress-wrap" style="margin-top:8px">
+      <div class="progress-label"><span>Cycle progress</span><span id="mj-days">--</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="mj-prog" style="background:var(--accent);width:0%"></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">active alerts</div>
+    <div id="med-alert-banner"></div>
+    <div class="alert alert-bad"><strong>CPK 367</strong> — double limit. Recheck late June with blood test.</div>
+    <div class="alert alert-bad"><strong>Cholesterol 252, LDL 133</strong> — Crestor 20mg started 3 weeks ago. Test late June.</div>
+    <div class="alert alert-warn"><strong>Fasting glucose 116</strong> — pre-diabetic range. Monitor.</div>
+    <div class="alert alert-warn"><strong>Repaglinide</strong> — discuss with Dr. Lakhani. HbA1c now normal.</div>
+    <div class="alert alert-ok"><strong>Diabetes reversed</strong> — HbA1c 9.3% → 5.3% in 13 months.</div>
+  </div>
+  <div class="card">
+    <div class="card-title">mounjaro injection log</div>
+    <div class="row" style="margin-bottom:8px">
+      <div class="half"><label>Date</label><input type="date" id="mj-log-date"></div>
+      <div class="half"><label>Dose (mg)</label>
+        <select id="mj-log-dose">
+          <option>2.5</option><option>5</option><option>7.5</option><option selected>10</option><option>12.5</option><option>15</option>
+        </select>
+      </div>
+    </div>
+    <label>Side effects / notes</label>
+    <input type="text" id="mj-log-note" placeholder="e.g. mild nausea, no issues...">
+    <button class="btn btn-green" onclick="logMounjaro()" style="margin-bottom:6px">Log injection</button>
+    <div id="mj-history" style="margin-top:4px"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">next actions</div>
+    <button class="btn" onclick="openCheckin()" style="background:#1e293b;border:1px solid var(--purple);color:var(--purple);margin-bottom:8px">🌙 Open evening check-in</button>
+    <div class="list-item"><div class="list-dot" style="background:var(--red)"></div><div>Next Mounjaro — <strong>13 June 2026</strong></div></div>
+    <div class="list-item"><div class="list-dot" style="background:var(--red)"></div><div>Blood test — cholesterol + CPK + glucose — <strong>late June</strong></div></div>
+    <div class="list-item"><div class="list-dot" style="background:var(--amber)"></div><div>InBody scan — <strong>end of June</strong></div></div>
+    <div class="list-item"><div class="list-dot" style="background:var(--amber)"></div><div>Dr. Lakhani visit — CPK, Repaglinide, cortisol result</div></div>
+    <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div>Eggs return — <strong>16 June</strong> — 3 whites + 2 whole daily</div></div>
+    <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div>Isabgol — 1 tsp before lunch and dinner — <strong>start today</strong></div></div>
+  </div>
+</div>
+
+  <!-- WALK TRACKER -->
+  <div class="card">
     <div class="card-title">🚶 walk tracker <span style="color:var(--text3);font-size:10px">log multiple sessions · any time of day</span></div>
 
-    <!-- Google Fit Sync -->
-    <div style="background:#0f2937;border:1px solid #1d4ed8;border-radius:10px;padding:10px;margin-bottom:10px">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <div style="font-size:12px;font-weight:700;color:#60a5fa">🔄 Sync from Google Fit</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:2px">Pulls today's steps, distance and calories from your Samsung watch via Google Fit</div>
-        </div>
-        <button onclick="syncGoogleFit()" id="gfit-sync-btn" style="background:#1d4ed8;border:none;border-radius:8px;color:white;padding:8px 14px;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap">Sync</button>
-      </div>
-      <div id="gfit-status" style="font-size:11px;margin-top:6px;display:none"></div>
-    </div>
-
     <div style="background:var(--bg3);border-radius:10px;padding:10px;margin-bottom:10px">
-      <div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:8px">+ Add walk session manually</div>
+      <div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:8px">+ Add walk session</div>
       <div class="row">
         <div class="half">
           <label style="color:var(--accent);font-weight:600">⏱ Duration (mins)</label>
@@ -228,109 +315,77 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
     <div style="font-size:11px;color:var(--text3);margin-top:8px;margin-bottom:4px">30-day walk streak</div>
     <div class="streak-row" id="walk-streak-row"></div>
   </div>
-  <div class="card">
-    <div class="card-title">next actions</div>
-    <button class="btn" onclick="openCheckin()" style="background:#1e293b;border:1px solid var(--purple);color:var(--purple);margin-bottom:8px">🌙 Open evening check-in</button>
-    <div class="list-item"><div class="list-dot" style="background:var(--red)"></div><div>Next Mounjaro — <strong>13 June 2026</strong></div></div>
-    <div class="list-item"><div class="list-dot" style="background:var(--red)"></div><div>Blood test — cholesterol + CPK + glucose — <strong>late June</strong></div></div>
-    <div class="list-item"><div class="list-dot" style="background:var(--amber)"></div><div>InBody scan — <strong>end of June</strong></div></div>
-    <div class="list-item"><div class="list-dot" style="background:var(--amber)"></div><div>Dr. Lakhani visit — CPK, Repaglinide, cortisol result</div></div>
-    <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div>Eggs return — <strong>16 June</strong> — 3 whites + 2 whole daily</div></div>
-    <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div>Isabgol — 1 tsp before lunch and dinner — <strong>start today</strong></div></div>
-  </div>
-  <div class="card">
-    <div class="card-title">today's health score<span id="score-badge" class="tag tag-b">--</span></div>
-    <div class="score-ring"><div class="score-num" id="score-num" style="color:var(--accent)">--</div><div class="score-label">out of 100</div></div>
-    <div class="score-grid">
-      <div class="score-item"><div class="score-item-val" id="sc-meds">-</div><div class="score-item-label">Meds taken</div></div>
-      <div class="score-item"><div class="score-item-val" id="sc-steps">-</div><div class="score-item-label">Steps</div></div>
-      <div class="score-item"><div class="score-item-val" id="sc-water">-</div><div class="score-item-label">Water</div></div>
-      <div class="score-item"><div class="score-item-val" id="sc-sleep">-</div><div class="score-item-label">Sleep hrs</div></div>
-      <div class="score-item"><div class="score-item-val" id="sc-meals">-</div><div class="score-item-label">Meals logged</div></div>
-      <div class="score-item"><div class="score-item-val" id="sc-sat">-</div><div class="score-item-label">Sat fat g</div></div>
-    </div>
-    <div id="score-breakdown" style="margin-top:10px"></div>
-  </div>
-  <div class="card">
-    <div class="card-title">daily calorie plan</div>
-    <div class="metric-grid">
-      <div class="metric"><div class="metric-label">BMR (at rest)</div><div class="metric-value info">1,609</div><div class="metric-sub">always</div></div>
-      <div class="metric"><div class="metric-label">Walk burned</div><div class="metric-value ok" id="tdee-walk-cals">--</div><div class="metric-sub" id="tdee-walk-sub">log walk above</div></div>
-      <div class="metric"><div class="metric-label">Exercise burned</div><div class="metric-value ok" id="tdee-ex-cals">--</div><div class="metric-sub" id="tdee-ex-sub">log exercise tab</div></div>
-      <div class="metric"><div class="metric-label">TDEE today</div><div class="metric-value info" id="tdee-today">1,609</div><div class="metric-sub">BMR + activity</div></div>
-      <div class="metric"><div class="metric-label">Ate today</div><div class="metric-value warn" id="tdee-ate">--</div><div class="metric-sub">from meal log</div></div>
-      <div class="metric"><div class="metric-label">Deficit today</div><div class="metric-value ok" id="tdee-deficit">--</div><div class="metric-sub" id="tdee-deficit-sub">log meals + activity</div></div>
-      <div class="metric"><div class="metric-label">Steps today</div><div class="metric-value ok" id="home-steps-today">--</div><div class="metric-sub" id="home-steps-sub">from walk tracker</div></div>
-    </div>
-    <div style="font-size:11px;color:var(--text3);margin-top:8px" id="tdee-note">Log walks and exercises to see your real daily TDEE and deficit.</div>
-    <div style="background:var(--bg3);border-radius:8px;padding:10px;margin-top:8px" id="deficit-card">
-      <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px">today's energy balance</div>
-      <div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid var(--border)">
-        <span style="color:var(--text3)">Food eaten</span><span id="deficit-food" style="font-weight:600">-- kcal</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid var(--border)">
-        <span style="color:var(--text3)">Walk today</span><span id="deficit-walk" style="font-weight:600;color:var(--text3);font-size:10px">not logged yet</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid var(--border)">
-        <span style="color:var(--text3)">Exercise today</span><span id="deficit-exercise" style="font-weight:600;color:var(--text3);font-size:10px">not logged yet</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:12px;padding:5px 0;font-weight:700">
-        <span>Calories eaten</span><span id="deficit-net" style="color:var(--accent)">-- kcal</span>
-      </div>
-      <div style="font-size:10px;color:var(--text3);text-align:center" id="deficit-status"></div>
-    </div><div class="metric-value info">1,609</div><div class="metric-sub">kcal/day</div></div>
-  <div class="card">
-    <div class="card-title">latest readings</div>
-    <div class="metric-grid">
-      <div class="metric"><div class="metric-label">Weight</div><div class="metric-value info" id="hm-wt">83.9 kg</div><div class="metric-sub">Started 97 kg (-13.1 kg)</div></div>
-      <div class="metric"><div class="metric-label">HbA1c</div><div class="metric-value ok">5.3%</div><div class="metric-sub">Was 9.3% (May 25)</div></div>
-      <div class="metric"><div class="metric-label">BP</div><div class="metric-value ok" id="hm-bp">124/72</div><div class="metric-sub">Was 180-190</div></div>
-      <div class="metric"><div class="metric-label">Cholesterol</div><div class="metric-value bad">252</div><div class="metric-sub">LDL 133 — on Crestor</div></div>
-      <div class="metric"><div class="metric-label">Body Fat</div><div class="metric-value warn">31.1%</div><div class="metric-sub">Target 20-22%</div></div>
-      <div class="metric"><div class="metric-label">Muscle SMM</div><div class="metric-value ok">32.1 kg</div><div class="metric-sub">↑ from 31.4</div></div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title">mounjaro tracker</div>
-    <div id="mj-next-display" style="background:var(--bg3);border-radius:8px;padding:10px;margin-bottom:8px;font-size:12px;text-align:center"><span style="color:var(--text3)">Loading Mounjaro countdown...</span></div>
-    <div class="metric-grid">
-      <div class="metric"><div class="metric-label">Dose</div><div class="metric-value info">10 mg</div><div class="metric-sub">Every 15 days</div></div>
-      <div class="metric"><div class="metric-label">Next due</div><div class="metric-value warn">13 Jun</div><div class="metric-sub">2026</div></div>
-    </div>
-    <div class="progress-wrap" style="margin-top:8px">
-      <div class="progress-label"><span>Cycle progress</span><span id="mj-days">--</span></div>
-      <div class="progress-bar"><div class="progress-fill" id="mj-prog" style="background:var(--accent);width:0%"></div></div>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title">active alerts</div>
-    <div id="med-alert-banner"></div>
-    <div class="alert alert-bad"><strong>CPK 367</strong> — double limit. Recheck late June with blood test.</div>
-    <div class="alert alert-bad"><strong>Cholesterol 252, LDL 133</strong> — Crestor 20mg started 3 weeks ago. Test late June.</div>
-    <div class="alert alert-warn"><strong>Fasting glucose 116</strong> — pre-diabetic range. Monitor.</div>
-    <div class="alert alert-warn"><strong>Repaglinide</strong> — discuss with Dr. Lakhani. HbA1c now normal.</div>
-    <div class="alert alert-ok"><strong>Diabetes reversed</strong> — HbA1c 9.3% → 5.3% in 13 months.</div>
-  </div>
-  <div class="card">
-    <div class="card-title">mounjaro injection log</div>
-    <div class="row" style="margin-bottom:8px">
-      <div class="half"><label>Date</label><input type="date" id="mj-log-date"></div>
-      <div class="half"><label>Dose (mg)</label>
-        <select id="mj-log-dose">
-          <option>2.5</option><option>5</option><option>7.5</option><option selected>10</option><option>12.5</option><option>15</option>
-        </select>
-      </div>
-    </div>
-    <label>Side effects / notes</label>
-    <input type="text" id="mj-log-note" placeholder="e.g. mild nausea, no issues...">
-    <button class="btn btn-green" onclick="logMounjaro()" style="margin-bottom:6px">Log injection</button>
-    <div id="mj-history" style="margin-top:4px"></div>
-  </div>id="tab-meals">
 
+<!-- TAB 2: MEALS -->
+<div class="tab" id="tab-meals">
+
+  <div class="card">
+    <div class="card-title">today's nutrition summary</div>
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Calories</span><span id="cal-today">0 / 1520 kcal</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="cal-bar" style="background:var(--accent);width:0%"></div></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Protein</span><span id="prot-today">0 / 120g</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="prot-bar" style="background:var(--green);width:0%"></div></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Carbohydrates</span><span id="carb-today">0 / 150g</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="carb-bar" style="background:var(--accent2);width:0%"></div></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Saturated fat <span style="color:var(--text3)">(keep under 13g)</span></span><span id="satfat-today">0 / 13g</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="satfat-bar" style="background:var(--red);width:0%"></div></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Fibre <span style="color:var(--text3)">(target 30g+)</span></span><span id="fibre-today">0 / 30g</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="fibre-bar" style="background:var(--purple);width:0%"></div></div>
+    </div>
+  </div>
+
+  <div id="nutrition-alert-panel"></div>
+
+  <!-- MEAL SLOTS -->
+  <div id="meal-slots-container"></div>
+
+  <!-- EATING OUT QUICK LOG -->
+  <div class="card">
+    <div class="card-title">🍽️ eating out — quick log</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:8px">At airport, office or restaurant — tap a preset to log instantly. All values are estimates ± 15%.</div>
+    <select id="eating-out-slot" style="margin-bottom:8px">
+      <option value="Breakfast">🌅 Breakfast</option>
+      <option value="Morning Snack">🍎 Morning Snack</option>
+      <option value="Lunch" selected>🍱 Lunch</option>
+      <option value="Evening Snack">🥜 Evening Snack</option>
+      <option value="Dinner">🌙 Dinner</option>
+      <option value="Before Sleep">🌛 Before Sleep</option>
+    </select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px" id="eating-out-grid">
+    </div>
+  </div>
+
+  <!-- PORTION COUNTER -->
+  <div class="card">
+    <div class="card-title">🔢 log by count — not weight</div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:8px">When you cannot weigh food — count pieces instead.</div>
+    <select id="portion-slot" style="margin-bottom:8px">
+      <option value="Breakfast">🌅 Breakfast</option>
+      <option value="Morning Snack">🍎 Morning Snack</option>
+      <option value="Lunch" selected>🍱 Lunch</option>
+      <option value="Evening Snack">🥜 Evening Snack</option>
+      <option value="Dinner">🌙 Dinner</option>
+      <option value="Before Sleep">🌛 Before Sleep</option>
+    </select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px" id="portion-grid">
+    </div>
+    <div id="portion-selected" style="margin-top:8px"></div>
+  </div>
+
+  <!-- LOG FOOD PANEL -->
   <div class="card" id="log-food-card">
     <div class="card-title" id="log-food-title">log food — by weight</div>
     <label>Date</label>
-    <input type="date" id="m-date" onchange="changeMealDate(this.value)">
+    <input type="date" id="m-date">
     <label>Meal slot</label>
     <select id="m-type">
       <option value="Breakfast">🌅 Breakfast (~400 kcal)</option>
@@ -340,12 +395,9 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
       <option value="Dinner">🌙 Dinner (~350 kcal)</option>
       <option value="Before Sleep">🌛 Before Sleep (~100 kcal)</option>
     </select>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-      <label style="margin:0">Search food</label>
-      <button onclick="showAddFoodModal()" style="background:var(--accent);border:none;border-radius:6px;color:white;font-size:11px;padding:5px 10px;cursor:pointer;font-weight:600">+ Add new food</button>
-    </div>
+    <label>Search food <span style="font-size:10px;color:var(--text3)">(type name — searches our database + USDA)</span></label>
     <div class="food-search-wrap">
-      <input type="text" id="food-search" placeholder="Type food name e.g. dal, eggs, oats..." autocomplete="off" oninput="searchFood(this.value)" onkeydown="if(event.key==='Enter'&&window._foodMatches&&window._foodMatches.length>0)pickFood(0)">
+      <input type="text" id="food-search" placeholder="Type food name e.g. dal, eggs, oats..." autocomplete="off" oninput="searchFood(this.value)">
       <div class="food-results" id="food-results"></div>
     </div>
     <div id="food-selected-panel" class="hidden">
@@ -388,71 +440,21 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
     </div>
     <button class="btn-sm" onclick="showAddFoodModal()" style="width:100%;margin-top:4px;margin-bottom:6px">+ Add new food to database</button>
   </div>
-  <div class="card">
-    <div class="card-title">🍽️ eating out — quick log</div>
-    <div style="font-size:11px;color:var(--text3);margin-bottom:8px">At airport, office or restaurant — tap a preset to log instantly. All values are estimates ± 15%.</div>
-    <select id="eating-out-slot" style="margin-bottom:8px">
-      <option value="Breakfast">🌅 Breakfast</option>
-      <option value="Morning Snack">🍎 Morning Snack</option>
-      <option value="Lunch" selected>🍱 Lunch</option>
-      <option value="Evening Snack">🥜 Evening Snack</option>
-      <option value="Dinner">🌙 Dinner</option>
-      <option value="Before Sleep">🌛 Before Sleep</option>
-    </select>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px" id="eating-out-grid">
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title">🔢 log by count — not weight</div>
-    <div style="font-size:11px;color:var(--text3);margin-bottom:8px">When you cannot weigh food — count pieces instead.</div>
-    <select id="portion-slot" style="margin-bottom:8px">
-      <option value="Breakfast">🌅 Breakfast</option>
-      <option value="Morning Snack">🍎 Morning Snack</option>
-      <option value="Lunch" selected>🍱 Lunch</option>
-      <option value="Evening Snack">🥜 Evening Snack</option>
-      <option value="Dinner">🌙 Dinner</option>
-      <option value="Before Sleep">🌛 Before Sleep</option>
-    </select>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px" id="portion-grid">
-    </div>
-    <div id="portion-selected" style="margin-top:8px"></div>
-  </div>
-  <div class="card">
-    <div class="card-title">today's nutrition summary</div>
-    <div class="progress-wrap">
-      <div class="progress-label"><span>Calories</span><span id="cal-today">0 / 1520 kcal</span></div>
-      <div class="progress-bar"><div class="progress-fill" id="cal-bar" style="background:var(--accent);width:0%"></div></div>
-    </div>
-    <div class="progress-wrap">
-      <div class="progress-label"><span>Protein</span><span id="prot-today">0 / 120g</span></div>
-      <div class="progress-bar"><div class="progress-fill" id="prot-bar" style="background:var(--green);width:0%"></div></div>
-    </div>
-    <div class="progress-wrap">
-      <div class="progress-label"><span>Carbohydrates</span><span id="carb-today">0 / 150g</span></div>
-      <div class="progress-bar"><div class="progress-fill" id="carb-bar" style="background:var(--accent2);width:0%"></div></div>
-    </div>
-    <div class="progress-wrap">
-      <div class="progress-label"><span>Saturated fat <span style="color:var(--text3)">(keep under 13g)</span></span><span id="satfat-today">0 / 13g</span></div>
-      <div class="progress-bar"><div class="progress-fill" id="satfat-bar" style="background:var(--red);width:0%"></div></div>
-    </div>
-    <div class="progress-wrap">
-      <div class="progress-label"><span>Fibre <span style="color:var(--text3)">(target 30g+)</span></span><span id="fibre-today">0 / 30g</span></div>
-      <div class="progress-bar"><div class="progress-fill" id="fibre-bar" style="background:var(--purple);width:0%"></div></div>
-    </div>
-  </div>
+
   <div class="card">
     <div class="card-title">today's food log</div>
     <div id="meal-list"><div style="color:var(--text3);font-size:12px">No meals logged yet.</div></div>
   </div>
+
   <div class="card">
     <div class="card-title">recent history</div>
     <div id="meal-history"><div style="color:var(--text3);font-size:12px">Log meals to see history.</div></div>
-  </div>id="tab-exercise">
-
-  <div class="card" id="ex-workout-card">
-    <div class="card-title" id="ex-workout-title">workout</div>
-    <div id="ex-workout-list"></div>
   </div>
+</div>
+
+<!-- TAB 3: EXERCISE -->
+<div class="tab" id="tab-exercise">
+
   <div class="card" id="ex-day-header">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <div>
@@ -467,6 +469,38 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
       <button id="btn-gym_cable" onclick="setExVersion('gym_cable')" style="flex:1;font-size:11px;padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);color:var(--text);cursor:pointer">💪 Cable</button>
     </div>
     <div style="font-size:11px;color:var(--text3);text-align:center" id="ex-version-label">Select workout type above — mix freely on same day</div>
+  </div>
+
+  <div class="card" style="padding:10px 12px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <label style="font-size:11px;color:var(--text3);margin:0;white-space:nowrap">Date:</label>
+      <input type="date" id="ex-log-date" style="flex:1;margin-bottom:0;font-size:12px;padding:6px" onchange="renderTodayWorkout()">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">today's workout summary</div>
+    <div class="metric-grid">
+      <div class="metric"><div class="metric-label">Done</div><div class="metric-value info" id="ex-done-count">0</div><div class="metric-sub" id="ex-planned-count">of 0 planned</div></div>
+      <div class="metric"><div class="metric-label">Total sets</div><div class="metric-value ok" id="ex-total-sets">0</div></div>
+      <div class="metric"><div class="metric-label">Calories burned</div><div class="metric-value pu" id="ex-total-cals">0 kcal</div></div>
+      <div class="metric"><div class="metric-label">Cardio</div><div class="metric-value warn" id="ex-total-cardio">0 min</div></div>
+    </div>
+    <div class="progress-wrap" style="margin-top:8px">
+      <div class="progress-label"><span>Completion</span><span id="ex-completion-pct">0%</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="ex-completion-bar" style="background:var(--green);width:0%"></div></div>
+    </div>
+    <div style="font-size:11px;color:var(--text2);margin-top:6px" id="ex-muscles-today"></div>
+  </div>
+
+  <div class="card" id="ex-warmup-card">
+    <div class="card-title">warmup — do first</div>
+    <div id="ex-warmup-list"></div>
+  </div>
+
+  <div class="card" id="ex-workout-card">
+    <div class="card-title" id="ex-workout-title">workout</div>
+    <div id="ex-workout-list"></div>
   </div>
 
   <div class="card hidden" id="ex-log-panel">
@@ -518,46 +552,36 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
     <button class="btn btn-green" onclick="saveExerciseLog()" style="margin-top:8px;margin-bottom:6px">✓ Log this exercise</button>
     <button onclick="hideExLogPanel()" style="width:100%;background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;padding:4px">Cancel</button>
   </div>
-  <div class="card" style="padding:10px 12px">
-    <div style="display:flex;align-items:center;gap:8px">
-      <label style="font-size:11px;color:var(--text3);margin:0;white-space:nowrap">Date:</label>
-      <input type="date" id="ex-log-date" style="flex:1;margin-bottom:0;font-size:12px;padding:6px" onchange="renderTodayWorkout()">
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-title">today's workout summary</div>
-    <div class="metric-grid">
-      <div class="metric"><div class="metric-label">Done</div><div class="metric-value info" id="ex-done-count">0</div><div class="metric-sub" id="ex-planned-count">of 0 planned</div></div>
-      <div class="metric"><div class="metric-label">Total sets</div><div class="metric-value ok" id="ex-total-sets">0</div></div>
-      <div class="metric"><div class="metric-label">Calories burned</div><div class="metric-value pu" id="ex-total-cals">0 kcal</div></div>
-      <div class="metric"><div class="metric-label">Cardio</div><div class="metric-value warn" id="ex-total-cardio">0 min</div></div>
-    </div>
-    <div class="progress-wrap" style="margin-top:8px">
-      <div class="progress-label"><span>Completion</span><span id="ex-completion-pct">0%</span></div>
-      <div class="progress-bar"><div class="progress-fill" id="ex-completion-bar" style="background:var(--green);width:0%"></div></div>
-    </div>
-    <div style="font-size:11px;color:var(--text2);margin-top:6px" id="ex-muscles-today"></div>
-  </div>
-  <div class="card" id="ex-warmup-card">
-    <div class="card-title">warmup — do first</div>
-    <div id="ex-warmup-list"></div>
-  </div>
+
   <div class="card" id="ex-cooldown-card">
     <div class="card-title">cooldown — always finish with this</div>
     <div id="ex-cooldown-list"></div>
   </div>
+
   <div class="card">
     <div class="card-title">today's full log</div>
     <div id="ex-today-log"><div style="color:var(--text3);font-size:12px">No exercises logged yet.</div></div>
   </div>
+
   <div class="card">
     <div class="card-title">weekly summary <span style="color:var(--text3);font-size:10px">(past 7 days, not today)</span></div>
     <div id="ex-weekly-summary"><div style="color:var(--text3);font-size:12px">Log workouts to see summary.</div></div>
   </div>
+
   <div class="card">
     <div class="card-title">30-day streak</div>
     <div class="streak-row" id="ex-streak-row"></div>
-  </div>dius:8px;padding:10px;margin-bottom:10px">
+  </div>
+
+</div>
+
+<!-- TAB 4: VITALS -->
+<div class="tab" id="tab-vitals">
+
+  <!-- QUICK LOG ROW -->
+  <div class="card">
+    <div class="card-title">quick morning log <span style="color:var(--text3);font-size:10px">Mon · Wed · Fri recommended</span></div>
+    <div style="background:var(--bg3);border-radius:8px;padding:10px;margin-bottom:10px">
       <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:8px">📅 Log for date:</div>
       <input type="date" id="v-quick-date" style="margin-bottom:8px">
       <div class="row">
@@ -718,7 +742,10 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
     <input type="range" id="v-wb" min="1" max="10" value="7" oninput="document.getElementById('wb-val').textContent=this.value">
     <div style="text-align:center;font-size:18px;font-weight:700;color:var(--accent)" id="wb-val">7</div>
     <button class="btn" onclick="saveVitals()">Save vitals</button>
-
+    <div class="row" style="margin-bottom:6px">
+      <button class="btn" onclick="syncHealthConnect()" style="background:var(--green);margin-bottom:0">Sync Samsung Health</button>
+    </div>
+    <div id="hc-status" style="font-size:11px;color:var(--text3);text-align:center;margin-bottom:8px"></div>
     <div class="row">
       <button class="btn-sm" onclick="exportData()" style="flex:1;color:var(--accent);border-color:var(--accent)">Export backup</button>
       <label class="btn-sm" style="flex:1;text-align:center;cursor:pointer">Import backup<input type="file" accept=".json" onchange="importData(event)" style="display:none"></label>
@@ -998,6 +1025,19 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
     <div class="alert alert-warn">Carry glucose tablets — for hypoglycaemia (shakiness, sweating, confusion).</div>
     <div class="alert alert-info">Watch: muscle pain, weakness, dark urine → tell doctor immediately.</div>
   </div>
+  <div class="card">
+    <div class="card-title">exercise protocol</div>
+    <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div><strong>Daily</strong> — 7-8k steps + 10-min home workout</div></div>
+    <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div><strong>2x week</strong> — swimming or cycling (low CPK impact)</div></div>
+    <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div><strong>After dinner</strong> — 20 min walk — best for glucose</div></div>
+    <div class="list-item"><div class="list-dot" style="background:var(--amber)"></div><div><strong>Avoid heavy compound lifts</strong> until CPK rechecked</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">sleep target</div>
+    <div class="alert alert-warn">Currently 6 hours light sleep. Poor sleep raises cortisol → belly fat + higher fasting glucose. Aim for 7 hours when possible.</div>
+    <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div>Prep lunch night before — saves 30 min, wake at 5:00 not 4:30</div></div>
+    <div class="list-item"><div class="list-dot" style="background:var(--green)"></div><div>Ashwagandha + Magnesium at night help sleep depth</div></div>
+  </div>
 </div>
 
 </div>
@@ -1044,11 +1084,22 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
       <div id="checkin-med-list"></div>
     </div>
 
-        <!-- STEPS — reads from walk tracker -->
+    <!-- STEPS QUESTION -->
     <div style="background:var(--bg3);border-radius:10px;padding:12px;margin-bottom:12px">
-      <div style="font-size:13px;font-weight:600;margin-bottom:6px;color:var(--accent2)">👟 Steps today</div>
-      <div id="ci-steps-from-tracker" style="font-size:13px;color:var(--text2);margin-bottom:6px"></div>
-      <div style="font-size:11px;color:var(--text3)">Steps are read automatically from your Walk Tracker. Log walks on the Home tab.</div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--accent2)">👟 Steps today?</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px">
+        <button class="steps-opt-btn" data-steps="3000" onclick="selectSteps(this,this.dataset.steps)" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">Under 4k</button>
+        <button class="steps-opt-btn" data-steps="5000" onclick="selectSteps(this,this.dataset.steps)" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">4k – 6k</button>
+        <button class="steps-opt-btn" data-steps="7000" onclick="selectSteps(this,this.dataset.steps)" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">6k – 8k</button>
+        <button class="steps-opt-btn" data-steps="9000" onclick="selectSteps(this,this.dataset.steps)" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">8k – 10k</button>
+        <button class="steps-opt-btn" data-steps="11000" onclick="selectSteps(this,this.dataset.steps)" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">10k+</button>
+        <button class="steps-opt-btn" data-steps="0" onclick="selectSteps(this,this.dataset.steps)" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-size:11px">Rest day</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <label style="font-size:11px;color:var(--text3);margin:0;white-space:nowrap">Exact steps:</label>
+        <input type="number" id="ci-steps-exact" placeholder="type your steps" oninput="selectStepsExact(this.value)" style="flex:1;margin-bottom:0;font-size:13px;padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text)">
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-top:4px;text-align:center" id="steps-cal-preview"></div>
     </div>
 
     <!-- ISABGOL -->
@@ -1352,97 +1403,49 @@ function cholesterolScore(food, grams) {
 function searchFood(q) {
   var res = document.getElementById('food-results');
   if (!res) return;
-
-  if (!q || q.length < 2) {
-    res.style.display = 'none';
-    res.innerHTML = '';
-    return;
-  }
-
+  if (!q || q.length < 2) { res.style.display='none'; res.innerHTML=''; return; }
   var qLow = q.toLowerCase().trim();
-  var allFoods = [];
-
-  // 1. Main built-in foods (f.n field)
-  try {
-    getFoodDB().forEach(function(f) {
-      if (f.n && f.n.toLowerCase().includes(qLow)) {
-        allFoods.push({n:f.n, cal:f.cal, p:f.p||0, c:f.c||0, f:f.f||0, s:f.s||0, fi:f.fi||0, unit:f.unit||'100g', g:f.g||100, grams:f.g||100});
-      }
-    });
-  } catch(e) {}
-
-  // 2. Indian foods DB (f.name field)
-  try {
-    INDIAN_FOODS_DB.forEach(function(f) {
-      if (f.name.toLowerCase().includes(qLow)) {
-        var dup = allFoods.some(function(m){return m.n.toLowerCase()===f.name.toLowerCase();});
-        if (!dup) allFoods.push({n:f.name, cal:f.cal, p:f.p||0, c:f.c||0, f:f.f||0, s:f.sat||0, fi:f.fi||0, unit:f.unit||'100g', g:f.grams||100, grams:f.grams||100});
-      }
-    });
-  } catch(e) {}
-
-  // 3. Custom foods
-  try {
-    JSON.parse(localStorage.getItem('hh_custom_foods') || '[]').forEach(function(f) {
-      var name = f.name||f.n||'';
-      if (name.toLowerCase().includes(qLow)) {
-        var dup = allFoods.some(function(m){return m.n.toLowerCase()===name.toLowerCase();});
-        if (!dup) allFoods.push({n:name, cal:f.cal, p:f.p||0, c:f.c||0, f:f.f||0, s:f.sat||f.s||0, fi:f.fi||0, unit:'100g', g:100, grams:100});
-      }
-    });
-  } catch(e) {}
-
-  // Show results
+  var all = [];
+  // Main DB
+  try { getFoodDB().forEach(function(f){if(f.n&&f.n.toLowerCase().includes(qLow)){all.push({n:f.n,cal:f.cal,p:f.p||0,c:f.c||0,f:f.f||0,s:f.s||0,fi:f.fi||0,unit:f.unit||'100g',g:f.g||100,grams:f.g||100});}}); } catch(e){}
+  // Indian DB
+  try { if(typeof INDIAN_FOODS_DB!=='undefined'){INDIAN_FOODS_DB.forEach(function(f){var dup=all.some(function(m){return m.n.toLowerCase()===f.name.toLowerCase();});if(!dup&&f.name.toLowerCase().includes(qLow)){all.push({n:f.name,cal:f.cal,p:f.p||0,c:f.c||0,f:f.f||0,s:f.sat||0,fi:f.fi||0,unit:f.unit||'100g',g:f.grams||100,grams:f.grams||100});}});}} catch(e){}
+  // Custom foods
+  try { JSON.parse(localStorage.getItem('hh_custom_foods')||'[]').forEach(function(f){var name=f.name||f.n||'';var dup=all.some(function(m){return m.n.toLowerCase()===name.toLowerCase();});if(!dup&&name.toLowerCase().includes(qLow)){all.push({n:name,cal:f.cal,p:f.p||0,c:f.c||0,f:f.f||0,s:f.sat||f.s||0,fi:f.fi||0,unit:'100g',g:100,grams:100});}}); } catch(e){}
+  all = all.slice(0,12);
+  window._foodMatches = all;
   res.style.display = 'block';
   res.style.zIndex = '9999';
-
-  if (!allFoods.length) {
-    res.innerHTML =
-      '<div style="padding:12px">' +
-        '<div style="font-size:12px;color:var(--text3);margin-bottom:10px">No results for <strong>' + q + '</strong></div>' +
-        '<button data-fname="' + q + '" onclick="openAddFoodWithName(this.dataset.fname)" ' +
-          'style="background:var(--accent);border:none;border-radius:8px;color:white;padding:12px;cursor:pointer;font-size:13px;font-weight:700;width:100%;text-align:left">' +
-          '+ Add &quot;' + q + '&quot; to my foods' +
-        '</button>' +
-      '</div>';
-    window._foodMatches = [];
+  if (!all.length) {
+    res.innerHTML = '<div style="padding:12px"><div style="font-size:12px;color:var(--text3);margin-bottom:10px">No results for <strong>' + q + '</strong></div><button data-fname="' + q + '" onclick="openAddFoodWithName(this.dataset.fname)" style="background:var(--accent);border:none;border-radius:8px;color:white;padding:12px;cursor:pointer;font-size:13px;font-weight:700;width:100%;text-align:left">+ Add &quot;' + q + '&quot; to my foods</button></div>';
     return;
   }
-
-  allFoods = allFoods.slice(0, 12);
-  window._foodMatches = allFoods;
-
-  res.innerHTML = allFoods.map(function(f, i) {
-    var unitLabel = f.unit && f.unit !== '100g' && f.unit !== '100ml' ? 'per ' + f.unit : 'per 100g';
-    return '<div class="food-result-item" onclick="pickFood(' + i + ')" style="padding:10px 12px;cursor:pointer;border-bottom:1px solid var(--border)">' +
-      '<div style="font-weight:600;font-size:13px">' + f.n + '</div>' +
-      '<div style="font-size:11px;color:var(--text3);margin-top:2px">' + f.cal + ' kcal · P:' + f.p + 'g · C:' + f.c + 'g · F:' + f.f + 'g <span style="color:var(--accent)">(' + unitLabel + ')</span></div>' +
-    '</div>';
+  res.innerHTML = all.map(function(f,i){
+    var ul = f.unit&&f.unit!=='100g'&&f.unit!=='100ml'?'per '+f.unit:'per 100g';
+    return '<div class="food-result-item" onclick="pickFood('+i+')" style="padding:10px 12px;cursor:pointer;border-bottom:1px solid var(--border)"><div style="font-weight:600;font-size:13px">'+f.n+'</div><div style="font-size:11px;color:var(--text3);margin-top:2px">'+f.cal+' kcal · P:'+f.p+'g · C:'+f.c+'g · F:'+f.f+'g <span style="color:var(--accent)">('+ul+')</span></div></div>';
   }).join('');
 }
 
+
 function openAddFoodWithName(name) {
   showAddFoodModal();
+  // Pre-fill the lookup field and trigger search
   var lookupEl = document.getElementById('af-lookup');
   var nameEl = document.getElementById('af-name');
-  if (lookupEl) { lookupEl.value = name; }
+  if (lookupEl) lookupEl.value = name;
   if (nameEl) nameEl.value = name;
+  // Auto-trigger lookup after modal opens
+  setTimeout(function() { lookupFoodNutrition(); }, 100);
+  // Hide food results dropdown
   var res = document.getElementById('food-results');
   if (res) res.style.display = 'none';
-  // Scroll modal to top and auto-lookup
-  setTimeout(function() {
-    lookupFoodNutrition();
-    var modal = document.getElementById('add-food-modal');
-    if (modal) modal.scrollTop = 0;
-    if (lookupEl) lookupEl.focus();
-  }, 150);
 }
 
 function pickFood(i) {
   const f = window._foodMatches[i];
   if (!f) return;
   selectedFood = f;
-  portionGrams = f.g || f.grams || 100;
+  portionGrams = f.g || 100;
   document.getElementById('food-results').style.display = 'none';
   document.getElementById('food-search').value = f.n;
   document.getElementById('food-selected-panel').classList.remove('hidden');
@@ -1549,23 +1552,12 @@ function updatePortion(g) {
   portionGrams = Number(g);
   if (!selectedFood) return;
   var baseGrams = selectedFood.g || selectedFood.grams || 100;
-  var unit = selectedFood.unit || '100g';
   const r = portionGrams / baseGrams;
-
-  // Show natural count for piece/unit foods
+  const unit = getUnit(selectedFood);
   const portionLabel = document.getElementById('portion-label');
   const sliderLabel = document.getElementById('portion-unit-label');
-  var displayCount = parseFloat((portionGrams / baseGrams).toFixed(1));
-  var isPiece = ['piece','square','roti','chapati','idli','dosa','scoop','nut','almond','half','whole','egg','white','samosa','papad','glass','cup','katori','slice','paratha'].indexOf(unit) > -1;
-
-  if (portionLabel) {
-    if (isPiece) {
-      portionLabel.textContent = displayCount + ' ' + unit + (displayCount > 1 && unit.slice(-1) !== 's' ? 's' : '') + ' (' + portionGrams + 'g)';
-    } else {
-      portionLabel.textContent = portionGrams + (unit.includes('ml') ? 'ml' : 'g');
-    }
-  }
-  if (sliderLabel) sliderLabel.textContent = isPiece ? unit : (unit.includes('ml') ? 'ml' : 'g');
+  if (portionLabel) portionLabel.textContent = portionGrams + ' ' + unit;
+  if (sliderLabel) sliderLabel.textContent = unit;
   document.getElementById('sel-cal').textContent = Math.round(selectedFood.cal * r);
   document.getElementById('sel-prot').textContent = (selectedFood.p * r).toFixed(1);
   document.getElementById('sel-carb').textContent = (selectedFood.c * r).toFixed(1);
@@ -1580,47 +1572,33 @@ function updatePortion(g) {
 function logSelectedFood() {
   if (!selectedFood) return;
   var baseGrams = selectedFood.g || selectedFood.grams || 100;
-  const r = portionGrams / baseGrams;
-  const mdate = document.getElementById('m-date').value || TODAY;
-  const unit = getUnit(selectedFood);
-  const entry = {
-    date: mdate,
-    time: new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
-    type: document.getElementById('m-type').value,
-    name: selectedFood.n,
-    grams: portionGrams,
-    unit: unit,
-    cal: Math.round(selectedFood.cal * r),
-    p: parseFloat((selectedFood.p * r).toFixed(1)),
-    c: parseFloat((selectedFood.c * r).toFixed(1)),
-    f: parseFloat((selectedFood.f * r).toFixed(1)),
-    sat: parseFloat((selectedFood.s * r).toFixed(1)),
-    fi: parseFloat((selectedFood.fi * r).toFixed(1)),
+  var r = portionGrams / baseGrams;
+  var mdate = document.getElementById('m-date') ? (document.getElementById('m-date').value || TODAY) : TODAY;
+  var mtype = document.getElementById('m-type') ? document.getElementById('m-type').value : 'Lunch';
+  var unit = getUnit ? getUnit(selectedFood) : (selectedFood.unit||'g');
+  var entry = {
+    date: mdate, time: new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
+    type: mtype, name: selectedFood.n, grams: portionGrams, unit: unit,
+    cal: Math.round(selectedFood.cal*r), p: parseFloat((selectedFood.p*r).toFixed(1)),
+    c: parseFloat(((selectedFood.c||0)*r).toFixed(1)), f: parseFloat(((selectedFood.f||0)*r).toFixed(1)),
+    sat: parseFloat(((selectedFood.s||selectedFood.sat||0)*r).toFixed(1)), fi: parseFloat(((selectedFood.fi||0)*r).toFixed(1)),
   };
-  var logs = JSON.parse(localStorage.getItem('hh_meals') || '[]');
+  var logs = JSON.parse(localStorage.getItem('hh_meals')||'[]');
   logs.unshift(entry);
   localStorage.setItem('hh_meals', JSON.stringify(logs));
-
-  // Reset search
-  selectedFood = null;
-  portionGrams = 100;
-  var fsEl = document.getElementById('food-search');
-  if (fsEl) fsEl.value = '';
-  var fpEl = document.getElementById('food-selected-panel');
-  if (fpEl) fpEl.classList.add('hidden');
-  var frEl = document.getElementById('food-results');
-  if (frEl) frEl.style.display = 'none';
-
-  // Only update meal-related displays — not the whole app
+  selectedFood = null; portionGrams = 100;
+  var fsEl = document.getElementById('food-search'); if(fsEl) fsEl.value='';
+  var fpEl = document.getElementById('food-selected-panel'); if(fpEl) fpEl.classList.add('hidden');
+  var frEl = document.getElementById('food-results'); if(frEl) frEl.style.display='none';
   try{renderMeals();}catch(e){}
   try{renderMealSlots();}catch(e){}
   try{updateTotals();}catch(e){}
   try{showNutritionAlert();}catch(e){}
   try{showDaySummary(TODAY);}catch(e){}
-  try{showWeekAverage();}catch(e){}
   try{updateDailyTDEE();}catch(e){}
   try{updateScore();}catch(e){}
 }
+
 
 function renderEatingOutGrid() {
   var grid = document.getElementById('eating-out-grid');
@@ -1649,14 +1627,14 @@ function logEatingOut(idx) {
     name: p.label + ' (est.)',
     grams: 0,
     unit: 'portion',
-    cal: p.cal, p: p.p||0, c: p.c||0, f: p.f||0, sat: p.sat||0, fi: p.fi||0,
+    cal: p.cal, p: p.p, c: p.c, f: p.f, sat: p.sat, fi: p.fi,
   };
 
   var logs = JSON.parse(localStorage.getItem('hh_meals') || '[]');
   logs.unshift(entry);
   localStorage.setItem('hh_meals', JSON.stringify(logs));
-  renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert();
-  try{showDaySummary(TODAY);}catch(e){} try{showWeekAverage();}catch(e){} updateDeficitCard();
+  try{renderMeals();}catch(e){} try{renderMealSlots();}catch(e){} try{updateTotals();}catch(e){} try{showNutritionAlert();}catch(e){} try{renderMeds();}catch(e){} try{renderMedStreak();}catch(e){} try{renderWalkTracker();}catch(e){}
+  showDaySummary(TODAY); showWeekAverage(); updateDeficitCard();
   alert('Logged: ' + p.label + ' — ' + p.cal + ' kcal to ' + slotVal + ' (estimated)');
 }
 
@@ -1783,7 +1761,7 @@ function logPortionEntry(key) {
   var logs = JSON.parse(localStorage.getItem('hh_meals') || '[]');
   logs.unshift(entry);
   localStorage.setItem('hh_meals', JSON.stringify(logs));
-  renderMeals(); renderMealSlots(); updateTotals(); showNutritionAlert();
+  try{renderMeals();}catch(e){} try{renderMealSlots();}catch(e){} try{updateTotals();}catch(e){} try{showNutritionAlert();}catch(e){} try{renderMeds();}catch(e){} try{renderMedStreak();}catch(e){} try{renderWalkTracker();}catch(e){}
   showDaySummary(TODAY); showWeekAverage(); updateDeficitCard();
 
   document.getElementById('portion-selected').innerHTML = '';
@@ -1833,24 +1811,15 @@ function deleteMeal(idx) {
   const toDelete = todayLogs[idx];
   logs = logs.filter(l => l !== toDelete);
   localStorage.setItem('hh_meals', JSON.stringify(logs));
-  try{renderMeals();}catch(e){}
-  try{renderMealSlots();}catch(e){}
-  try{updateTotals();}catch(e){}
-  try{showNutritionAlert();}catch(e){}
-  try{updateDeficitCard();}catch(e){}
-  try{renderEatingOutGrid();}catch(e){}
-  try{renderPortionGrid();}catch(e){}
-  try{migrateExLogs();}catch(e){}
-  try{renderWalkTracker();}catch(e){}
-  try{renderMeds();}catch(e){}
-  try{renderMedStreak();}catch(e){}
+  try{renderMeals();}catch(e){} try{renderMealSlots();}catch(e){} try{updateTotals();}catch(e){} try{showNutritionAlert();}catch(e){} try{renderMeds();}catch(e){} try{renderMedStreak();}catch(e){} try{renderWalkTracker();}catch(e){} updateDeficitCard();
+  renderEatingOutGrid(); renderPortionGrid();
+  migrateExLogs();
+  renderWalkTracker();
   showDaySummary(TODAY);
   showWeekAverage();
-  try{renderExercise();}catch(e){}
-  try{seedHistoricalData();}catch(e){}
-  try{updateDailyTDEE();}catch(e){}
-  setTimeout(function(){
-  try{renderWeightTrend();}catch(e){} renderGlucoseTrend(); renderCholesterolTrend(); renderIsabgol();}, 400);
+  renderExercise();
+  seedHistoricalData();
+  setTimeout(function(){renderWeightTrend(); renderGlucoseTrend(); renderCholesterolTrend(); renderIsabgol();}, 400);
   setTimeout(function(){generateWeeklySummary(0);}, 600);
   setTimeout(function(){renderSleepTracker(); seedWaistData(); renderWaistTracker(); renderMounjaroEffectiveness();}, 800);
   setTimeout(initCheckin, 1000); updateScore(); showNutritionAlert();
@@ -1895,13 +1864,11 @@ function lookupFoodNutrition() {
   var results = [];
 
   // Search Indian foods DB (extended)
-  if (typeof INDIAN_FOODS_DB !== 'undefined') {
-    INDIAN_FOODS_DB.forEach(function(f) {
-      if (f.name.toLowerCase().includes(q)) {
-        results.push({name:f.name, cal:f.cal, p:f.p, c:f.c, f:f.f, sat:f.sat, fi:f.fi||0, unit:f.unit||'100g', grams:f.grams||100, source:'verified DB'});
-      }
-    });
-  }
+  if (typeof INDIAN_FOODS_DB !== 'undefined') INDIAN_FOODS_DB.forEach(function(f) {
+    if (f.name.toLowerCase().includes(q)) {
+      results.push({name:f.name, cal:f.cal, p:f.p, c:f.c, f:f.f, sat:f.sat, fi:f.fi||0, unit:f.unit||'100g', grams:f.grams||100, source:'verified DB'});
+    }
+  });
 
   // Search main food database (FOOD_DB)
   if (typeof FOOD_DB !== 'undefined') {
@@ -2388,15 +2355,10 @@ function renderMeds() {
   var taken = JSON.parse(localStorage.getItem('hh_meds_' + TODAY) || '{}');
   var el = document.getElementById('med-list');
   if (!el) return;
-
   el.innerHTML = MEDS.map(function(m) {
     var isTaken = taken[m.id] ? true : false;
-    var tickStyle = 'width:28px;height:28px;border-radius:50%;border:2px solid ' +
-      (isTaken ? 'var(--green)' : 'var(--border)') +
-      ';background:' + (isTaken ? 'var(--green)' : 'transparent') +
-      ';display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:14px;color:white;transition:all .2s';
     return '<div class="med-card">' +
-      '<div data-mid="' + m.id + '" onclick="handleMedTick(event)" style="' + tickStyle + '">' +
+      '<div data-mid="' + m.id + '" onclick="toggleMed(this.dataset.mid)" style="width:28px;height:28px;border-radius:50%;border:2px solid ' + (isTaken?'var(--green)':'var(--border)') + ';background:' + (isTaken?'var(--green)':'transparent') + ';display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:14px;color:white;transition:all .2s">' +
         (isTaken ? '✓' : '') +
       '</div>' +
       '<div class="med-info">' +
@@ -2406,7 +2368,6 @@ function renderMeds() {
       '</div>' +
     '</div>';
   }).join('');
-
   var takenCount = MEDS.filter(function(m){return taken[m.id];}).length;
   var badge = document.getElementById('med-score-badge');
   if (badge) badge.textContent = takenCount + '/' + MEDS.length;
@@ -2415,37 +2376,16 @@ function renderMeds() {
   var p = MEDS.length > 0 ? Math.round(takenCount/MEDS.length*100) : 0;
   if (pct) pct.textContent = p + '%';
   if (bar) bar.style.width = p + '%';
-  renderMedStreak();
+  try{renderMedStreak();}catch(e){}
 }
 
-
-function renderMedStreak() {
-  var el = document.getElementById('med-streak-row');
-  if (!el) return;
-  var html = '';
-  for (var i = 29; i >= 0; i--) {
-    var d = getDateOffset(-i);
-    var taken = JSON.parse(localStorage.getItem('hh_meds_' + d) || '{}');
-    var count = Object.values(taken).filter(Boolean).length;
-    var done = count >= MEDS.length;
-    var partial = count > 0 && count < MEDS.length;
-    var isToday = d === TODAY;
-    html += '<div class="streak-day' + (done?' done':partial?' style="background:var(--amber);border-color:var(--amber)"':'') + (isToday?' today':'') + '">' + new Date(d+'T00:00:00').getDate() + '</div>';
-  }
-  el.innerHTML = html;
-}
-
-function handleMedTick(e) {
-  var el = e.currentTarget || e.target;
-  var id = el.getAttribute('data-mid');
-  if (id) toggleMed(id);
-}
 
 function toggleMed(id) {
   var taken = JSON.parse(localStorage.getItem('hh_meds_' + TODAY) || '{}');
   taken[id] = !taken[id];
   localStorage.setItem('hh_meds_' + TODAY, JSON.stringify(taken));
   renderMeds();
+  updateScore();
 }
 function renderStreak() {
   const el = document.getElementById('streak-row');
@@ -2540,13 +2480,6 @@ function updateScore() {
   var isabScore = (isab.lunch && isab.dinner) ? 5 : (isab.lunch || isab.dinner) ? 2 : 0;
   score += isabScore;
   breakdown.push({label:'Isabgol', val:isabScore, max:5, color:'var(--green)'});
-
-  // 7b. STEPS — 5 points
-  var walkSessions2 = JSON.parse(localStorage.getItem('hh_walks') || '[]');
-  var todayStepsForScore = walkSessions2.filter(function(s){return s.date===today;}).reduce(function(a,s){return a+(s.steps||0);},0);
-  var stepsScore = todayStepsForScore >= 7000 ? 5 : todayStepsForScore >= 5000 ? 3 : todayStepsForScore > 0 ? 1 : 0;
-  score += stepsScore;
-  breakdown.push({label:'Steps ' + (todayStepsForScore > 0 ? todayStepsForScore.toLocaleString() : '0'), val:stepsScore, max:5, color:'var(--accent2)'});
 
   // 8. SAT FAT — 5 points
   var totSat = parseFloat(todayMeals.reduce(function(a,l){return a+(l.sat||0);},0).toFixed(1));
@@ -2947,19 +2880,20 @@ function showTab(id, btn) {
   if (tabEl) tabEl.classList.add('active');
   if (btn && btn.classList) btn.classList.add('active');
   window.scrollTo(0, 0);
-  // Refresh tab content when switching
-  if (id === 'meds') { setTimeout(function(){renderMeds(); renderMedStreak();}, 50); }
-  if (id === 'vitals') { setTimeout(function(){renderWeightTrend();renderGlucoseTrend();renderCholesterolTrend();renderSleepTracker();renderWaistTracker();renderMounjaroEffectiveness();renderIsabgol();},100); }
-  if (id === 'exercise') { setTimeout(function(){try{renderTodayWorkout();}catch(e){}},50); }
-  if (id === 'reports') { setTimeout(function(){generateWeeklySummary(0);},50); }
-  if (id === 'home') { setTimeout(function(){updateScore(); updateDailyTDEE(); renderWalkTracker();},50); }
-  if (id === 'meals') { setTimeout(function(){renderMeals(); renderMealSlots(); updateTotals();},50); }
+  if (id==='meds') { setTimeout(function(){try{renderMeds();}catch(e){} try{renderMedStreak();}catch(e){}},50); }
+  if (id==='vitals') { setTimeout(function(){try{renderWeightTrend();}catch(e){} try{renderGlucoseTrend();}catch(e){} try{renderCholesterolTrend();}catch(e){} try{renderSleepTracker();}catch(e){} try{renderWaistTracker();}catch(e){} try{renderMounjaroEffectiveness();}catch(e){} try{renderIsabgol();}catch(e){}},100); }
+  if (id==='exercise') { setTimeout(function(){try{renderTodayWorkout();}catch(e){}},50); }
+  if (id==='reports') { setTimeout(function(){try{generateWeeklySummary(0);}catch(e){}},50); }
+  if (id==='home') { setTimeout(function(){try{updateScore();}catch(e){} try{updateDailyTDEE();}catch(e){} try{renderWalkTracker();}catch(e){}},50); }
+  if (id==='meals') { setTimeout(function(){try{renderMeals();}catch(e){} try{renderMealSlots();}catch(e){} try{updateTotals();}catch(e){}},50); }
 }
 
 // ═══════════════════════════════════
+// INIT
+// ═══════════════════════════════════
+// ═══════════════════════════════════
 // MOUNJARO INJECTION LOG
 // ═══════════════════════════════════
-
 function logMounjaro() {
   const date = document.getElementById('mj-log-date').value || TODAY;
   const dose = document.getElementById('mj-log-dose').value;
@@ -3435,7 +3369,7 @@ function showCheckin() {
   MEDS.forEach(function(m, idx) {
     var isTaken = taken[m.id] !== false;
     medHTML += '<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)">' +
-      '<div class="med-tick ' + (isTaken ? 'done' : '') + '" id="ci-med-' + idx + '" data-idx="' + idx + '" data-done="' + (isTaken ? '1' : '0') + '" onclick="toggleCIMed(' + idx + ')" style="width:26px;height:26px;border-radius:50%;border:2px solid ' + (isTaken ? 'var(--green)' : 'var(--border)') + ';background:' + (isTaken ? 'var(--green)' : 'transparent') + ';display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:14px;color:white">' +
+      '<div class="med-tick ' + (isTaken ? 'done' : '') + '" id="ci-med-' + idx + '" data-idx="' + idx + '" onclick="toggleCIMed(' + idx + ')" style="width:26px;height:26px;border-radius:50%;border:2px solid ' + (isTaken ? 'var(--green)' : 'var(--border)') + ';background:' + (isTaken ? 'var(--green)' : 'transparent') + ';display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:14px;color:white">' +
       (isTaken ? '✓' : '') + '</div>' +
       '<div style="font-size:12px">' + m.name + '<div style="font-size:10px;color:var(--text3)">' + m.time + '</div></div>' +
       '</div>';
@@ -3447,12 +3381,10 @@ function showCheckin() {
   ['lunch','dinner'].forEach(function(meal) {
     var btn = document.getElementById('ci-isabgol-' + meal);
     if (!btn) return;
-    var state = isab[meal] ? true : false;
-    btn.setAttribute('data-done', state ? '1' : '0');
-    btn.style.background = state ? 'var(--green)' : 'var(--bg2)';
-    btn.style.borderColor = state ? 'var(--green)' : 'var(--border)';
-    btn.style.color = state ? 'white' : 'var(--text)';
-    btn.textContent = (state ? '\u2713 ' : '') + (meal === 'lunch' ? '\uD83C\uDF71 Before Lunch' : '\uD83C\uDF19 Before Dinner');
+    btn.style.background = isab[meal] ? 'var(--green)' : 'var(--bg2)';
+    btn.style.borderColor = isab[meal] ? 'var(--green)' : 'var(--border)';
+    btn.style.color = isab[meal] ? 'white' : 'var(--text)';
+    btn.textContent = (isab[meal] ? '\u2713 ' : '') + (meal === 'lunch' ? '\uD83C\uDF71 Before Lunch' : '\uD83C\uDF19 Before Dinner');
   });
 
   document.getElementById('checkin-modal').classList.remove('hidden');
@@ -3477,21 +3409,16 @@ function toggleCIIsabgol(meal) {
 function toggleCIMed(idx) {
   var el = document.getElementById('ci-med-' + idx);
   if (!el) return;
-
-  // Use data attribute as source of truth — not class
   var isDone = el.getAttribute('data-done') === '1';
   var newDone = !isDone;
-
   el.setAttribute('data-done', newDone ? '1' : '0');
   el.innerHTML = newDone ? '✓' : '';
   el.style.background = newDone ? 'var(--green)' : 'transparent';
   el.style.borderColor = newDone ? 'var(--green)' : 'var(--border)';
-
-  // Save immediately to localStorage
   var taken = {};
   MEDS.forEach(function(m, i) {
     var btn = document.getElementById('ci-med-' + i);
-    taken[m.id] = btn ? btn.getAttribute('data-done') === '1' : true;
+    taken[m.id] = btn ? btn.getAttribute('data-done') === '1' : false;
   });
   localStorage.setItem('hh_meds_' + TODAY, JSON.stringify(taken));
   updateScore();
@@ -3564,9 +3491,17 @@ function saveCheckin() {
   var taken = {};
   MEDS.forEach(function(m, idx) {
     var el = document.getElementById('ci-med-' + idx);
-    taken[m.id] = el ? el.getAttribute('data-done') === '1' : true;
+    taken[m.id] = el ? el.classList.contains('done') : true;
   });
   localStorage.setItem('hh_meds_' + TODAY, JSON.stringify(taken));
+
+  // Save isabgol from check-in
+  var isabgolData = {};
+  var lBtn2 = document.getElementById('ci-isabgol-lunch');
+  var dBtn2 = document.getElementById('ci-isabgol-dinner');
+  if(lBtn2) isabgolData.lunch = lBtn2.getAttribute('data-done') === '1';
+  if(dBtn2) isabgolData.dinner = dBtn2.getAttribute('data-done') === '1';
+  localStorage.setItem('hh_isabgol_' + TODAY, JSON.stringify(isabgolData));
 
   // Save water as glasses
   if (_checkinWater > 0) {
@@ -3576,19 +3511,19 @@ function saveCheckin() {
     localStorage.setItem('hh_water_' + TODAY, JSON.stringify(waterArr));
   }
 
-  // Save isabgol from check-in buttons
-  var isabgolData = {};
-  var isabLunch = document.getElementById('ci-isabgol-lunch');
-  var isabDinner = document.getElementById('ci-isabgol-dinner');
-  if (isabLunch) isabgolData.lunch = isabLunch.getAttribute('data-done') === '1';
-  if (isabDinner) isabgolData.dinner = isabDinner.getAttribute('data-done') === '1';
-  localStorage.setItem('hh_isabgol_' + TODAY, JSON.stringify(isabgolData));
-
-  // Save wellbeing only — steps come from walk tracker now
-  if (_checkinWB > 0) {
+  // Save steps, wellbeing and auto-calculate walk calories
+  if (_checkinSteps > 0 || _checkinWB > 0) {
     var vitals = JSON.parse(localStorage.getItem('hh_vitals') || '[]');
     var todayVital = vitals.find(function(v){return v.date===TODAY;}) || {date:TODAY};
-    todayVital.wb = _checkinWB;
+    if (_checkinSteps > 0) {
+      todayVital.steps = _checkinSteps;
+      // Auto-calc walk calories: MET 3.5 × weight 83.9kg × hours walking
+      // Assume avg 1000 steps = 8 mins walking at moderate pace
+      var walkMins = (_checkinSteps / 1000) * 8;
+      var walkCals = Math.round(3.5 * 83.9 * (walkMins / 60));
+      todayVital.walkCals = walkCals;
+    }
+    if (_checkinWB > 0) todayVital.wb = _checkinWB;
     vitals = vitals.filter(function(v){return v.date!==TODAY;});
     vitals.unshift(todayVital);
     localStorage.setItem('hh_vitals', JSON.stringify(vitals));
@@ -3603,9 +3538,10 @@ function saveCheckin() {
   // Show confirmation
   var medsTaken = Object.values(taken).filter(Boolean).length;
   var waterL = _checkinWater > 0 ? (_checkinWater/1000).toFixed(1) + 'L' : 'not logged';
-  var walkSessions2 = JSON.parse(localStorage.getItem('hh_walks') || '[]');
-  var todaySteps2 = walkSessions2.filter(function(s){return s.date===TODAY;}).reduce(function(a,s){return a+(s.steps||0);},0);
-  alert('Check-in saved! Good night, Hemant. Medicines: ' + medsTaken + '/' + MEDS.length + ' — Water: ' + waterL + (todaySteps2>0?' — Steps: '+todaySteps2.toLocaleString():''));
+  var vitalsNow = JSON.parse(localStorage.getItem('hh_vitals') || '[]');
+  var todayV = vitalsNow.find(function(v){return v.date===TODAY;}) || {};
+  var walkCalMsg = todayV.walkCals ? ' (~' + todayV.walkCals + ' kcal burned)' : '';
+  alert('Check-in saved! Good night, Hemant. Medicines: ' + medsTaken + '/' + MEDS.length + ' — Water: ' + waterL + ' — Steps: ' + (_checkinSteps>0?_checkinSteps.toLocaleString():'not logged') + walkCalMsg);
 }
 
 function skipCheckin() {
@@ -4034,7 +3970,7 @@ function renderTodayWorkout() {
   }
 
   renderExSummary(dateKey, exercises);
-  try{renderExWeekly();}catch(e){}
+  renderExWeekly();
   renderExStreak();
 }
 
@@ -4461,7 +4397,7 @@ function renderWeightTrend() {
 
   // Metrics
   if (sorted.length > 0) {
-    var latest = sorted[sorted.length-1].kg || sorted[sorted.length-1].kg;
+    var latest = sorted[sorted.length-1].kg;
     var el = document.getElementById('wt-current');
     if (el) el.textContent = latest.toFixed(1);
     el = document.getElementById('wt-lost');
@@ -5006,7 +4942,7 @@ function generateWorkoutPlan() {
     html += '<div style="font-size:10px;color:var(--green);margin-left:8px;margin-top:3px">Cooldown: ' + (plan.cooldown||[]).join(' · ') + '</div>';
     html += '</div>';
   });
-  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v9.1</div>';
+  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v7.0</div>';
   html += '</div>';
   el.innerHTML = html;
 }
@@ -5302,34 +5238,6 @@ function renderWaistTracker() {
 // ═══════════════════════════════════
 // MOUNJARO EFFECTIVENESS
 // ═══════════════════════════════════
-function renderMounjaroCountdown() {
-  var el = document.getElementById('mj-next-display');
-  if (!el) return;
-  var doses = JSON.parse(localStorage.getItem('hh_mj_log') || '[]');
-  if (!doses.length) {
-    el.innerHTML = '<span style="color:var(--text3)">No injections logged yet</span>';
-    return;
-  }
-  // Sort by date descending
-  doses.sort(function(a,b){return b.date.localeCompare(a.date);});
-  var last = doses[0];
-  var lastDate = new Date(last.date + 'T00:00:00');
-  var nextDate = new Date(lastDate);
-  nextDate.setDate(nextDate.getDate() + 15); // 15-day frequency
-  var today = new Date();
-  today.setHours(0,0,0,0);
-  var daysLeft = Math.ceil((nextDate - today) / 86400000);
-  var nextStr = nextDate.toISOString().split('T')[0];
-
-  if (daysLeft < 0) {
-    el.innerHTML = '<span style="color:var(--red);font-weight:700">⚠ Injection overdue by ' + Math.abs(daysLeft) + ' days</span><br><span style="color:var(--text3);font-size:10px">Last: ' + last.date + ' · ' + last.dose + '</span>';
-  } else if (daysLeft === 0) {
-    el.innerHTML = '<span style="color:var(--amber);font-weight:700">💉 Mounjaro due TODAY</span><br><span style="color:var(--text3);font-size:10px">Last: ' + last.date + ' · ' + last.dose + '</span>';
-  } else {
-    el.innerHTML = '<span style="color:var(--green);font-weight:700">💉 Next: ' + nextStr + ' (' + daysLeft + ' days)</span><br><span style="color:var(--text3);font-size:10px">Last: ' + last.date + ' · ' + last.dose + '</span>';
-  }
-}
-
 function renderMounjaroEffectiveness() {
   var wtLog = JSON.parse(localStorage.getItem('hh_weight_log') || '[]');
   var mjDoses = JSON.parse(localStorage.getItem('hh_mj_log') || '[]');
@@ -5812,21 +5720,18 @@ function renderWalkTracker() {
 function deleteWalkSession(idx) {
   var sessions = JSON.parse(localStorage.getItem('hh_walks') || '[]');
   var todaySessions = sessions.filter(function(s){return s.date===TODAY;});
-  if (idx < 0 || idx >= todaySessions.length) return;
+  if(idx<0||idx>=todaySessions.length) return;
   var toDelete = todaySessions[idx];
-  // Find by matching all fields — indexOf won't work on parsed JSON copies
   var gi = -1;
-  for (var i = 0; i < sessions.length; i++) {
-    var s = sessions[i];
-    if (s.date === toDelete.date && s.time === toDelete.time && s.steps === toDelete.steps && s.dur === toDelete.dur) {
-      gi = i; break;
-    }
+  for(var i=0;i<sessions.length;i++){
+    var s=sessions[i];
+    if(s.date===toDelete.date&&s.time===toDelete.time&&s.steps===toDelete.steps&&s.dur===toDelete.dur){gi=i;break;}
   }
-  if (gi > -1) sessions.splice(gi, 1);
+  if(gi>-1) sessions.splice(gi,1);
   localStorage.setItem('hh_walks', JSON.stringify(sessions));
-  renderWalkTracker();
-  updateDeficitCard();
-  updateScore();
+  try{renderWalkTracker();}catch(e){}
+  try{updateDailyTDEE();}catch(e){}
+  try{updateScore();}catch(e){}
 }
 
 function renderWalkWeekChart(sessions) {
@@ -5900,253 +5805,6 @@ function renderWalkStreak(sessions) {
   el.innerHTML = html;
 }
 
-// ═══════════════════════════════════
-// GOOGLE FIT SYNC
-// Reads today's steps, distance, calories, HR
-// via Google Fit REST API
-// ═══════════════════════════════════
-var GFIT_CLIENT_ID = ''; // Set by user on first use
-var GFIT_TOKEN = null;
-var GFIT_TOKEN_EXPIRY = 0;
-
-function syncGoogleFit() {
-  var btn = document.getElementById('gfit-sync-btn');
-  var status = document.getElementById('gfit-status');
-  if (btn) btn.textContent = 'Connecting...';
-  if (status) { status.style.display = 'block'; status.style.color = 'var(--accent)'; status.textContent = 'Opening Google sign-in...'; }
-
-  // Google OAuth 2.0 implicit flow
-  // Scopes needed: fitness.activity.read, fitness.body.read
-  var clientId = localStorage.getItem('gfit_client_id') || '';
-
-  if (!clientId) {
-    if (status) {
-      status.textContent = '';
-      status.innerHTML =
-        '<div style="color:var(--amber);margin-bottom:6px">One-time setup required:</div>' +
-        '<div style="font-size:10px;color:var(--text3);margin-bottom:6px">1. Go to console.cloud.google.com<br>2. Create a project → Enable Fitness API<br>3. Create OAuth 2.0 credentials (Web application)<br>4. Add ' + window.location.origin + ' as authorised origin<br>5. Copy your Client ID and paste below</div>' +
-        '<div style="display:flex;gap:6px">' +
-          '<input type="text" id="gfit-client-id-input" placeholder="Paste Google Client ID here" style="flex:1;font-size:11px;padding:6px;border-radius:6px;border:1px solid var(--border);background:var(--bg2);color:var(--text)">' +
-          '<button onclick="saveGfitClientId()" style="background:var(--accent);border:none;border-radius:6px;color:white;padding:6px 10px;cursor:pointer;font-size:11px">Save</button>' +
-        '</div>';
-    }
-    if (btn) btn.textContent = 'Sync';
-    return;
-  }
-
-  // Launch OAuth popup
-  var now = Date.now();
-  if (GFIT_TOKEN && now < GFIT_TOKEN_EXPIRY) {
-    fetchGoogleFitData(GFIT_TOKEN, status, btn);
-    return;
-  }
-
-  var scope = 'https://www.googleapis.com/auth/fitness.activity.read https://www.googleapis.com/auth/fitness.body.read';
-  // Use the exact app URL as redirect — must match Authorised JavaScript origins in Google Cloud
-  var redirectUri = 'https://hemantpandav-boop.github.io/health/';
-  var authUrl = 'https://accounts.google.com/o/oauth2/v2/auth' +
-    '?client_id=' + encodeURIComponent(clientId) +
-    '&redirect_uri=' + encodeURIComponent(redirectUri) +
-    '&response_type=token' +
-    '&scope=' + encodeURIComponent(scope) +
-    '&prompt=select_account';
-
-  var popup = window.open(authUrl, 'gfit_auth', 'width=500,height=600,scrollbars=yes');
-
-  // Listen for token return
-  var checkInterval = setInterval(function() {
-    try {
-      if (popup && popup.closed) {
-        clearInterval(checkInterval);
-        if (btn) btn.textContent = 'Sync';
-        if (!GFIT_TOKEN) {
-          if (status) { status.style.color = 'var(--amber)'; status.textContent = 'Sign-in cancelled.'; }
-        }
-        return;
-      }
-      var hash = popup && popup.location && popup.location.hash;
-      if (hash && hash.includes('access_token')) {
-        clearInterval(checkInterval);
-        popup.close();
-        var params = {};
-        hash.substring(1).split('&').forEach(function(p) {
-          var kv = p.split('=');
-          params[kv[0]] = decodeURIComponent(kv[1]);
-        });
-        GFIT_TOKEN = params.access_token;
-        GFIT_TOKEN_EXPIRY = Date.now() + (parseInt(params.expires_in || 3600) * 1000);
-        if (status) { status.style.color = 'var(--green)'; status.textContent = 'Connected. Fetching today data...'; }
-        fetchGoogleFitData(GFIT_TOKEN, status, btn);
-      }
-    } catch(e) {
-      // Cross-origin — popup still on Google domain, keep waiting
-    }
-  }, 500);
-}
-
-function saveGfitClientId() {
-  var input = document.getElementById('gfit-client-id-input');
-  if (!input || !input.value.trim()) return;
-  localStorage.setItem('gfit_client_id', input.value.trim());
-  var status = document.getElementById('gfit-status');
-  if (status) { status.style.color = 'var(--green)'; status.textContent = 'Client ID saved. Tap Sync to connect.'; }
-  setTimeout(function() { syncGoogleFit(); }, 800);
-}
-
-function fetchGoogleFitData(token, statusEl, btn) {
-  // Get today's data from Google Fit
-  var now = new Date();
-  var startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-  var endOfDay = startOfDay + 86400000;
-
-  var body = JSON.stringify({
-    aggregateBy: [
-      {dataTypeName: 'com.google.step_count.delta'},
-      {dataTypeName: 'com.google.distance.delta'},
-      {dataTypeName: 'com.google.calories.expended'},
-      {dataTypeName: 'com.google.heart_rate.bpm'},
-      {dataTypeName: 'com.google.active_minutes'},
-    ],
-    bucketByTime: {durationMillis: 86400000},
-    startTimeMillis: startOfDay,
-    endTimeMillis: endOfDay,
-  });
-
-  fetch('https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate', {
-    method: 'POST',
-    headers: {
-      'Authorization': 'Bearer ' + token,
-      'Content-Type': 'application/json',
-    },
-    body: body,
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    if (!data.bucket || !data.bucket.length) {
-      if (statusEl) { statusEl.style.color = 'var(--amber)'; statusEl.textContent = 'No activity data found for today yet.'; }
-      if (btn) btn.textContent = 'Sync';
-      return;
-    }
-
-    var bucket = data.bucket[0];
-    var steps = 0, distM = 0, cals = 0, hrSum = 0, hrCount = 0, activeMins = 0;
-
-    (bucket.dataset || []).forEach(function(ds) {
-      (ds.point || []).forEach(function(pt) {
-        var val = pt.value && pt.value[0];
-        if (!val) return;
-        var dtn = ds.dataSourceId || '';
-        if (dtn.includes('step_count')) steps += (val.intVal || 0);
-        else if (dtn.includes('distance')) distM += (val.fpVal || 0);
-        else if (dtn.includes('calories')) cals += (val.fpVal || 0);
-        else if (dtn.includes('heart_rate')) { hrSum += (val.fpVal || 0); hrCount++; }
-        else if (dtn.includes('active_minutes')) activeMins += (val.intVal || 0);
-      });
-    });
-
-    var distKm = parseFloat((distM / 1000).toFixed(2));
-    var calsBurned = Math.round(cals);
-    var hrAvg = hrCount > 0 ? Math.round(hrSum / hrCount) : 0;
-    var dur = activeMins > 0 ? activeMins : (steps > 0 ? Math.round(steps / 100) : 0);
-
-    if (steps === 0 && calsBurned === 0) {
-      if (statusEl) { statusEl.style.color = 'var(--amber)'; statusEl.textContent = 'No steps data yet today. Check Google Fit has Samsung Health connected.'; }
-      if (btn) btn.textContent = 'Sync';
-      return;
-    }
-
-    // Check if already synced today
-    var sessions = JSON.parse(localStorage.getItem('hh_walks') || '[]');
-    var existingSync = sessions.find(function(s) { return s.date === TODAY && s.fromGoogleFit; });
-
-    if (existingSync) {
-      // Update existing sync entry
-      existingSync.steps = steps;
-      existingSync.dist = distKm;
-      existingSync.cals = calsBurned;
-      existingSync.hr = hrAvg;
-      existingSync.dur = dur;
-      localStorage.setItem('hh_walks', JSON.stringify(sessions));
-    } else {
-      // Add new sync entry
-      var session = {
-        date: TODAY,
-        time: new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'}),
-        label: 'Google Fit sync',
-        dur: dur,
-        steps: steps,
-        dist: distKm,
-        hr: hrAvg,
-        cals: calsBurned,
-        fromGoogleFit: true,
-      };
-      sessions.unshift(session);
-      localStorage.setItem('hh_walks', JSON.stringify(sessions));
-    }
-
-    if (statusEl) {
-      statusEl.style.color = 'var(--green)';
-      statusEl.textContent = 'Synced: ' + steps.toLocaleString() + ' steps · ' + distKm + ' km · ' + calsBurned + ' kcal' + (hrAvg > 0 ? ' · HR ' + hrAvg + ' bpm' : '');
-    }
-    if (btn) btn.textContent = 'Sync';
-
-    renderWalkTracker();
-    updateDailyTDEE();
-    updateScore();
-  })
-  .catch(function(e) {
-    if (statusEl) { statusEl.style.color = 'var(--red)'; statusEl.textContent = 'Sync failed: ' + e.message + '. Try again.'; }
-    if (btn) btn.textContent = 'Sync';
-  });
-}
-
-function changeMealDate(dateStr) {
-  if (!dateStr) return;
-  showDaySummary(dateStr);
-  renderMeals();
-  // Update log to show entries for selected date
-  var logEl = document.getElementById('meal-list');
-  if (!logEl) return;
-  var logs = JSON.parse(localStorage.getItem('hh_meals') || '[]');
-  var dayLogs = logs.filter(function(l){return l.date===dateStr;});
-  if (!dayLogs.length) {
-    logEl.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:8px">No meals logged for ' + dateStr + '</div>';
-    return;
-  }
-  // Re-render meals for selected date
-  var html = dayLogs.map(function(l, i) {
-    return '<div class="log-row">' +
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start">' +
-        '<div>' +
-          '<div style="font-size:11px;color:var(--text3)">' + l.type + ' · ' + (l.time||'') + '</div>' +
-          '<div style="font-weight:500">' + l.name + ' (' + l.grams + 'g)</div>' +
-          '<div style="margin-top:3px">' +
-            '<span class="tag tag-a">' + l.cal + ' kcal</span>' +
-            '<span class="tag tag-g">P:' + (l.p||0).toFixed(0) + 'g</span>' +
-            '<span class="tag tag-r">Sat:' + (l.sat||0).toFixed(1) + 'g</span>' +
-          '</div>' +
-        '</div>' +
-        '<button data-li="' + i + '" data-date="' + dateStr + '" onclick="deleteMealByDate(parseInt(this.dataset.li),this.dataset.date)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px">✕</button>' +
-      '</div>' +
-    '</div>';
-  }).join('');
-  logEl.innerHTML = html;
-}
-
-function deleteMealEntry(idx, dateStr) { deleteMealByDate(idx, dateStr); }
-
-function deleteMealByDate(idx, dateStr) {
-  var logs = JSON.parse(localStorage.getItem('hh_meals') || '[]');
-  var dayLogs = logs.filter(function(l){return l.date===dateStr;});
-  var toDelete = dayLogs[idx];
-  var gi = logs.indexOf(toDelete);
-  if (gi > -1) logs.splice(gi, 1);
-  localStorage.setItem('hh_meals', JSON.stringify(logs));
-  changeMealDate(dateStr);
-  updateTotals();
-  updateScore();
-}
-
 function initAll() {
   // Set default dates to today
   try { document.getElementById('v-date').value = TODAY; } catch(e) {}
@@ -6165,24 +5823,15 @@ function initAll() {
   try { document.getElementById('m-date').value = TODAY; } catch(e) {}
   try { document.getElementById('ex-date').value = TODAY; } catch(e) {}
   try { document.getElementById('mj-log-date').value = TODAY; } catch(e) {}
-  try{renderMeals();}catch(e){}
-  try{renderMealSlots();}catch(e){}
-  try{updateTotals();}catch(e){}
-  try{showNutritionAlert();}catch(e){}
-  try{updateDeficitCard();}catch(e){}
-  try{renderEatingOutGrid();}catch(e){}
-  try{renderPortionGrid();}catch(e){}
-  try{migrateExLogs();}catch(e){}
-  try{renderWalkTracker();}catch(e){}
-  try{renderMeds();}catch(e){}
-  try{renderMedStreak();}catch(e){}
+  try{renderMeals();}catch(e){} try{renderMealSlots();}catch(e){} try{updateTotals();}catch(e){} try{showNutritionAlert();}catch(e){} try{renderMeds();}catch(e){} try{renderMedStreak();}catch(e){} try{renderWalkTracker();}catch(e){} updateDeficitCard();
+  renderEatingOutGrid(); renderPortionGrid();
+  migrateExLogs();
+  renderWalkTracker();
   showDaySummary(TODAY);
   showWeekAverage();
   renderExercise();
-  try{seedHistoricalData();}catch(e){}
-  try{updateDailyTDEE();}catch(e){}
-  setTimeout(function(){
-  try{renderWeightTrend();}catch(e){} renderGlucoseTrend(); renderCholesterolTrend(); renderIsabgol();}, 400);
+  seedHistoricalData();
+  setTimeout(function(){renderWeightTrend(); renderGlucoseTrend(); renderCholesterolTrend(); renderIsabgol();}, 400);
   setTimeout(function(){generateWeeklySummary(0);}, 600);
   setTimeout(function(){renderSleepTracker(); seedWaistData(); renderWaistTracker(); renderMounjaroEffectiveness();}, 800);
   setTimeout(initCheckin, 1000);
