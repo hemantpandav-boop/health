@@ -4285,10 +4285,10 @@ function seedHistoricalData() {
   var wtData = JSON.parse(localStorage.getItem('hh_weight_log') || '[]');
   if (wtData.length === 0) {
     wtData = [
-      {date:'2025-04-01', wt:97.0},
-      {date:'2025-07-01', wt:93.0},
-      {date:'2025-10-07', wt:85.7},
-      {date:'2026-05-11', wt:83.9},
+      {date:'2025-04-01', kg:97.0},
+      {date:'2025-07-01', kg:93.0},
+      {date:'2025-10-07', kg:85.7},
+      {date:'2026-05-11', kg:83.9},
     ];
     localStorage.setItem('hh_weight_log', JSON.stringify(wtData));
   }
@@ -4407,7 +4407,7 @@ function renderWeightTrend() {
 
   // Metrics
   if (sorted.length > 0) {
-    var latest = sorted[sorted.length-1].kg || sorted[sorted.length-1].wt;
+    var latest = (sorted[sorted.length-1].kg||sorted[sorted.length-1].wt||0) || sorted[sorted.length-1].wt;
     var el = document.getElementById('wt-current');
     if (el && latest) el.textContent = parseFloat(latest).toFixed(1);
     el = document.getElementById('wt-lost');
@@ -4420,7 +4420,7 @@ function renderWeightTrend() {
       return d >= cutoff;
     });
     if (recent.length > 0) {
-      var avg = recent.reduce(function(a,e){return a+e.kg;},0) / recent.length;
+      var avg = recent.reduce(function(a,e){return a+(e.kg||e.wt||0);},0) / recent.length;
       el = document.getElementById('wt-7avg');
       if (el) el.textContent = avg.toFixed(1);
     }
@@ -4438,8 +4438,8 @@ function renderWeightTrend() {
       return d >= c1 && d < c2;
     });
     if (thisWeek.length > 0 && lastWeek.length > 0) {
-      var twAvg = thisWeek.reduce(function(a,e){return a+e.kg;},0)/thisWeek.length;
-      var lwAvg = lastWeek.reduce(function(a,e){return a+e.kg;},0)/lastWeek.length;
+      var twAvg = thisWeek.reduce(function(a,e){return a+(e.kg||e.wt||0);},0)/thisWeek.length;
+      var lwAvg = lastWeek.reduce(function(a,e){return a+(e.kg||e.wt||0);},0)/lastWeek.length;
       var change = twAvg - lwAvg;
       el = document.getElementById('wt-week-change');
       if (el) {
@@ -4453,7 +4453,7 @@ function renderWeightTrend() {
   var canvas = document.getElementById('wt-trend-chart');
   if (!canvas || sorted.length < 2) return;
   var labels = sorted.map(function(e){return e.date.slice(5);});
-  var weights = sorted.map(function(e){return e.kg;});
+  var weights = sorted.map(function(e){return (e.kg||e.wt||0);});
 
   // Add 7-day rolling average
   var avgLine = weights.map(function(w, i) {
@@ -4473,10 +4473,10 @@ function renderWeightTrend() {
     histEl.innerHTML = '<div style="font-size:11px;color:var(--text3);margin-bottom:4px">Recent readings:</div>' +
       recent10.map(function(e, i) {
         var prev = recent10[i+1];
-        var change = prev ? (e.kg - prev.kg) : 0;
+        var change = prev ? ((e.kg||e.wt||0) - prev.kg) : 0;
         return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px">' +
           '<span style="color:var(--text3)">' + e.date + '</span>' +
-          '<span><strong>' + e.kg.toFixed(1) + ' kg</strong>' +
+          '<span><strong>' + (e.kg||e.wt||0).toFixed(1) + ' kg</strong>' +
             (prev ? ' <span style="color:' + (change<=0?'var(--green)':'var(--red)') + ';font-size:10px">' + (change>0?'+':'') + change.toFixed(1) + 'kg</span>' : '') +
           '</span>' +
         '</div>';
