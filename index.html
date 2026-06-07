@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Hemant Health v8.5</title>
+<title>Hemant Health v8.6</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -166,12 +166,68 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v8.5</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v8.6</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
 <!-- TAB 1: HOME -->
 <div class="tab active" id="tab-home">
+  <div class="card">
+    <div class="card-title">🚶 walk tracker <span style="color:var(--text3);font-size:10px">log multiple sessions · any time of day</span></div>
+
+    <!-- Google Fit Sync -->
+    <div style="background:#0f2937;border:1px solid #1d4ed8;border-radius:10px;padding:10px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#60a5fa">🔄 Sync from Google Fit</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">Pulls today's steps, distance and calories from your Samsung watch via Google Fit</div>
+        </div>
+        <button onclick="syncGoogleFit()" id="gfit-sync-btn" style="background:#1d4ed8;border:none;border-radius:8px;color:white;padding:8px 14px;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap">Sync</button>
+      </div>
+      <div id="gfit-status" style="font-size:11px;margin-top:6px;display:none"></div>
+    </div>
+
+    <div style="background:var(--bg3);border-radius:10px;padding:10px;margin-bottom:10px">
+      <div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:8px">+ Add walk session manually</div>
+      <div class="row">
+        <div class="half">
+          <label style="color:var(--accent);font-weight:600">⏱ Duration (mins)</label>
+          <input type="number" id="walk-dur" placeholder="25" oninput="previewWalkCals()" style="font-size:15px;font-weight:700;margin-bottom:0">
+        </div>
+        <div class="half">
+          <label style="color:var(--accent);font-weight:600">👟 Steps (from watch)</label>
+          <input type="number" id="walk-steps" placeholder="e.g. 4200" oninput="previewWalkCals()" style="margin-bottom:0">
+        </div>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <div class="half">
+          <label>📍 Distance km (optional)</label>
+          <input type="number" id="walk-dist" placeholder="e.g. 2.1" step="0.1" oninput="previewWalkCals()" style="margin-bottom:0">
+        </div>
+        <div class="half">
+          <label>💓 Avg HR bpm (optional)</label>
+          <input type="number" id="walk-hr" placeholder="read watch after walk" oninput="previewWalkCals()" style="margin-bottom:0">
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+        <div style="font-size:13px;color:var(--green);font-weight:700" id="walk-cal-preview"></div>
+        <button onclick="saveWalkSession()" style="background:var(--green);border:none;border-radius:8px;color:white;padding:10px 20px;cursor:pointer;font-size:13px;font-weight:700">+ Log walk</button>
+      </div>
+    </div>
+
+    <div class="metric-grid" style="margin-bottom:8px">
+      <div class="metric"><div class="metric-label">Total steps today</div><div class="metric-value ok" id="walk-total-steps">0</div></div>
+      <div class="metric"><div class="metric-label">Total distance</div><div class="metric-value info" id="walk-total-dist">0 km</div></div>
+      <div class="metric"><div class="metric-label">Total time</div><div class="metric-value warn" id="walk-total-dur">0 min</div></div>
+      <div class="metric"><div class="metric-label">Calories burned</div><div class="metric-value pu" id="walk-total-cals">0 kcal</div></div>
+    </div>
+
+    <div id="walk-sessions-list"><div style="color:var(--text3);font-size:12px">No walks logged today. Target: 7,000-8,000 steps.</div></div>
+
+    <canvas id="walk-week-chart" height="90" style="width:100%;margin-top:10px"></canvas>
+    <div style="font-size:11px;color:var(--text3);margin-top:8px;margin-bottom:4px">30-day walk streak</div>
+    <div class="streak-row" id="walk-streak-row"></div>
+  </div>
   <div class="card">
     <div class="card-title">today's health score<span id="score-badge" class="tag tag-b">--</span></div>
     <div class="score-ring"><div class="score-num" id="score-num" style="color:var(--accent)">--</div><div class="score-label">out of 100</div></div>
@@ -280,66 +336,71 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 </div>
 
   <!-- WALK TRACKER -->
-  <div class="card">
-    <div class="card-title">🚶 walk tracker <span style="color:var(--text3);font-size:10px">log multiple sessions · any time of day</span></div>
-
-    <!-- Google Fit Sync -->
-    <div style="background:#0f2937;border:1px solid #1d4ed8;border-radius:10px;padding:10px;margin-bottom:10px">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <div style="font-size:12px;font-weight:700;color:#60a5fa">🔄 Sync from Google Fit</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:2px">Pulls today's steps, distance and calories from your Samsung watch via Google Fit</div>
-        </div>
-        <button onclick="syncGoogleFit()" id="gfit-sync-btn" style="background:#1d4ed8;border:none;border-radius:8px;color:white;padding:8px 14px;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap">Sync</button>
-      </div>
-      <div id="gfit-status" style="font-size:11px;margin-top:6px;display:none"></div>
-    </div>
-
-    <div style="background:var(--bg3);border-radius:10px;padding:10px;margin-bottom:10px">
-      <div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:8px">+ Add walk session manually</div>
-      <div class="row">
-        <div class="half">
-          <label style="color:var(--accent);font-weight:600">⏱ Duration (mins)</label>
-          <input type="number" id="walk-dur" placeholder="25" oninput="previewWalkCals()" style="font-size:15px;font-weight:700;margin-bottom:0">
-        </div>
-        <div class="half">
-          <label style="color:var(--accent);font-weight:600">👟 Steps (from watch)</label>
-          <input type="number" id="walk-steps" placeholder="e.g. 4200" oninput="previewWalkCals()" style="margin-bottom:0">
-        </div>
-      </div>
-      <div class="row" style="margin-top:6px">
-        <div class="half">
-          <label>📍 Distance km (optional)</label>
-          <input type="number" id="walk-dist" placeholder="e.g. 2.1" step="0.1" oninput="previewWalkCals()" style="margin-bottom:0">
-        </div>
-        <div class="half">
-          <label>💓 Avg HR bpm (optional)</label>
-          <input type="number" id="walk-hr" placeholder="read watch after walk" oninput="previewWalkCals()" style="margin-bottom:0">
-        </div>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
-        <div style="font-size:13px;color:var(--green);font-weight:700" id="walk-cal-preview"></div>
-        <button onclick="saveWalkSession()" style="background:var(--green);border:none;border-radius:8px;color:white;padding:10px 20px;cursor:pointer;font-size:13px;font-weight:700">+ Log walk</button>
-      </div>
-    </div>
-
-    <div class="metric-grid" style="margin-bottom:8px">
-      <div class="metric"><div class="metric-label">Total steps today</div><div class="metric-value ok" id="walk-total-steps">0</div></div>
-      <div class="metric"><div class="metric-label">Total distance</div><div class="metric-value info" id="walk-total-dist">0 km</div></div>
-      <div class="metric"><div class="metric-label">Total time</div><div class="metric-value warn" id="walk-total-dur">0 min</div></div>
-      <div class="metric"><div class="metric-label">Calories burned</div><div class="metric-value pu" id="walk-total-cals">0 kcal</div></div>
-    </div>
-
-    <div id="walk-sessions-list"><div style="color:var(--text3);font-size:12px">No walks logged today. Target: 7,000-8,000 steps.</div></div>
-
-    <canvas id="walk-week-chart" height="90" style="width:100%;margin-top:10px"></canvas>
-    <div style="font-size:11px;color:var(--text3);margin-top:8px;margin-bottom:4px">30-day walk streak</div>
-    <div class="streak-row" id="walk-streak-row"></div>
-  </div>
 
 <!-- TAB 2: MEALS -->
 <div class="tab" id="tab-meals">
 
+  <div class="card" id="log-food-card">
+    <div class="card-title" id="log-food-title">log food — by weight</div>
+    <label>Date</label>
+    <input type="date" id="m-date" onchange="changeMealDate(this.value)">
+    <label>Meal slot</label>
+    <select id="m-type">
+      <option value="Breakfast">🌅 Breakfast (~400 kcal)</option>
+      <option value="Morning Snack">🍎 Morning Snack (~100 kcal)</option>
+      <option value="Lunch">🍱 Lunch (~450 kcal)</option>
+      <option value="Evening Snack">🥜 Evening Snack (~100 kcal)</option>
+      <option value="Dinner">🌙 Dinner (~350 kcal)</option>
+      <option value="Before Sleep">🌛 Before Sleep (~100 kcal)</option>
+    </select>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <label style="margin:0">Search food</label>
+      <button onclick="showAddFoodModal()" style="background:var(--accent);border:none;border-radius:6px;color:white;font-size:11px;padding:5px 10px;cursor:pointer;font-weight:600">+ Add new food</button>
+    </div>
+    <div class="food-search-wrap">
+      <input type="text" id="food-search" placeholder="Type food name e.g. dal, eggs, oats..." autocomplete="off" oninput="searchFood(this.value)" onkeydown="if(event.key==='Enter'&&window._foodMatches&&window._foodMatches.length>0)pickFood(0)">
+      <div class="food-results" id="food-results"></div>
+    </div>
+    <div id="food-selected-panel" class="hidden">
+      <div class="food-selected">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="food-selected-name" id="sel-food-name"></div>
+          <span id="sel-chol-score" class="chol-score"></span>
+        </div>
+        <div class="food-nutrients">
+          <div class="food-nut"><div class="food-nut-val" id="sel-cal">0</div><div class="food-nut-label">kcal</div></div>
+          <div class="food-nut"><div class="food-nut-val" id="sel-prot">0</div><div class="food-nut-label">protein g</div></div>
+          <div class="food-nut"><div class="food-nut-val" id="sel-carb">0</div><div class="food-nut-label">carbs g</div></div>
+          <div class="food-nut"><div class="food-nut-val" id="sel-fat">0</div><div class="food-nut-label">fat g</div></div>
+          <div class="food-nut"><div class="food-nut-val" id="sel-sat">0</div><div class="food-nut-label">sat fat g</div></div>
+          <div class="food-nut"><div class="food-nut-val" id="sel-fib">0</div><div class="food-nut-label">fibre g</div></div>
+        </div>
+        <div style="margin-top:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-size:11px;color:var(--text3)">Portion size</span>
+            <span style="font-size:11px;color:var(--text2)" id="portion-label">100g</span>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
+            <input type="number" id="portion-slider" min="1" max="2000" step="1" value="100" 
+              style="flex:1;font-size:18px;font-weight:700;text-align:center;padding:10px;margin-bottom:0;border-color:var(--accent)"
+              oninput="updatePortion(this.value)" placeholder="amount">
+            <span style="font-size:14px;font-weight:600;color:var(--accent);min-width:24px" id="portion-unit-label">g</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;" id="portion-quick-btns">
+            <button class="btn-sm" onclick="setPortion(25)" style="font-size:11px;padding:4px 10px">25g</button>
+            <button class="btn-sm" onclick="setPortion(50)" style="font-size:11px;padding:4px 10px">50g</button>
+            <button class="btn-sm" onclick="setPortion(100)" style="font-size:11px;padding:4px 10px">100g</button>
+            <button class="btn-sm" onclick="setPortion(150)" style="font-size:11px;padding:4px 10px">150g</button>
+            <button class="btn-sm" onclick="setPortion(200)" style="font-size:11px;padding:4px 10px">200g</button>
+            <button class="btn-sm" onclick="setPortion(250)" style="font-size:11px;padding:4px 10px">250g</button>
+          </div>
+          <div id="portion-serving-btns" style="margin-top:5px;display:flex;flex-wrap:wrap;gap:5px;"></div>
+        </div>
+      </div>
+      <button class="btn btn-green" onclick="logSelectedFood()">Log this food</button>
+    </div>
+    <button class="btn-sm" onclick="showAddFoodModal()" style="width:100%;margin-top:4px;margin-bottom:6px">+ Add new food to database</button>
+  </div>
   <div class="card">
     <div class="card-title">today's nutrition summary</div>
     <div class="progress-wrap">
@@ -403,67 +464,6 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
   </div>
 
   <!-- LOG FOOD PANEL -->
-  <div class="card" id="log-food-card">
-    <div class="card-title" id="log-food-title">log food — by weight</div>
-    <label>Date</label>
-    <input type="date" id="m-date" onchange="changeMealDate(this.value)">
-    <label>Meal slot</label>
-    <select id="m-type">
-      <option value="Breakfast">🌅 Breakfast (~400 kcal)</option>
-      <option value="Morning Snack">🍎 Morning Snack (~100 kcal)</option>
-      <option value="Lunch">🍱 Lunch (~450 kcal)</option>
-      <option value="Evening Snack">🥜 Evening Snack (~100 kcal)</option>
-      <option value="Dinner">🌙 Dinner (~350 kcal)</option>
-      <option value="Before Sleep">🌛 Before Sleep (~100 kcal)</option>
-    </select>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-      <label style="margin:0">Search food</label>
-      <button onclick="showAddFoodModal()" style="background:var(--accent);border:none;border-radius:6px;color:white;font-size:11px;padding:5px 10px;cursor:pointer;font-weight:600">+ Add new food</button>
-    </div>
-    <div class="food-search-wrap">
-      <input type="text" id="food-search" placeholder="Type food name e.g. dal, eggs, oats..." autocomplete="off" oninput="searchFood(this.value)" onkeydown="if(event.key==='Enter'&&window._foodMatches&&window._foodMatches.length>0)pickFood(0)">
-      <div class="food-results" id="food-results"></div>
-    </div>
-    <div id="food-selected-panel" class="hidden">
-      <div class="food-selected">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div class="food-selected-name" id="sel-food-name"></div>
-          <span id="sel-chol-score" class="chol-score"></span>
-        </div>
-        <div class="food-nutrients">
-          <div class="food-nut"><div class="food-nut-val" id="sel-cal">0</div><div class="food-nut-label">kcal</div></div>
-          <div class="food-nut"><div class="food-nut-val" id="sel-prot">0</div><div class="food-nut-label">protein g</div></div>
-          <div class="food-nut"><div class="food-nut-val" id="sel-carb">0</div><div class="food-nut-label">carbs g</div></div>
-          <div class="food-nut"><div class="food-nut-val" id="sel-fat">0</div><div class="food-nut-label">fat g</div></div>
-          <div class="food-nut"><div class="food-nut-val" id="sel-sat">0</div><div class="food-nut-label">sat fat g</div></div>
-          <div class="food-nut"><div class="food-nut-val" id="sel-fib">0</div><div class="food-nut-label">fibre g</div></div>
-        </div>
-        <div style="margin-top:8px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-            <span style="font-size:11px;color:var(--text3)">Portion size</span>
-            <span style="font-size:11px;color:var(--text2)" id="portion-label">100g</span>
-          </div>
-          <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
-            <input type="number" id="portion-slider" min="1" max="2000" step="1" value="100" 
-              style="flex:1;font-size:18px;font-weight:700;text-align:center;padding:10px;margin-bottom:0;border-color:var(--accent)"
-              oninput="updatePortion(this.value)" placeholder="amount">
-            <span style="font-size:14px;font-weight:600;color:var(--accent);min-width:24px" id="portion-unit-label">g</span>
-          </div>
-          <div style="display:flex;flex-wrap:wrap;gap:5px;" id="portion-quick-btns">
-            <button class="btn-sm" onclick="setPortion(25)" style="font-size:11px;padding:4px 10px">25g</button>
-            <button class="btn-sm" onclick="setPortion(50)" style="font-size:11px;padding:4px 10px">50g</button>
-            <button class="btn-sm" onclick="setPortion(100)" style="font-size:11px;padding:4px 10px">100g</button>
-            <button class="btn-sm" onclick="setPortion(150)" style="font-size:11px;padding:4px 10px">150g</button>
-            <button class="btn-sm" onclick="setPortion(200)" style="font-size:11px;padding:4px 10px">200g</button>
-            <button class="btn-sm" onclick="setPortion(250)" style="font-size:11px;padding:4px 10px">250g</button>
-          </div>
-          <div id="portion-serving-btns" style="margin-top:5px;display:flex;flex-wrap:wrap;gap:5px;"></div>
-        </div>
-      </div>
-      <button class="btn btn-green" onclick="logSelectedFood()">Log this food</button>
-    </div>
-    <button class="btn-sm" onclick="showAddFoodModal()" style="width:100%;margin-top:4px;margin-bottom:6px">+ Add new food to database</button>
-  </div>
 
   <div class="card">
     <div class="card-title">today's food log</div>
@@ -479,6 +479,10 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <!-- TAB 3: EXERCISE -->
 <div class="tab" id="tab-exercise">
 
+  <div class="card" id="ex-workout-card">
+    <div class="card-title" id="ex-workout-title">workout</div>
+    <div id="ex-workout-list"></div>
+  </div>
   <div class="card" id="ex-day-header">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <div>
@@ -522,10 +526,6 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
     <div id="ex-warmup-list"></div>
   </div>
 
-  <div class="card" id="ex-workout-card">
-    <div class="card-title" id="ex-workout-title">workout</div>
-    <div id="ex-workout-list"></div>
-  </div>
 
   <div class="card hidden" id="ex-log-panel">
     <div class="card-title" id="ex-log-title">log exercise</div>
@@ -5034,7 +5034,7 @@ function generateWorkoutPlan() {
     html += '<div style="font-size:10px;color:var(--green);margin-left:8px;margin-top:3px">Cooldown: ' + (plan.cooldown||[]).join(' · ') + '</div>';
     html += '</div>';
   });
-  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v8.5</div>';
+  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v8.6</div>';
   html += '</div>';
   el.innerHTML = html;
 }
