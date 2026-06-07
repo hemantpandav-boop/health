@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Hemant Health v8.9</title>
+<title>Hemant Health v9.0</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -166,7 +166,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v8.9</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v9.0</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -1895,11 +1895,13 @@ function lookupFoodNutrition() {
   var results = [];
 
   // Search Indian foods DB (extended)
-  INDIAN_FOODS_DB.forEach(function(f) {
-    if (f.name.toLowerCase().includes(q)) {
-      results.push({name:f.name, cal:f.cal, p:f.p, c:f.c, f:f.f, sat:f.sat, fi:f.fi||0, unit:f.unit||'100g', grams:f.grams||100, source:'verified DB'});
-    }
-  });
+  if (typeof INDIAN_FOODS_DB !== 'undefined') {
+    INDIAN_FOODS_DB.forEach(function(f) {
+      if (f.name.toLowerCase().includes(q)) {
+        results.push({name:f.name, cal:f.cal, p:f.p, c:f.c, f:f.f, sat:f.sat, fi:f.fi||0, unit:f.unit||'100g', grams:f.grams||100, source:'verified DB'});
+      }
+    });
+  }
 
   // Search main food database (FOOD_DB)
   if (typeof FOOD_DB !== 'undefined') {
@@ -4383,7 +4385,7 @@ function saveQuickVitals() {
   if (wt > 0) {
     var wtLog = JSON.parse(localStorage.getItem('hh_weight_log') || '[]');
     wtLog = wtLog.filter(function(e){return e.date !== date;});
-    wtLog.push({date:date, wt:wt});
+    wtLog.push({date:date, kg:wt});
     wtLog.sort(function(a,b){return a.date.localeCompare(b.date);});
     localStorage.setItem('hh_weight_log', JSON.stringify(wtLog));
   }
@@ -4459,7 +4461,7 @@ function renderWeightTrend() {
 
   // Metrics
   if (sorted.length > 0) {
-    var latest = sorted[sorted.length-1].wt;
+    var latest = sorted[sorted.length-1].kg || sorted[sorted.length-1].kg;
     var el = document.getElementById('wt-current');
     if (el) el.textContent = latest.toFixed(1);
     el = document.getElementById('wt-lost');
@@ -4472,7 +4474,7 @@ function renderWeightTrend() {
       return d >= cutoff;
     });
     if (recent.length > 0) {
-      var avg = recent.reduce(function(a,e){return a+e.wt;},0) / recent.length;
+      var avg = recent.reduce(function(a,e){return a+e.kg;},0) / recent.length;
       el = document.getElementById('wt-7avg');
       if (el) el.textContent = avg.toFixed(1);
     }
@@ -4490,8 +4492,8 @@ function renderWeightTrend() {
       return d >= c1 && d < c2;
     });
     if (thisWeek.length > 0 && lastWeek.length > 0) {
-      var twAvg = thisWeek.reduce(function(a,e){return a+e.wt;},0)/thisWeek.length;
-      var lwAvg = lastWeek.reduce(function(a,e){return a+e.wt;},0)/lastWeek.length;
+      var twAvg = thisWeek.reduce(function(a,e){return a+e.kg;},0)/thisWeek.length;
+      var lwAvg = lastWeek.reduce(function(a,e){return a+e.kg;},0)/lastWeek.length;
       var change = twAvg - lwAvg;
       el = document.getElementById('wt-week-change');
       if (el) {
@@ -4505,7 +4507,7 @@ function renderWeightTrend() {
   var canvas = document.getElementById('wt-trend-chart');
   if (!canvas || sorted.length < 2) return;
   var labels = sorted.map(function(e){return e.date.slice(5);});
-  var weights = sorted.map(function(e){return e.wt;});
+  var weights = sorted.map(function(e){return e.kg;});
 
   // Add 7-day rolling average
   var avgLine = weights.map(function(w, i) {
@@ -4525,10 +4527,10 @@ function renderWeightTrend() {
     histEl.innerHTML = '<div style="font-size:11px;color:var(--text3);margin-bottom:4px">Recent readings:</div>' +
       recent10.map(function(e, i) {
         var prev = recent10[i+1];
-        var change = prev ? (e.wt - prev.wt) : 0;
+        var change = prev ? (e.kg - prev.kg) : 0;
         return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px">' +
           '<span style="color:var(--text3)">' + e.date + '</span>' +
-          '<span><strong>' + e.wt.toFixed(1) + ' kg</strong>' +
+          '<span><strong>' + e.kg.toFixed(1) + ' kg</strong>' +
             (prev ? ' <span style="color:' + (change<=0?'var(--green)':'var(--red)') + ';font-size:10px">' + (change>0?'+':'') + change.toFixed(1) + 'kg</span>' : '') +
           '</span>' +
         '</div>';
@@ -5004,7 +5006,7 @@ function generateWorkoutPlan() {
     html += '<div style="font-size:10px;color:var(--green);margin-left:8px;margin-top:3px">Cooldown: ' + (plan.cooldown||[]).join(' · ') + '</div>';
     html += '</div>';
   });
-  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v8.9</div>';
+  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v9.0</div>';
   html += '</div>';
   el.innerHTML = html;
 }
