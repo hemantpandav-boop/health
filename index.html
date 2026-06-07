@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Hemant Health v8.7</title>
+<title>Hemant Health v8.8</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
@@ -166,7 +166,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
 <div id="app">
 <div class="header">
   <h1>Hemant Health</h1>
-  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v8.7</span><span class="date-badge" id="hdr-date"></span>
+  <span style="font-size:10px;color:var(--green);background:#052e16;padding:2px 7px;border-radius:20px;margin-right:4px">v8.8</span><span class="date-badge" id="hdr-date"></span>
 </div>
 <div class="content">
 
@@ -273,6 +273,7 @@ label{font-size:11px;color:var(--text3);margin-bottom:3px;display:block}
   </div>
   <div class="card">
     <div class="card-title">mounjaro tracker</div>
+    <div id="mj-next-display" style="background:var(--bg3);border-radius:8px;padding:10px;margin-bottom:8px;font-size:12px;text-align:center"><span style="color:var(--text3)">Loading Mounjaro countdown...</span></div>
     <div class="metric-grid">
       <div class="metric"><div class="metric-label">Dose</div><div class="metric-value info">10 mg</div><div class="metric-sub">Every 15 days</div></div>
       <div class="metric"><div class="metric-label">Next due</div><div class="metric-value warn">13 Jun</div><div class="metric-sub">2026</div></div>
@@ -1629,7 +1630,7 @@ function logEatingOut(idx) {
     name: p.label + ' (est.)',
     grams: 0,
     unit: 'portion',
-    cal: p.cal, p: p.p, c: p.c, f: p.f, sat: p.sat, fi: p.fi,
+    cal: p.cal, p: p.p||0, c: p.c||0, f: p.f||0, sat: p.sat||0, fi: p.fi||0,
   };
 
   var logs = JSON.parse(localStorage.getItem('hh_meals') || '[]');
@@ -2519,6 +2520,13 @@ function updateScore() {
   score += isabScore;
   breakdown.push({label:'Isabgol', val:isabScore, max:5, color:'var(--green)'});
 
+  // 7b. STEPS — 5 points
+  var walkSessions2 = JSON.parse(localStorage.getItem('hh_walks') || '[]');
+  var todayStepsForScore = walkSessions2.filter(function(s){return s.date===today;}).reduce(function(a,s){return a+(s.steps||0);},0);
+  var stepsScore = todayStepsForScore >= 7000 ? 5 : todayStepsForScore >= 5000 ? 3 : todayStepsForScore > 0 ? 1 : 0;
+  score += stepsScore;
+  breakdown.push({label:'Steps ' + (todayStepsForScore > 0 ? todayStepsForScore.toLocaleString() : '0'), val:stepsScore, max:5, color:'var(--accent2)'});
+
   // 8. SAT FAT — 5 points
   var totSat = parseFloat(todayMeals.reduce(function(a,l){return a+(l.sat||0);},0).toFixed(1));
   var satScore = totSat <= 8 ? 5 : totSat <= 13 ? 3 : 0;
@@ -2914,8 +2922,9 @@ function updateCalPreview() {
 function showTab(id, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + id).classList.add('active');
-  btn.classList.add('active');
+  var tabEl = document.getElementById('tab-' + id);
+  if (tabEl) tabEl.classList.add('active');
+  if (btn && btn.classList) btn.classList.add('active');
   window.scrollTo(0, 0);
   // Refresh tab content when switching
   if (id === 'meds') { setTimeout(function(){renderMeds(); renderMedStreak();}, 50); }
@@ -3417,10 +3426,12 @@ function showCheckin() {
   ['lunch','dinner'].forEach(function(meal) {
     var btn = document.getElementById('ci-isabgol-' + meal);
     if (!btn) return;
-    btn.style.background = isab[meal] ? 'var(--green)' : 'var(--bg2)';
-    btn.style.borderColor = isab[meal] ? 'var(--green)' : 'var(--border)';
-    btn.style.color = isab[meal] ? 'white' : 'var(--text)';
-    btn.textContent = (isab[meal] ? '\u2713 ' : '') + (meal === 'lunch' ? '\uD83C\uDF71 Before Lunch' : '\uD83C\uDF19 Before Dinner');
+    var state = isab[meal] ? true : false;
+    btn.setAttribute('data-done', state ? '1' : '0');
+    btn.style.background = state ? 'var(--green)' : 'var(--bg2)';
+    btn.style.borderColor = state ? 'var(--green)' : 'var(--border)';
+    btn.style.color = state ? 'white' : 'var(--text)';
+    btn.textContent = (state ? '\u2713 ' : '') + (meal === 'lunch' ? '\uD83C\uDF71 Before Lunch' : '\uD83C\uDF19 Before Dinner');
   });
 
   document.getElementById('checkin-modal').classList.remove('hidden');
@@ -3543,6 +3554,14 @@ function saveCheckin() {
     for (var i = 0; i < Math.min(glasses, 10); i++) waterArr.push(true);
     localStorage.setItem('hh_water_' + TODAY, JSON.stringify(waterArr));
   }
+
+  // Save isabgol from check-in buttons
+  var isabgolData = {};
+  var isabLunch = document.getElementById('ci-isabgol-lunch');
+  var isabDinner = document.getElementById('ci-isabgol-dinner');
+  if (isabLunch) isabgolData.lunch = isabLunch.getAttribute('data-done') === '1';
+  if (isabDinner) isabgolData.dinner = isabDinner.getAttribute('data-done') === '1';
+  localStorage.setItem('hh_isabgol_' + TODAY, JSON.stringify(isabgolData));
 
   // Save wellbeing only — steps come from walk tracker now
   if (_checkinWB > 0) {
@@ -4966,7 +4985,7 @@ function generateWorkoutPlan() {
     html += '<div style="font-size:10px;color:var(--green);margin-left:8px;margin-top:3px">Cooldown: ' + (plan.cooldown||[]).join(' · ') + '</div>';
     html += '</div>';
   });
-  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v8.7</div>';
+  html += '<div style="text-align:center;font-size:10px;color:var(--text3);margin-top:8px;border-top:1px solid var(--border);padding-top:8px">Generated ' + new Date().toISOString().split("T")[0] + ' · Hemant Health App v8.8</div>';
   html += '</div>';
   el.innerHTML = html;
 }
@@ -4995,7 +5014,7 @@ function generateDoctorReport() {
   var avgDia = bpReadings.length > 0 ? Math.round(bpReadings.reduce(function(a,v){return a+v.dia;},0)/bpReadings.length) : 72;
 
   // Mounjaro last injection
-  var mjDoses = JSON.parse(localStorage.getItem('hp_mj_doses2') || '[]');
+  var mjDoses = JSON.parse(localStorage.getItem('hh_mj_log') || '[]');
   var lastMJ = mjDoses.length > 0 ? mjDoses[mjDoses.length-1] : {date:'2026-05-29', dose:'10mg'};
 
   el.innerHTML =
@@ -5262,9 +5281,37 @@ function renderWaistTracker() {
 // ═══════════════════════════════════
 // MOUNJARO EFFECTIVENESS
 // ═══════════════════════════════════
+function renderMounjaroCountdown() {
+  var el = document.getElementById('mj-next-display');
+  if (!el) return;
+  var doses = JSON.parse(localStorage.getItem('hh_mj_log') || '[]');
+  if (!doses.length) {
+    el.innerHTML = '<span style="color:var(--text3)">No injections logged yet</span>';
+    return;
+  }
+  // Sort by date descending
+  doses.sort(function(a,b){return b.date.localeCompare(a.date);});
+  var last = doses[0];
+  var lastDate = new Date(last.date + 'T00:00:00');
+  var nextDate = new Date(lastDate);
+  nextDate.setDate(nextDate.getDate() + 15); // 15-day frequency
+  var today = new Date();
+  today.setHours(0,0,0,0);
+  var daysLeft = Math.ceil((nextDate - today) / 86400000);
+  var nextStr = nextDate.toISOString().split('T')[0];
+
+  if (daysLeft < 0) {
+    el.innerHTML = '<span style="color:var(--red);font-weight:700">⚠ Injection overdue by ' + Math.abs(daysLeft) + ' days</span><br><span style="color:var(--text3);font-size:10px">Last: ' + last.date + ' · ' + last.dose + '</span>';
+  } else if (daysLeft === 0) {
+    el.innerHTML = '<span style="color:var(--amber);font-weight:700">💉 Mounjaro due TODAY</span><br><span style="color:var(--text3);font-size:10px">Last: ' + last.date + ' · ' + last.dose + '</span>';
+  } else {
+    el.innerHTML = '<span style="color:var(--green);font-weight:700">💉 Next: ' + nextStr + ' (' + daysLeft + ' days)</span><br><span style="color:var(--text3);font-size:10px">Last: ' + last.date + ' · ' + last.dose + '</span>';
+  }
+}
+
 function renderMounjaroEffectiveness() {
   var wtLog = JSON.parse(localStorage.getItem('hh_weight_log') || '[]');
-  var mjDoses = JSON.parse(localStorage.getItem('hp_mj_doses2') || '[]');
+  var mjDoses = JSON.parse(localStorage.getItem('hh_mj_log') || '[]');
 
   // Use known milestone weights matched to injection phases
   var milestones = [
@@ -5744,8 +5791,16 @@ function renderWalkTracker() {
 function deleteWalkSession(idx) {
   var sessions = JSON.parse(localStorage.getItem('hh_walks') || '[]');
   var todaySessions = sessions.filter(function(s){return s.date===TODAY;});
+  if (idx < 0 || idx >= todaySessions.length) return;
   var toDelete = todaySessions[idx];
-  var gi = sessions.indexOf(toDelete);
+  // Find by matching all fields — indexOf won't work on parsed JSON copies
+  var gi = -1;
+  for (var i = 0; i < sessions.length; i++) {
+    var s = sessions[i];
+    if (s.date === toDelete.date && s.time === toDelete.time && s.steps === toDelete.steps && s.dur === toDelete.dur) {
+      gi = i; break;
+    }
+  }
   if (gi > -1) sessions.splice(gi, 1);
   localStorage.setItem('hh_walks', JSON.stringify(sessions));
   renderWalkTracker();
