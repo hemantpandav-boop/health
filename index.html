@@ -11,7 +11,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Hemant Health v9.4</title>
+<title>Hemant Health v9.5</title>
 <link rel="manifest" href="data:application/json;charset=utf-8,{
   &quot;name&quot;: &quot;Hemant Health&quot;,
   &quot;short_name&quot;: &quot;H Health&quot;,
@@ -5885,16 +5885,17 @@ function initAll() {
   showWeekAverage();
   renderExercise();
   seedHistoricalData();
-  setTimeout(function(){renderWeightTrend(); renderGlucoseTrend(); renderCholesterolTrend(); renderIsabgol();}, 400);
-  setTimeout(function(){generateWeeklySummary(0);}, 600);
-  setTimeout(function(){renderSleepTracker(); seedWaistData(); renderWaistTracker(); renderMounjaroEffectiveness();}, 800);
-  setTimeout(initCheckin, 1000);
-  renderExercise(); renderExDBList();
-  renderVitals(); renderWater();
-  renderLabResults();
-  renderMeds(); renderStreak();
-  renderMounjaroLog();
-  checkMedAlert();
+  setTimeout(function(){try{renderWeightTrend();}catch(e){} try{renderGlucoseTrend();}catch(e){} try{renderCholesterolTrend();}catch(e){} try{renderIsabgol();}catch(e){}}, 400);
+  setTimeout(function(){try{generateWeeklySummary(0);}catch(e){}}, 600);
+  setTimeout(function(){try{renderSleepTracker();}catch(e){} try{seedWaistData();}catch(e){} try{renderWaistTracker();}catch(e){} try{renderMounjaroEffectiveness();}catch(e){}}, 800);
+  setTimeout(function(){try{initCheckin();}catch(e){}}, 1000);
+  try{renderExercise();}catch(e){} try{renderExDBList();}catch(e){}
+  try{renderVitals();}catch(e){} try{renderWater();}catch(e){}
+  try{renderLabResults();}catch(e){}
+  try{renderMeds();}catch(e){} try{renderMedStreak();}catch(e){}
+  try{renderMounjaroLog();}catch(e){}
+  try{checkMedAlert();}catch(e){}
+  try{updateDailyTDEE();}catch(e){}
   setTimeout(renderTrendCharts, 300);
   updateScore(); initMJ();
 }
