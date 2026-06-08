@@ -3392,6 +3392,8 @@ function initCheckin() {
 }
 
 function showCheckin() {
+  var modal = document.getElementById('checkin-modal');
+  if (modal) { modal.style.display = 'flex'; }
   var taken = JSON.parse(localStorage.getItem('hh_meds_' + TODAY) || '{}');
   var medHTML = '';
   MEDS.forEach(function(m, idx) {
